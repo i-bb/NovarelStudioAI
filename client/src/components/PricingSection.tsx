@@ -36,7 +36,7 @@ export default function PricingSection() {
       annualBilling: "$382 billed annually",
       badge: "MOST POPULAR",
       features: [
-        "Unlimited clips",
+        "5 clips per day",
         "4K export quality",
         "Advanced AI detection",
         "Instagram Reels publishing",
@@ -57,6 +57,7 @@ export default function PricingSection() {
       annualBilling: "$1,162 billed annually",
       badge: null,
       features: [
+        "12 clips per day",
         "Everything in Creator",
         "Multi-stream support",
         "Team collaboration (5 seats)",
@@ -64,7 +65,6 @@ export default function PricingSection() {
         "White-label exports",
         "Dedicated account manager",
         "99.9% uptime SLA",
-        "Custom integrations",
       ],
       cta: "Contact Sales",
       popular: false,
