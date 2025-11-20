@@ -7,10 +7,10 @@ Drawing inspiration from OnlyFans (aesthetic), Twitch/Kick (gamification), and O
 ## Core Design Elements
 
 ### Typography
-**Primary Font**: Inter Extra Bold (blocky, bold, Twitch/Kick style)
-- Hero Headlines: 48px-64px, font-weight: 800, letter-spacing: -0.02em
-- Section Headers: 32px-40px, font-weight: 800, letter-spacing: -0.02em
-- Subheadings: 24px-28px, font-weight: 700
+**Primary Font**: Inter Black (blocky, ultra-bold, Twitch/Kick style)
+- Hero Headlines: 48px-64px, font-weight: 900, letter-spacing: -0.03em, uppercase
+- Section Headers: 32px-40px, font-weight: 900, letter-spacing: -0.03em, uppercase
+- Subheadings: 24px-28px, font-weight: 800
 
 **Secondary Font**: Inter (for dashboard, UI, body text)
 - Dashboard Headers: 24px-28px, font-weight: 600-700
