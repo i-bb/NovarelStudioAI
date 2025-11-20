@@ -46,7 +46,7 @@
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --font-cursive: Pacifico, cursive;
+  --font-cursive: Inter, sans-serif;
   --radius: .5rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(215 85% 52% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(215 85% 52% / 0.00);
@@ -177,6 +177,11 @@
 
   html {
     scroll-behavior: smooth;
+  }
+
+  .font-cursive {
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 }
 

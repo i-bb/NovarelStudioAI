@@ -7,15 +7,15 @@ Drawing inspiration from OnlyFans (aesthetic), Twitch/Kick (gamification), and O
 ## Core Design Elements
 
 ### Typography
-**Primary Font**: Pacifico or Dancing Script (cursive, elegant, lighter than OnlyFans)
-- Hero Headlines: 48px-64px, font-weight: 400
-- Section Headers: 32px-40px, font-weight: 400
-- Body Text: Inter or SF Pro Display, 16px-18px, font-weight: 400
+**Primary Font**: Inter Extra Bold (blocky, bold, Twitch/Kick style)
+- Hero Headlines: 48px-64px, font-weight: 800, letter-spacing: -0.02em
+- Section Headers: 32px-40px, font-weight: 800, letter-spacing: -0.02em
+- Subheadings: 24px-28px, font-weight: 700
 
 **Secondary Font**: Inter (for dashboard, UI, body text)
-- Dashboard Headers: 24px-28px, font-weight: 500
-- Tab Labels: 14px-16px, font-weight: 500
-- Body Copy: 14px-16px, font-weight: 400
+- Dashboard Headers: 24px-28px, font-weight: 600-700
+- Tab Labels: 14px-16px, font-weight: 600
+- Body Copy: 14px-16px, font-weight: 400-500
 
 ### Layout System
 **Spacing Units**: Tailwind spacing - 4, 6, 8, 12, 16, 24, 32
