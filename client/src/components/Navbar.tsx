@@ -14,7 +14,7 @@ export default function Navbar() {
                 <div className="absolute inset-0 bg-primary/20 blur-xl group-hover:blur-2xl transition-all" />
                 <Zap className="w-8 h-8 text-primary relative z-10" fill="currentColor" />
               </div>
-              <span className="text-2xl font-black tracking-tight text-primary uppercase">NovarelStudio</span>
+              <span className="text-2xl font-cursive text-primary">NovarelStudio</span>
               <Badge variant="secondary" className="bg-accent/20 text-accent-foreground border-accent/30 text-xs">LIVE</Badge>
             </a>
           </Link>
