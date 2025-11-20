@@ -27,56 +27,47 @@ export default function PlatformIntegration() {
           </div>
 
           <div className="space-y-6">
-            <Card className="p-6 hover-elevate active-elevate-2" data-testid="card-platform-tiktok">
-              <div className="flex items-center justify-between mb-4">
-                <PlatformBadge platform="tiktok" connected />
-                <span className="inline-flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs text-muted-foreground">Connected</span>
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="text-muted-foreground">Posted Today</div>
-                  <div className="text-xl font-bold text-foreground" data-testid="text-tiktok-posted">24</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Total Reach</div>
-                  <div className="text-xl font-bold text-foreground" data-testid="text-tiktok-reach">2.5M</div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 hover-elevate active-elevate-2" data-testid="card-platform-youtube">
-              <div className="flex items-center justify-between mb-4">
-                <PlatformBadge platform="youtube" connected />
-                <span className="inline-flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs text-muted-foreground">Connected</span>
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="text-muted-foreground">Posted Today</div>
-                  <div className="text-xl font-bold text-foreground" data-testid="text-youtube-posted">18</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Total Reach</div>
-                  <div className="text-xl font-bold text-foreground" data-testid="text-youtube-reach">1.8M</div>
-                </div>
-              </div>
-            </Card>
-
             <Card className="p-6 hover-elevate active-elevate-2" data-testid="card-platform-instagram">
               <div className="flex items-center justify-between mb-4">
-                <PlatformBadge platform="instagram" />
+                <PlatformBadge platform="instagram" connected />
                 <span className="inline-flex items-center gap-2">
-                  <span className="w-2 h-2 bg-muted-foreground rounded-full" />
-                  <span className="text-xs text-muted-foreground">Not Connected</span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-xs text-green-500 font-semibold">Connected</span>
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div className="text-muted-foreground">Posted Today</div>
+                  <div className="text-xl font-bold text-foreground" data-testid="text-instagram-posted">24</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Total Reach</div>
+                  <div className="text-xl font-bold text-foreground" data-testid="text-instagram-reach">2.5M</div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 hover-elevate active-elevate-2 opacity-60" data-testid="card-platform-tiktok">
+              <div className="flex items-center justify-between mb-4">
+                <PlatformBadge platform="tiktok" />
+                <span className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full">
+                  <span className="text-xs font-bold">COMING SOON</span>
                 </span>
               </div>
               <div className="text-sm text-muted-foreground">
-                Connect to start publishing automatically
+                TikTok integration in development
+              </div>
+            </Card>
+
+            <Card className="p-6 hover-elevate active-elevate-2 opacity-60" data-testid="card-platform-youtube">
+              <div className="flex items-center justify-between mb-4">
+                <PlatformBadge platform="youtube" />
+                <span className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full">
+                  <span className="text-xs font-bold">COMING SOON</span>
+                </span>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                YouTube Shorts integration in development
               </div>
             </Card>
           </div>

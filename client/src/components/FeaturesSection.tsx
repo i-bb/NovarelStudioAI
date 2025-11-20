@@ -6,7 +6,7 @@ export default function FeaturesSection() {
     {
       icon: Radio,
       title: "Auto Stream Detection",
-      description: "Automatically detects when you go live on Twitch, YouTube, or other platforms and starts recording.",
+      description: "Automatically detects when you go live on Twitch or other platforms and starts recording.",
       level: 1,
       color: "primary"
     },
@@ -34,7 +34,7 @@ export default function FeaturesSection() {
     {
       icon: Share2,
       title: "Auto-Publishing",
-      description: "Posts clips to TikTok, YouTube Shorts, and Instagram Reels with smart scheduling.",
+      description: "Posts clips to Instagram Reels automatically. TikTok and YouTube Shorts coming soon.",
       level: 5,
       color: "primary"
     },

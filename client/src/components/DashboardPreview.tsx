@@ -150,16 +150,16 @@ export default function DashboardPreview() {
                   <h3 className="text-lg font-semibold mb-4">Platform Connections</h3>
                   <div className="space-y-3">
                     <Card className="p-4 flex items-center justify-between">
-                      <span className="font-medium">TikTok</span>
-                      <Badge variant="secondary" data-testid="badge-tiktok-status">Connected</Badge>
-                    </Card>
-                    <Card className="p-4 flex items-center justify-between">
-                      <span className="font-medium">YouTube Shorts</span>
-                      <Badge variant="secondary" data-testid="badge-youtube-status">Connected</Badge>
-                    </Card>
-                    <Card className="p-4 flex items-center justify-between">
                       <span className="font-medium">Instagram Reels</span>
-                      <Button size="sm" variant="outline" data-testid="button-connect-instagram">Connect</Button>
+                      <Badge variant="secondary" className="bg-green-500/20 text-green-500 border-green-500/40" data-testid="badge-instagram-status">Connected</Badge>
+                    </Card>
+                    <Card className="p-4 flex items-center justify-between opacity-60">
+                      <span className="font-medium">TikTok</span>
+                      <Badge variant="secondary" className="bg-accent/20 text-accent border-accent/40" data-testid="badge-tiktok-status">Coming Soon</Badge>
+                    </Card>
+                    <Card className="p-4 flex items-center justify-between opacity-60">
+                      <span className="font-medium">YouTube Shorts</span>
+                      <Badge variant="secondary" className="bg-accent/20 text-accent border-accent/40" data-testid="badge-youtube-status">Coming Soon</Badge>
                     </Card>
                   </div>
                 </div>
