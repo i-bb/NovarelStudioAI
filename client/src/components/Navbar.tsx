@@ -20,26 +20,18 @@ export default function Navbar() {
           </Link>
           
           <div className="hidden md:flex items-center gap-6">
-            <Link href="#features">
-              <a className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-features">
-                Features
-              </a>
-            </Link>
-            <Link href="#how-it-works">
-              <a className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-how-it-works">
-                How It Works
-              </a>
-            </Link>
-            <Link href="#pricing">
-              <a className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-pricing">
-                Pricing
-              </a>
-            </Link>
-            <Link href="#dashboard">
-              <a className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-dashboard">
-                Dashboard
-              </a>
-            </Link>
+            <a href="#features" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-features">
+              Features
+            </a>
+            <a href="#how-it-works" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-how-it-works">
+              How It Works
+            </a>
+            <a href="#pricing" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-pricing">
+              Pricing
+            </a>
+            <a href="#dashboard" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-dashboard">
+              Dashboard
+            </a>
           </div>
           
           <div className="flex items-center gap-4">
