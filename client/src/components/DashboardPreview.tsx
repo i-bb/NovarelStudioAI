@@ -10,7 +10,7 @@ export default function DashboardPreview() {
   const [activeTab, setActiveTab] = useState("projects");
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-b from-primary/5 to-background">
+    <section id="dashboard" className="py-20 px-6 bg-gradient-to-b from-primary/5 to-background">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="font-cursive text-4xl md:text-5xl text-foreground mb-4">

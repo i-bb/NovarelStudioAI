@@ -16,7 +16,7 @@ export default function CTASection() {
   };
 
   return (
-    <section className="py-20 px-6">
+    <section id="pricing" className="py-20 px-6">
       <div className="max-w-4xl mx-auto">
         <Card className="p-12 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 border-primary/20 text-center">
           <h2 className="font-cursive text-4xl md:text-5xl text-foreground mb-4">
