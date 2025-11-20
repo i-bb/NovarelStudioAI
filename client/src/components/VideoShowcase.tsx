@@ -18,55 +18,60 @@ export default function VideoShowcase({ title = "AI-Generated Clips", descriptio
   ];
 
   return (
-    <section className="py-20 px-6">
+    <section className="py-20 px-6 bg-muted/30">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="font-cursive text-4xl md:text-5xl text-foreground mb-4">{title}</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{description}</p>
+        <div className="mb-12">
+          <h2 className="font-cursive text-4xl md:text-5xl text-foreground mb-4">
+            <span className="text-accent">Clips</span> — Viral Moments
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl">{description}</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <Card className="overflow-hidden hover-elevate active-elevate-2" data-testid="card-video-showcase">
-              <div className="relative group cursor-pointer">
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4">
+          {videos.map((video, index) => (
+            <Card key={index} className="overflow-hidden border-2 border-primary/20 bg-card/80 backdrop-blur hover-elevate active-elevate-2 group cursor-pointer" data-testid={`card-video-stat-${video.platform}`}>
+              <div className="relative aspect-[9/16] bg-gradient-to-br from-primary/20 to-accent/20">
                 <img 
                   src={dashboardImage} 
-                  alt="Dashboard Preview" 
-                  className="w-full h-auto"
+                  alt={`${video.platform} clip`}
+                  className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                  <Button size="icon" className="rounded-full w-16 h-16 bg-primary hover:bg-primary/90" data-testid="button-play-showcase">
-                    <Play className="w-8 h-8 fill-white" />
-                  </Button>
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
+                <Badge className="absolute top-3 left-3 bg-red-600 text-white border-0 font-bold">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-1" />
+                  LIVE
+                </Badge>
+                <div className="absolute bottom-3 left-3 right-3">
+                  <div className="flex items-center gap-2 text-white mb-2">
+                    <Eye className="w-4 h-4" />
+                    <span className="font-bold text-sm" data-testid={`text-views-${video.platform}`}>{video.views}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="capitalize bg-black/60 text-white border-0 backdrop-blur" data-testid={`badge-platform-${video.platform}`}>
+                      {video.platform}
+                    </Badge>
+                    <Badge className="bg-primary/80 text-white border-0 backdrop-blur font-bold">
+                      +{index * 100 + 250}%
+                    </Badge>
+                  </div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-16 h-16 rounded-full bg-primary/90 backdrop-blur flex items-center justify-center">
+                    <Play className="w-8 h-8 text-white" fill="white" />
+                  </div>
+                </div>
+              </div>
+              <div className="p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-sm">Epic Gameplay Moment #{index + 1}</h3>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Heart className="w-3 h-3" />
+                    <span data-testid={`text-likes-${video.platform}`}>{video.likes}</span>
+                  </div>
                 </div>
               </div>
             </Card>
-          </div>
-
-          <div className="space-y-4">
-            {videos.map((video, index) => (
-              <Card key={index} className="p-6 hover-elevate active-elevate-2" data-testid={`card-video-stat-${video.platform}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Badge className="mb-2 capitalize" data-testid={`badge-platform-${video.platform}`}>
-                      {video.platform}
-                    </Badge>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Eye className="w-4 h-4" />
-                        <span data-testid={`text-views-${video.platform}`}>{video.views}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Heart className="w-4 h-4" />
-                        <span data-testid={`text-likes-${video.platform}`}>{video.likes}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold font-cursive text-primary">+{index * 100 + 250}%</div>
-                </div>
-              </Card>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
     </section>

@@ -48,19 +48,18 @@ export default function FeaturesSection() {
   ];
 
   return (
-    <section id="features" className="py-20 px-6 bg-gradient-to-b from-background to-muted/30">
+    <section id="features" className="py-20 px-6 bg-background">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="mb-12">
           <h2 className="font-cursive text-4xl md:text-5xl text-foreground mb-4">
-            The Complete
-            <span className="text-primary"> Automation Pipeline</span>
+            <span className="text-primary">Features</span> — Level Up Your Content
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From live stream to viral clip in minutes. No manual work required.
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            Complete automation pipeline. From live stream to viral clip in minutes.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((feature, index) => (
             <FeatureCard
               key={index}
