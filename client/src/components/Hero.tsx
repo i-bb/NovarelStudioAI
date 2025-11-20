@@ -42,18 +42,39 @@ export default function Hero() {
           </Button>
         </div>
         
-        <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-1 font-cursive" data-testid="text-stat-streams">2.5M+</div>
-            <div className="text-sm text-muted-foreground">Streams Processed</div>
+        <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-xl blur-xl group-hover:blur-2xl transition-all" />
+            <div className="relative bg-card/50 backdrop-blur border border-primary/30 rounded-xl p-6 text-center hover-elevate active-elevate-2">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">LIVE</div>
+              </div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1 font-cursive" data-testid="text-stat-streams">2.5M+</div>
+              <div className="text-sm text-muted-foreground font-medium">Streams</div>
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-1 font-cursive" data-testid="text-stat-clips">50M+</div>
-            <div className="text-sm text-muted-foreground">Clips Generated</div>
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 rounded-xl blur-xl group-hover:blur-2xl transition-all" />
+            <div className="relative bg-card/50 backdrop-blur border border-accent/30 rounded-xl p-6 text-center hover-elevate active-elevate-2">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">LIVE</div>
+              </div>
+              <div className="text-3xl md:text-4xl font-bold text-accent mb-1 font-cursive" data-testid="text-stat-clips">50M+</div>
+              <div className="text-sm text-muted-foreground font-medium">Clips</div>
+            </div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-1 font-cursive" data-testid="text-stat-creators">10K+</div>
-            <div className="text-sm text-muted-foreground">Creators</div>
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-xl blur-xl group-hover:blur-2xl transition-all" />
+            <div className="relative bg-card/50 backdrop-blur border border-primary/30 rounded-xl p-6 text-center hover-elevate active-elevate-2">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">LIVE</div>
+              </div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1 font-cursive" data-testid="text-stat-creators">10K+</div>
+              <div className="text-sm text-muted-foreground font-medium">Creators</div>
+            </div>
           </div>
         </div>
       </div>
