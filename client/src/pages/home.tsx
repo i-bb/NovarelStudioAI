@@ -5,6 +5,7 @@ import HowItWorks from "@/components/HowItWorks";
 import VideoShowcase from "@/components/VideoShowcase";
 import PlatformIntegration from "@/components/PlatformIntegration";
 import DashboardPreview from "@/components/DashboardPreview";
+import PricingSection from "@/components/PricingSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
@@ -19,6 +20,7 @@ export default function Home() {
         <VideoShowcase />
         <PlatformIntegration />
         <DashboardPreview />
+        <PricingSection />
         <CTASection />
       </main>
       <Footer />
