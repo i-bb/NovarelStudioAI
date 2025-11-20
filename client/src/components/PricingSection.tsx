@@ -1,15 +1,20 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 
 export default function PricingSection() {
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
+
   const plans = [
     {
       name: "Free",
       tagline: "Try Novarel Studio for free",
-      price: "$0",
+      monthlyPrice: "$0",
+      annualPrice: "$0",
       period: "",
+      annualBilling: null,
       badge: null,
       features: [
         "Up to 10 clips/month",
@@ -25,8 +30,10 @@ export default function PricingSection() {
     {
       name: "Creator",
       tagline: "For serious content creators",
-      price: "$49",
+      monthlyPrice: "$49",
+      annualPrice: "$32",
       period: "/month",
+      annualBilling: "$382 billed annually",
       badge: "MOST POPULAR",
       features: [
         "Unlimited clips",
@@ -44,8 +51,10 @@ export default function PricingSection() {
     {
       name: "Streamer",
       tagline: "For professional streamers & teams",
-      price: "$149",
+      monthlyPrice: "$149",
+      annualPrice: "$97",
       period: "/month",
+      annualBilling: "$1,162 billed annually",
       badge: null,
       features: [
         "Everything in Creator",
@@ -78,9 +87,32 @@ export default function PricingSection() {
           <h2 className="text-5xl font-cursive text-foreground mb-4">
             LEVEL UP YOUR CONTENT GAME
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             Select the perfect plan for your streaming empire. All plans include 24/7 automated clipping.
           </p>
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-4">
+            <Button
+              variant={billingPeriod === "monthly" ? "default" : "outline"}
+              onClick={() => setBillingPeriod("monthly")}
+              className="font-semibold"
+              data-testid="button-billing-monthly"
+            >
+              Monthly
+            </Button>
+            <Button
+              variant={billingPeriod === "annual" ? "default" : "outline"}
+              onClick={() => setBillingPeriod("annual")}
+              className="font-semibold relative"
+              data-testid="button-billing-annual"
+            >
+              Annual
+              <Badge className="ml-2 bg-green-500 text-white border-0 font-bold">
+                35% OFF
+              </Badge>
+            </Button>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -117,11 +149,16 @@ export default function PricingSection() {
                 {/* Price */}
                 <div className="mt-6 mb-4">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-cursive text-foreground">{plan.price}</span>
+                    <span className="text-5xl font-cursive text-foreground">
+                      {billingPeriod === "monthly" ? plan.monthlyPrice : plan.annualPrice}
+                    </span>
                     {plan.period && (
                       <span className="text-lg text-muted-foreground">{plan.period}</span>
                     )}
                   </div>
+                  {billingPeriod === "annual" && plan.annualBilling && (
+                    <p className="text-sm text-muted-foreground mt-1">{plan.annualBilling}</p>
+                  )}
                 </div>
               </CardHeader>
 
