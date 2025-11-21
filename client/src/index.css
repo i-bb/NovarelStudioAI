@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Porcine Bosk Font */
+@font-face {
+  font-family: 'Porcine Bosk';
+  src: url('@assets/Porcine Bosk_1763753585847.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);
@@ -46,7 +55,7 @@
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --font-cursive: 'Bebas Neue', 'Anton', 'Teko', sans-serif;
+  --font-cursive: 'Porcine Bosk', 'Bebas Neue', 'Anton', 'Teko', sans-serif;
   --radius: .5rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(215 85% 52% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(215 85% 52% / 0.00);

@@ -1,5 +1,3 @@
-import { Link } from "wouter";
-
 export default function Footer() {
   return (
     <footer className="border-t border-border bg-card/50 backdrop-blur">
@@ -15,9 +13,9 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#features"><a className="hover:text-foreground transition-colors" data-testid="link-footer-features">Features</a></Link></li>
-              <li><Link href="#pricing"><a className="hover:text-foreground transition-colors" data-testid="link-footer-pricing">Pricing</a></Link></li>
-              <li><Link href="#dashboard"><a className="hover:text-foreground transition-colors" data-testid="link-footer-dashboard">Dashboard</a></Link></li>
+              <li><a href="#features" className="hover:text-foreground transition-colors" data-testid="link-footer-features">Features</a></li>
+              <li><a href="#pricing" className="hover:text-foreground transition-colors" data-testid="link-footer-pricing">Pricing</a></li>
+              <li><a href="#dashboard" className="hover:text-foreground transition-colors" data-testid="link-footer-dashboard">Dashboard</a></li>
             </ul>
           </div>
 
