@@ -8,15 +8,13 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-background/95 border-b border-primary/20 shadow-lg shadow-primary/5">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/">
-            <a className="flex items-center gap-3 hover-elevate active-elevate-2 px-2 group" data-testid="link-logo">
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-xl group-hover:blur-2xl transition-all" />
-                <Zap className="w-8 h-8 text-primary relative z-10" fill="currentColor" />
-              </div>
-              <span className="text-2xl font-cursive text-primary">NovarelStudio</span>
-              <Badge variant="secondary" className="bg-accent/20 text-accent-foreground border-accent/30 text-xs">LIVE</Badge>
-            </a>
+          <Link href="/" className="flex items-center gap-3 hover-elevate active-elevate-2 px-2 group" data-testid="link-logo">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl group-hover:blur-2xl transition-all" />
+              <Zap className="w-8 h-8 text-primary relative z-10" fill="currentColor" />
+            </div>
+            <span className="text-2xl font-cursive text-primary">NovarelStudio</span>
+            <Badge variant="secondary" className="bg-accent/20 text-accent-foreground border-accent/30 text-xs">LIVE</Badge>
           </Link>
           
           <div className="hidden md:flex items-center gap-6">
