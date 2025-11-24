@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Play, Zap, Users, Clock3 } from "lucide-react";
+import streamerImage from "@assets/generated_images/young_black_streamer_selfie_pov.png";
 
 export default function Hero() {
   return (
@@ -94,7 +95,11 @@ export default function Hero() {
               {/* Live stream preview */}
               <div className="relative border-r border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)]">
                 <div className="aspect-video w-full overflow-hidden">
-                  <div className="relative h-full w-full bg-[url('https://images.pexels.com/photos/9071730/pexels-photo-9071730.jpeg?auto=compress&cs=tinysrgb&w=1200')] bg-cover bg-center mask-fade-b" />
+                  <img 
+                    src={streamerImage} 
+                    alt="Live streaming" 
+                    className="relative h-full w-full object-cover object-center mask-fade-b"
+                  />
                 </div>
                 <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
                   <div className="flex items-center gap-3 text-xs">
