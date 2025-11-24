@@ -98,7 +98,7 @@ export default function Hero() {
                   <img 
                     src={streamerImage} 
                     alt="Live streaming" 
-                    className="relative h-full w-full object-cover object-center mask-fade-b"
+                    className="relative h-full w-full object-cover object-top mask-fade-b"
                   />
                 </div>
                 <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
