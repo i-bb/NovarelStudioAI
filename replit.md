@@ -6,6 +6,17 @@ NovarelStudio is an AI-powered content automation platform designed for Twitch a
 
 The product targets "stream-first creators" who treat their channels like professional studios, emphasizing automation and minimal manual intervention. The design draws inspiration from OnlyFans (aesthetic), Twitch/Kick (gamification), and Opus.pro/Vizard.ai (dashboard functionality).
 
+## Recent Changes (November 24, 2025)
+
+- Added login and signup functionality:
+  - Created /login page with email and password form
+  - Created /signup page with channel name, email, and password form
+  - Updated all "Sign In"/"Log in" buttons to navigate to /login
+  - Updated all "Get Started"/"Start Free" buttons to navigate to /signup
+  - Forms include client-side validation and are ready for backend integration
+  - All interactive elements have data-testid attributes for testing
+  - Uses Button asChild pattern with wouter Link for proper navigation
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -19,6 +30,14 @@ Preferred communication style: Simple, everyday language.
 - Vite as the build tool and development server
 - Two client implementations present: `client` (current) and `client-v2` (alternate version)
 - Wouter for client-side routing (lightweight alternative to React Router)
+
+**Page Routes**
+- `/` - Home page (landing with hero, features, platform integration, dashboard preview, CTA, footer)
+- `/how-it-works` - How It Works page explaining the platform's process
+- `/showcase` - Showcase page with examples and success stories
+- `/pricing` - Pricing page with plan tiers
+- `/login` - Login page with authentication form (UI complete, ready for backend)
+- `/signup` - Signup page with registration form (UI complete, ready for backend)
 
 **UI Component Strategy**
 - Shadcn/ui component library with Radix UI primitives
