@@ -1,5 +1,6 @@
 import { Radio, Video, Sparkles, Scissors, Share2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import captureSystemImage from "@assets/generated_images/live_stream_capture_system.png";
 
 export default function FeaturesSection() {
   return (
@@ -36,6 +37,7 @@ export default function FeaturesSection() {
             title="Hands-off capture"
             description="We detect when you go live, spin up a recorder in the cloud, and track your VOD from the first hello to the last raid."
             tag="Live ingest"
+            imageSrc={captureSystemImage}
           >
             <div className="mt-4 flex items-center justify-between text-[11px] text-muted-foreground/90">
               <span>Zero overlays or bots required on stream.</span>
@@ -97,6 +99,7 @@ function FeatureCard({
   description,
   tag,
   children,
+  imageSrc,
 }: {
   className?: string;
   icon: any;
@@ -104,6 +107,7 @@ function FeatureCard({
   description: string;
   tag: string;
   children?: React.ReactNode;
+  imageSrc?: string;
 }) {
   return (
     <article
@@ -113,6 +117,16 @@ function FeatureCard({
         className,
       )}
     >
+      {imageSrc && (
+        <div className="absolute inset-0 opacity-30">
+          <img 
+            src={imageSrc} 
+            alt={title} 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
+        </div>
+      )}
       <div className="relative z-10 flex-1 flex flex-col gap-3">
         <div className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-slate-100 group-hover:bg-white/10">
           <Icon className="w-4.5 h-4.5" />

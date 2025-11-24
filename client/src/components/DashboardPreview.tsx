@@ -5,6 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { LayoutDashboard, BarChart3, Settings, Scissors, Upload, Play } from "lucide-react";
+import streamThumb1 from "@assets/generated_images/gaming_stream_thumbnail_1.png";
+import streamThumb2 from "@assets/generated_images/just_chatting_stream_thumbnail_2.png";
+import streamThumb3 from "@assets/generated_images/valorant_stream_thumbnail_3.png";
 
 export default function DashboardPreview() {
   const [activeTab, setActiveTab] = useState("projects");
@@ -90,20 +93,29 @@ export default function DashboardPreview() {
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="relative group/card">
-                      <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.35),_transparent_65%)] opacity-0 group-hover/card:opacity-100 transition-opacity" />
-                      <Card
-                        className="relative border border-white/12 bg-slate-950/90 p-4 rounded-2xl cursor-pointer"
-                        data-testid={`card-project-${i}`}
-                      >
-                        <div className="relative mb-3 overflow-hidden rounded-xl bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_60%)]">
-                          <div className="aspect-video w-full bg-[radial-gradient(circle_at_center,_rgba(15,23,42,0.85),_transparent_70%)]" />
-                          <Play className="absolute inset-0 m-auto h-6 w-6 text-slate-100" />
-                          <Badge className="absolute top-2 left-2 bg-black/80 text-[10px] font-semibold uppercase tracking-[0.18em] border border-white/20">
-                            Stream {i}
-                          </Badge>
-                        </div>
+                  {[1, 2, 3].map((i) => {
+                    const thumbnails = [streamThumb1, streamThumb2, streamThumb3];
+                    return (
+                      <div key={i} className="relative group/card">
+                        <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.35),_transparent_65%)] opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                        <Card
+                          className="relative border border-white/12 bg-slate-950/90 p-4 rounded-2xl cursor-pointer"
+                          data-testid={`card-project-${i}`}
+                        >
+                          <div className="relative mb-3 overflow-hidden rounded-xl bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_60%)]">
+                            <div className="aspect-video w-full relative">
+                              <img 
+                                src={thumbnails[i - 1]} 
+                                alt={`Stream ${i}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            </div>
+                            <Play className="absolute inset-0 m-auto h-6 w-6 text-slate-100" />
+                            <Badge className="absolute top-2 left-2 bg-black/80 text-[10px] font-semibold uppercase tracking-[0.18em] border border-white/20">
+                              Stream {i}
+                            </Badge>
+                          </div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <p className="text-xs font-medium text-foreground">Highlights run</p>
@@ -122,7 +134,8 @@ export default function DashboardPreview() {
                         </div>
                       </Card>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               </TabsContent>
 
