@@ -7,6 +7,8 @@ import Home from "@/pages/home";
 import HowItWorksPage from "@/pages/how-it-works";
 import Pricing from "@/pages/pricing";
 import ShowcasePage from "@/pages/showcase";
+import LoginPage from "@/pages/login";
+import SignupPage from "@/pages/signup";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +18,8 @@ function Router() {
       <Route path="/how-it-works" component={HowItWorksPage} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/showcase" component={ShowcasePage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/signup" component={SignupPage} />
       <Route component={NotFound} />
     </Switch>
   );

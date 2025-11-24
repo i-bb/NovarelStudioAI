@@ -25,7 +25,7 @@ export function TopNav() {
       )}
     >
       <div className="mx-auto flex h-16 sm:h-18 max-w-7xl items-center justify-between px-4 md:px-8 lg:px-12">
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5" data-testid="link-logo">
           <div className="relative">
             <div className="absolute inset-0 rounded-xl bg-primary/60 blur-md" />
             <div className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 bg-slate-950 text-white">
@@ -47,12 +47,14 @@ export function TopNav() {
               item === "How it works" ? "/how-it-works" :
               item === "Pricing" ? "/pricing" :
               item === "Showcase" ? "/showcase" : "#";
+            const testId = `link-${item.toLowerCase().replace(/\s+/g, '-')}`;
             
             return (
               <a
                 key={item}
                 href={href}
                 className="relative inline-flex items-center gap-1 py-1 transition-colors hover:text-foreground"
+                data-testid={testId}
               >
                 <span>{item}</span>
               </a>
@@ -64,12 +66,18 @@ export function TopNav() {
           <Button
             variant="ghost"
             className="hidden sm:inline-flex h-8 rounded-full border border-transparent px-3 text-xs font-medium text-muted-foreground hover:border-white/15 hover:bg-white/5 hover:text-foreground"
+            data-testid="button-log-in"
+            asChild
           >
-            Log in
+            <Link href="/login">
+              Log in
+            </Link>
           </Button>
-          <Button className="h-9 sm:h-10 rounded-full bg-white px-3.5 sm:px-4 text-xs sm:text-sm font-semibold text-black shadow-[0_12px_40px_rgba(15,23,42,0.9)] hover:bg-slate-100">
-            Get started
-            <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+          <Button className="h-9 sm:h-10 rounded-full bg-white px-3.5 sm:px-4 text-xs sm:text-sm font-semibold text-black shadow-[0_12px_40px_rgba(15,23,42,0.9)] hover:bg-slate-100" data-testid="button-get-started" asChild>
+            <Link href="/signup">
+              Get started
+              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
           </Button>
         </div>
       </div>

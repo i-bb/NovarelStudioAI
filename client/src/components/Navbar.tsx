@@ -33,11 +33,15 @@ export default function Navbar() {
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="ghost" className="hidden md:inline-flex font-semibold" data-testid="button-sign-in">
-              Sign In
+            <Button variant="ghost" className="hidden md:inline-flex font-semibold" data-testid="button-sign-in" asChild>
+              <Link href="/login">
+                Sign In
+              </Link>
             </Button>
-            <Button className="rounded-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-semibold shadow-lg shadow-primary/30" data-testid="button-start-free">
-              Start Free
+            <Button className="rounded-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-semibold shadow-lg shadow-primary/30" data-testid="button-start-free" asChild>
+              <Link href="/signup">
+                Start Free
+              </Link>
             </Button>
             <Button variant="ghost" size="icon" className="md:hidden" data-testid="button-menu">
               <Menu className="w-5 h-5" />
