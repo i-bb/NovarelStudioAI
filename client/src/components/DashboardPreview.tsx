@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { LayoutDashboard, BarChart3, Settings, Scissors, Upload, Play } from "lucide-react";
-import streamThumb1 from "@assets/generated_images/gaming_stream_thumbnail_1.png";
+import streamThumb1 from "@assets/generated_images/realistic_male_irl_streamer.png";
 import streamThumb2 from "@assets/generated_images/just_chatting_stream_thumbnail_2.png";
 import streamThumb3 from "@assets/generated_images/valorant_stream_thumbnail_3.png";
 
