@@ -10,49 +10,62 @@ export default function CTASection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Waitlist signup:', email);
+    // wire up to backend later
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 3000);
   };
 
   return (
-    <section id="pricing" className="py-20 px-6">
-      <div className="max-w-4xl mx-auto">
-        <Card className="p-12 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10 border-primary/20 text-center">
-          <h2 className="font-cursive text-4xl md:text-5xl text-foreground mb-4">
-            Ready to Go Viral?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of creators who are scaling their content without scaling their team.
-            Start your free trial today.
-          </p>
+    <section className="relative py-16">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+      <div className="relative max-w-4xl mx-auto px-4 md:px-0">
+        <Card className="relative overflow-hidden rounded-3xl border border-white/15 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.25),_transparent_55%),_#020617] px-6 py-8 sm:px-10 sm:py-10 text-center">
+          <div className="mx-auto max-w-2xl">
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
+              Put your next stream on autopilot
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground/90 mb-6">
+              Drop in your email and we&apos;ll send you a link to spin up NovarelStudio before you go live tonight. No credit card, no contracts—just see if the clips are worth it.
+            </p>
 
-          {!submitted ? (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="rounded-full px-6"
-                data-testid="input-email-waitlist"
-              />
-              <Button type="submit" size="lg" className="rounded-full px-8 whitespace-nowrap group" data-testid="button-join-waitlist">
-                Join Waitlist
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </form>
-          ) : (
-            <div className="flex items-center justify-center gap-2 text-green-600" data-testid="text-success-message">
-              <CheckCircle className="w-5 h-5" />
-              <span>Thanks! We'll be in touch soon.</span>
-            </div>
-          )}
+            {!submitted ? (
+              <form
+                onSubmit={handleSubmit}
+                className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
+              >
+                <Input
+                  type="email"
+                  placeholder="you@yourchannel.gg"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="rounded-full border-white/20 bg-black/60 px-4 text-sm"
+                  data-testid="input-email-waitlist"
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="rounded-full px-6 text-xs sm:text-sm font-semibold bg-white text-black hover:bg-slate-100 shadow-[0_16px_60px_rgba(15,23,42,0.95)] group"
+                  data-testid="button-join-waitlist"
+                >
+                  Get access for my stream
+                  <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Button>
+              </form>
+            ) : (
+              <div
+                className="flex items-center justify-center gap-2 text-emerald-300 text-xs sm:text-sm"
+                data-testid="text-success-message"
+              >
+                <CheckCircle className="h-4 w-4" />
+                <span>We&apos;ll email you setup instructions for your next stream.</span>
+              </div>
+            )}
 
-          <p className="text-xs text-muted-foreground mt-4">
-            No credit card required • 14-day free trial • Cancel anytime
-          </p>
+            <p className="mt-4 text-[11px] text-muted-foreground/85">
+              No credit card required • First clips on us • You decide if it stays in your stack.
+            </p>
+          </div>
         </Card>
       </div>
     </section>

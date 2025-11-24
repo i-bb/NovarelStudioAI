@@ -1,122 +1,182 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { ArrowRight, Play, Users, Video, TrendingUp } from "lucide-react";
-import heroBackground from "@assets/generated_images/hero_background_tech_visualization.png";
+import { ArrowRight, Play, Zap, Users, Clock3 } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background pt-20">
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 w-full">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
-          {/* Left side - Featured "Stream" */}
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-accent/30 rounded-xl blur-2xl opacity-75" />
-            <Card className="relative overflow-hidden border-2 border-primary/30 bg-card/50 backdrop-blur">
-              <div className="aspect-video relative bg-gradient-to-br from-primary/20 to-accent/20">
-                <img 
-                  src={heroBackground} 
-                  alt="Hero" 
-                  className="w-full h-full object-cover opacity-60"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                <Badge className="absolute top-3 left-3 bg-red-600 text-white border-0 font-bold px-3 py-1">
-                  <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-2" />
-                  LIVE
-                </Badge>
-                <div className="absolute bottom-3 left-3 right-3">
-                  <div className="flex items-center gap-2 text-white">
-                    <Users className="w-4 h-4" />
-                    <span className="font-bold">2.5M viewers</span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-primary/90 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
-                    <Play className="w-10 h-10 text-white" fill="white" />
-                  </div>
-                </div>
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg mb-2">AI Clipping in Action</h3>
-                <p className="text-sm text-muted-foreground">Watch how NovarelStudio turns hours of content into viral moments</p>
-              </div>
-            </Card>
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden pt-24 pb-16">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(22,163,74,0.25),_transparent_55%)]" />
+      <div className="absolute inset-0 bg-noise opacity-40" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12 w-full grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-12 items-center">
+        {/* Left: Narrative & CTA */}
+        <div>
+          <Badge className="mb-6 border-white/15 bg-white/5 text-xs font-medium tracking-[0.18em] uppercase rounded-full px-4 py-1.5 text-muted-foreground flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+            </span>
+            Built for Twitch & Kick streamers
+          </Badge>
+
+          <h1 className="font-display font-semibold text-4xl sm:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-[1.05] text-foreground mb-6" style={{ fontFamily: "'Porcine Bosk', var(--font-display)" }}>
+            Turn live chaos into
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-fuchsia-500 to-emerald-400 mt-2">
+              content that prints followers.
+            </span>
+          </h1>
+
+          <p className="text-base sm:text-lg text-muted-foreground/90 max-w-xl leading-relaxed mb-8">
+            NovarelStudio watches your stream end-to-end, finds the moments your chat loses its mind, and ships vertical clips to every platform automatically.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
+            <Button className="h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-semibold rounded-full bg-white text-black hover:bg-slate-100 shadow-[0_18px_60px_rgba(15,23,42,0.8)]">
+              Start free for your next stream
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base rounded-full border-white/15 bg-black/40 hover:bg-white/5 text-foreground flex items-center"
+            >
+              <Play className="mr-2 h-4 w-4 fill-current" />
+              Watch 60s product tour
+            </Button>
           </div>
 
-          {/* Right side - Info */}
-          <div className="space-y-6">
-            <Badge className="bg-primary/20 text-primary border-primary/40 font-bold px-4 py-2 text-sm">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              #1 AI Clipping Platform
-            </Badge>
-            
-            <h1 className="font-cursive text-5xl md:text-6xl lg:text-7xl text-foreground leading-tight">
-              Turn Streams Into
-              <br />
-              <span className="text-primary">Viral Clips</span>
-            </h1>
-            
-            <p className="text-lg text-muted-foreground">
-              The autonomous AI platform that detects, records, analyzes, and publishes 
-              viral short-form content from your livestreams—24/7, completely hands-free.
-            </p>
-            
-            <div className="flex flex-wrap gap-3">
-              <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-bold shadow-lg shadow-primary/30 px-8" data-testid="button-get-started">
-                Get Started Free
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="font-bold border-2" data-testid="button-watch-demo">
-                <Play className="mr-2 w-5 h-5" />
-                Watch Demo
-              </Button>
+          <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-muted-foreground/80">
+            <div className="flex -space-x-3">
+              {["#10b981", "#6366f1", "#f97316"].map((color, i) => (
+                <div
+                  key={i}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-background/80 bg-slate-900 text-[10px] font-semibold"
+                  style={{ boxShadow: "0 0 0 1.5px rgba(15,23,42,0.9)" }}
+                >
+                  <span className="h-6 w-6 rounded-full" style={{ background: color }} />
+                </div>
+              ))}
             </div>
+            <span className="flex items-center gap-1">
+              <Users className="h-3.5 w-3.5 text-emerald-400" />
+              Trusted by early teams from top Twitch categories
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock3 className="h-3.5 w-3.5 text-sky-400" />
+              Goes live in under 5 minutes
+            </span>
           </div>
         </div>
-        
-        {/* Stats Grid - Twitch-style blocks */}
-        <div className="grid grid-cols-3 gap-4 mt-12">
-          <Card className="p-6 border-2 border-primary/30 bg-card/80 backdrop-blur hover-elevate active-elevate-2">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                <Video className="w-5 h-5 text-white" />
+
+        {/* Right: Product Surface */}
+        <div className="relative">
+          <div className="absolute -inset-10 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.22),_transparent_60%)] opacity-70" />
+          <div className="relative rounded-3xl border border-white/8 bg-gradient-to-b from-slate-900/80 via-slate-950/95 to-black/95 shadow-[0_24px_80px_rgba(15,23,42,0.95)] overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-slate-900/60">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                </div>
+                <span className="ml-3 font-mono text-[11px] bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                  twitch.tv/your-channel • LIVE
+                </span>
               </div>
-              <Badge className="bg-green-500/20 text-green-500 border-green-500/40 font-bold">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1" />
-                LIVE
-              </Badge>
-            </div>
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-1 font-cursive" data-testid="text-stat-streams">2.5M+</div>
-            <div className="text-sm text-muted-foreground font-semibold">Streams Processed</div>
-          </Card>
-          
-          <Card className="p-6 border-2 border-accent/30 bg-card/80 backdrop-blur hover-elevate active-elevate-2">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center">
-                <Play className="w-5 h-5 text-white" fill="white" />
+              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Zap className="h-3.5 w-3.5 text-primary" />
+                  Auto-clipping
+                </span>
               </div>
-              <Badge className="bg-green-500/20 text-green-500 border-green-500/40 font-bold">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1" />
-                LIVE
-              </Badge>
             </div>
-            <div className="text-3xl md:text-4xl font-bold text-accent mb-1 font-cursive" data-testid="text-stat-clips">50M+</div>
-            <div className="text-sm text-muted-foreground font-semibold">Clips Generated</div>
-          </Card>
-          
-          <Card className="p-6 border-2 border-primary/30 bg-card/80 backdrop-blur hover-elevate active-elevate-2">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                <Users className="w-5 h-5 text-white" />
+
+            <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-0">
+              {/* Live stream preview */}
+              <div className="relative border-r border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)]">
+                <div className="aspect-video w-full overflow-hidden">
+                  <div className="relative h-full w-full bg-[url('https://images.pexels.com/photos/9071730/pexels-photo-9071730.jpeg?auto=compress&cs=tinysrgb&w=1200')] bg-cover bg-center mask-fade-b" />
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
+                  <div className="flex items-center gap-3 text-xs">
+                    <div className="flex items-center gap-1 rounded-full bg-rose-600/90 px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase text-white shadow-lg shadow-rose-500/40">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+                      </span>
+                      Live
+                    </div>
+                    <div className="hidden sm:flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[11px] text-slate-100 border border-white/10">
+                      EN • Just Chatting
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {["Clip queued", "Moment detected"].map((label, i) => (
+                      <span
+                        key={label}
+                        className="rounded-full bg-black/75 px-2.5 py-1 text-[10px] font-medium text-slate-100 border border-emerald-400/30 flex items-center gap-1"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {i === 0 ? "Clip queued" : "Chat spike"}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <Badge className="bg-green-500/20 text-green-500 border-green-500/40 font-bold">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1" />
-                LIVE
-              </Badge>
+
+              {/* Clip stack */}
+              <div className="p-4 sm:p-5 flex flex-col gap-4 bg-black/80">
+                <div className="flex items-center justify-between mb-1">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-[0.18em] mb-1">
+                      Tonight's stream
+                    </p>
+                    <p className="text-sm font-semibold text-slate-50">6 clips generated • 3 auto-published</p>
+                  </div>
+                  <button className="rounded-full bg-emerald-400/90 px-3 py-1.5 text-[11px] font-semibold text-emerald-950 shadow-md hover:bg-emerald-300">
+                    Approve all
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { title: "Ace clutch on Ascent", perf: "+214%", tag: "Gameplay" },
+                    { title: "Chat loses it at 3AM", perf: "+181%", tag: "Chat moment" },
+                    { title: "Streamer explains setup", perf: "+96%", tag: "Creator story" },
+                  ].map((clip, idx) => (
+                    <div
+                      key={clip.title}
+                      className="group flex items-center gap-3 rounded-2xl border border-white/8 bg-slate-900/60 px-2.5 py-2.5 hover:border-emerald-400/40 hover:bg-slate-900/90 transition-colors"
+                    >
+                      <div className="relative h-12 w-9 overflow-hidden rounded-xl bg-slate-800/80">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(52,211,153,0.65),_transparent_65%)] opacity-70" />
+                        <Play className="absolute inset-0 m-auto h-3.5 w-3.5 text-slate-950" />
+                        <span className="absolute bottom-1 left-1 rounded-full bg-black/65 px-1.5 py-0.5 text-[9px] font-semibold text-slate-100">
+                          0{idx + 1}:23
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="truncate text-[13px] font-medium text-slate-50">{clip.title}</p>
+                        <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                          <span className="rounded-full bg-slate-900/80 px-1.5 py-0.5 border border-white/10">{clip.tag}</span>
+                          <span className="flex items-center gap-1 text-emerald-400">
+                            {clip.perf} better than avg
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>Auto-posts to TikTok, Reels & Shorts while you sleep.</span>
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Running on your next stream
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="text-3xl md:text-4xl font-bold text-primary mb-1 font-cursive" data-testid="text-stat-creators">10K+</div>
-            <div className="text-sm text-muted-foreground font-semibold">Active Creators</div>
-          </Card>
+          </div>
         </div>
       </div>
     </section>

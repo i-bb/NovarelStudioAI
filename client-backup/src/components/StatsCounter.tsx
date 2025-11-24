@@ -37,7 +37,7 @@ export default function StatsCounter({ label, targetValue, suffix = "", icon }: 
         <div className="text-sm text-muted-foreground">{label}</div>
         {icon || <TrendingUp className="w-4 h-4 text-primary" />}
       </div>
-      <div className="text-3xl font-bold font-display text-primary" data-testid={`text-stat-value-${label.toLowerCase().replace(/\s+/g, '-')}`}>
+      <div className="text-3xl font-bold font-cursive text-primary" data-testid={`text-stat-value-${label.toLowerCase().replace(/\s+/g, '-')}`}>
         {count.toLocaleString()}{suffix}
       </div>
     </Card>

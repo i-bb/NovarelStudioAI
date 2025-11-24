@@ -9,185 +9,180 @@ export default function PricingSection() {
 
   const plans = [
     {
-      name: "Free",
-      tagline: "Try Novarel Studio for free",
+      id: "starter",
+      name: "Starter",
+      tagline: "Try NovarelStudio on nights and weekends.",
       monthlyPrice: "$0",
       annualPrice: "$0",
       period: "",
       annualBilling: null,
       badge: null,
+      bullet: "Best if you&apos;re testing the waters.",
       features: [
-        "Up to 10 clips/month",
-        "720p export quality",
-        "Basic AI detection",
-        "Instagram Reels publishing",
-        "3-day video storage",
-        "Community support",
+        "Up to 10 AI clips / month",
+        "720p exports",
+        "Basic moment detection",
+        "1 connected platform",
+        "3-day clip history",
       ],
-      cta: "Start Free",
+      cta: "Start free",
       popular: false,
     },
     {
+      id: "creator",
       name: "Creator",
-      tagline: "For serious content creators",
+      tagline: "For channels that treat streaming like a job.",
       monthlyPrice: "$49",
       annualPrice: "$32",
       period: "/month",
       annualBilling: "$382 billed annually",
-      badge: "MOST POPULAR",
+      badge: "Most picked by full-time creators",
+      bullet: "Best if you stream 3–6 nights a week.",
       features: [
-        "5 clips per day",
-        "4K export quality",
-        "Advanced AI detection",
-        "Instagram Reels publishing",
-        "Unlimited storage",
-        "Custom branding",
-        "Priority support",
-        "Schedule posts",
+        "Up to 5 clips / day",
+        "4K exports",
+        "Advanced chat + audio detection",
+        "Instagram Reels auto-posting",
+        "Unlimited clip archive",
+        "Basic branding presets",
+        "Email support",
       ],
-      cta: "Get Started",
+      cta: "Use on my next stream",
       popular: true,
     },
     {
-      name: "Streamer",
-      tagline: "For professional streamers & teams",
+      id: "studio",
+      name: "Studio",
+      tagline: "For partnered channels and small teams.",
       monthlyPrice: "$149",
       annualPrice: "$97",
       period: "/month",
       annualBilling: "$1,162 billed annually",
-      badge: null,
+      badge: "For serious growth pushes",
+      bullet: "Best if you run multiple channels or games.",
       features: [
-        "12 clips per day",
+        "Up to 12 clips / day",
         "Everything in Creator",
-        "Multi-stream support",
-        "Team collaboration (5 seats)",
-        "API access",
-        "White-label exports",
-        "Dedicated account manager",
-        "99.9% uptime SLA",
+        "Multi-channel & multi-game workspaces",
+        "Team access (up to 5 seats)",
+        "API + webhooks",
+        "Custom caption + template setup",
+        "Priority support and check-ins",
       ],
-      cta: "Contact Sales",
+      cta: "Talk to the team",
       popular: false,
     },
   ];
 
   return (
-    <section id="pricing" className="relative py-24 bg-background overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-accent/5" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <Badge variant="secondary" className="mb-4 bg-primary/10 text-primary border-primary/20 text-xs font-semibold">
-            PRICING — CHOOSE YOUR PLAN
-          </Badge>
-          <h2 className="text-5xl font-cursive text-foreground mb-4">
-            LEVEL UP YOUR CONTENT GAME
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            Select the perfect plan for your streaming empire. All plans include 24/7 automated clipping.
-          </p>
+    <section id="pricing" className="relative py-20">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.2),_transparent_60%)] opacity-70" />
 
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4">
-            <Button
-              variant={billingPeriod === "monthly" ? "default" : "outline"}
-              onClick={() => setBillingPeriod("monthly")}
-              className="font-semibold"
-              data-testid="button-billing-monthly"
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
+        <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <Badge
+              variant="secondary"
+              className="mb-3 bg-black/60 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground border border-white/20"
             >
-              Monthly
-            </Button>
-            <Button
-              variant={billingPeriod === "annual" ? "default" : "outline"}
-              onClick={() => setBillingPeriod("annual")}
-              className="font-semibold relative"
-              data-testid="button-billing-annual"
-            >
-              Annual
-              <Badge className="ml-2 bg-green-500 text-white border-0 font-bold">
-                35% OFF
-              </Badge>
-            </Button>
+              Pricing
+            </Badge>
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
+              Pay for the clips that actually move your channel
+            </h2>
+            <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
+              All tiers include always-on clipping. Pick how aggressive you want NovarelStudio to be about turning streams into posts.
+            </p>
+          </div>
+          <div className="flex flex-col items-start sm:items-end gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-2 py-1 text-[11px] text-muted-foreground">
+              <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">Save 35%</span>
+              on annual billing
+            </div>
+            <div className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/60 p-1">
+              <BillingToggleButton
+                active={billingPeriod === "monthly"}
+                onClick={() => setBillingPeriod("monthly")}
+                label="Monthly"
+                testId="button-billing-monthly"
+              />
+              <BillingToggleButton
+                active={billingPeriod === "annual"}
+                onClick={() => setBillingPeriod("annual")}
+                label="Annual"
+                testId="button-billing-annual"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan, index) => (
+        <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
+          {plans.map((plan) => (
             <Card
-              key={index}
-              className={`relative overflow-hidden hover-elevate transition-all ${
+              key={plan.id}
+              className={`relative flex h-full flex-col overflow-hidden rounded-3xl border bg-black/70 backdrop-blur-xl transition-transform duration-200 ${
                 plan.popular
-                  ? "border-primary/50 shadow-xl shadow-primary/20 scale-105"
-                  : "border-border"
+                  ? "border-white/40 shadow-[0_20px_70px_rgba(15,23,42,0.95)] md:-translate-y-2"
+                  : "border-white/10"
               }`}
-              data-testid={`card-pricing-${plan.name.toLowerCase()}`}
+              data-testid={`card-pricing-${plan.id}`}
             >
-              {/* Popular Badge */}
               {plan.badge && (
-                <div className="absolute top-0 right-0 left-0">
-                  <div className="bg-gradient-to-r from-primary to-accent text-white text-xs font-bold text-center py-2 uppercase tracking-wide">
+                <div className="absolute inset-x-4 top-4 z-10 flex justify-end">
+                  <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-100 border border-white/30">
                     {plan.badge}
-                  </div>
+                  </span>
                 </div>
               )}
 
-              <CardHeader className={plan.badge ? "mt-8" : ""}>
-                <div className="flex items-center justify-between mb-2">
-                  <CardTitle className="text-2xl font-cursive text-foreground">
-                    {plan.name}
-                  </CardTitle>
-                </div>
-                <CardDescription className="text-sm text-muted-foreground">
+              <CardHeader className="pt-8 pb-4">
+                <CardTitle className="mb-1 text-xl font-semibold text-foreground">{plan.name}</CardTitle>
+                <CardDescription className="text-xs sm:text-sm text-muted-foreground/90">
                   {plan.tagline}
                 </CardDescription>
-                
-                {/* Price */}
-                <div className="mt-6 mb-4">
+
+                <div className="mt-5">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-cursive text-foreground">
+                    <span className="text-3xl sm:text-4xl font-display font-semibold text-foreground">
                       {billingPeriod === "monthly" ? plan.monthlyPrice : plan.annualPrice}
                     </span>
-                    {plan.period && (
-                      <span className="text-lg text-muted-foreground">{plan.period}</span>
-                    )}
+                    {plan.period && <span className="text-xs sm:text-sm text-muted-foreground">{plan.period}</span>}
                   </div>
                   {billingPeriod === "annual" && plan.annualBilling && (
-                    <p className="text-sm text-muted-foreground mt-1">{plan.annualBilling}</p>
+                    <p className="mt-1 text-[11px] text-muted-foreground/80">{plan.annualBilling}</p>
                   )}
+                  <p className="mt-2 text-[11px] text-muted-foreground/90">{plan.bullet}</p>
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                {/* Features List */}
-                <div className="space-y-3">
+              <CardContent className="flex-1 space-y-3 pb-4">
+                <div className="space-y-2.5">
                   {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-3" data-testid={`feature-${plan.name.toLowerCase()}-${idx}`}>
-                      <div className="mt-0.5">
-                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Check className="w-3 h-3 text-primary" strokeWidth={3} />
-                        </div>
-                      </div>
-                      <span className="text-sm text-foreground/80">{feature}</span>
+                    <div
+                      key={idx}
+                      className="flex items-start gap-2.5"
+                      data-testid={`feature-${plan.id}-${idx}`}
+                    >
+                      <span className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400/10">
+                        <Check className="h-2.5 w-2.5 text-emerald-300" strokeWidth={3} />
+                      </span>
+                      <span className="text-xs sm:text-sm text-foreground/85">{feature}</span>
                     </div>
                   ))}
                 </div>
               </CardContent>
 
-              <CardFooter>
+              <CardFooter className="pt-0 pb-5 px-6">
                 <Button
-                  className={`w-full font-semibold ${
+                  className={`w-full rounded-full text-xs sm:text-sm font-semibold ${
                     plan.popular
-                      ? "bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg shadow-primary/30"
-                      : ""
+                      ? "bg-white text-black hover:bg-slate-100 shadow-[0_16px_60px_rgba(15,23,42,0.95)]"
+                      : "bg-black/60 text-foreground border border-white/25 hover:bg-black"
                   }`}
                   variant={plan.popular ? "default" : "outline"}
-                  size="lg"
-                  data-testid={`button-${plan.name.toLowerCase()}-cta`}
+                  size="sm"
+                  data-testid={`button-${plan.id}-cta`}
                 >
                   {plan.cta}
                 </Button>
@@ -196,13 +191,36 @@ export default function PricingSection() {
           ))}
         </div>
 
-        {/* Footer Note */}
-        <div className="text-center mt-12">
-          <p className="text-sm text-muted-foreground">
-            All plans include AI-powered clipping, automatic publishing, and 24/7 monitoring. No credit card required for free plan.
-          </p>
+        <div className="mt-8 flex flex-col items-center gap-1 text-[11px] sm:text-xs text-muted-foreground/85 text-center">
+          <p>All plans include AI-powered clipping, automated posting and 24/7 monitoring of your streams.</p>
+          <p>No credit card required for Starter. Upgrade once you&apos;re happy with what lands in your feeds.</p>
         </div>
       </div>
     </section>
+  );
+}
+
+function BillingToggleButton({
+  active,
+  onClick,
+  label,
+  testId,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  testId: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-testid={testId}
+      className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
+        active ? "bg-white text-black" : "bg-transparent text-muted-foreground"
+      }`}
+    >
+      {label}
+    </button>
   );
 }
