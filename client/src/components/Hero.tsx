@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Play, Zap, Users, Clock3 } from "lucide-react";
-import streamerImage from "@assets/generated_images/young_black_streamer_selfie_pov.png";
+import streamerImage from "@assets/generated_images/young_black_teen_streamer_horizontal.png";
 
 export default function Hero() {
   return (
