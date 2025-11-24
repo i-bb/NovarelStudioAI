@@ -24,9 +24,9 @@ export default function Navbar() {
             <a href="#how-it-works" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-how-it-works">
               How It Works
             </a>
-            <a href="/pricing" target="_blank" rel="noreferrer" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-pricing">
+            <Link href="/pricing" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-pricing">
               Pricing
-            </a>
+            </Link>
             <a href="#dashboard" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-dashboard">
               Dashboard
             </a>
