@@ -1,6 +1,6 @@
 import { Radio, Video, Sparkles, Scissors, Share2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import captureSystemImage from "@assets/generated_images/streaming_capture_dashboard_interface.png";
+import captureSystemImage from "@assets/generated_images/live_stream_capture_system.png";
 
 export default function FeaturesSection() {
   return (
