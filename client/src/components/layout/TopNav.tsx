@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Zap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Link } from "wouter";
 
 export function TopNav() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -24,7 +25,7 @@ export function TopNav() {
       )}
     >
       <div className="mx-auto flex h-16 sm:h-18 max-w-7xl items-center justify-between px-4 md:px-8 lg:px-12">
-        <a href="#top" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <div className="relative">
             <div className="absolute inset-0 rounded-xl bg-primary/60 blur-md" />
             <div className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 bg-slate-950 text-white">
@@ -37,18 +38,26 @@ export function TopNav() {
             </p>
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Stream-to-clip autopilot</p>
           </div>
-        </a>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-muted-foreground/90">
-          {["Features", "How it works", "Pricing", "Showcase"].map((item) => (
-            <a
-              key={item}
-              href={item === "Pricing" ? "/pricing" : `#${item.toLowerCase().replace(/\s+/g, '-')}`}
-              className="relative inline-flex items-center gap-1 py-1 transition-colors hover:text-foreground"
-            >
-              <span>{item}</span>
-            </a>
-          ))}
+          {["Features", "How it works", "Pricing", "Showcase"].map((item) => {
+            const href = 
+              item === "Features" ? "/#features" :
+              item === "How it works" ? "/how-it-works" :
+              item === "Pricing" ? "/pricing" :
+              item === "Showcase" ? "/showcase" : "#";
+            
+            return (
+              <a
+                key={item}
+                href={href}
+                className="relative inline-flex items-center gap-1 py-1 transition-colors hover:text-foreground"
+              >
+                <span>{item}</span>
+              </a>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">

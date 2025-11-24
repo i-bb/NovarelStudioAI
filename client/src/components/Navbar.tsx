@@ -18,18 +18,18 @@ export default function Navbar() {
           </Link>
           
           <div className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-features">
+            <a href="/#features" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-features">
               Features
             </a>
-            <a href="#how-it-works" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-how-it-works">
+            <Link href="/how-it-works" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-how-it-works">
               How It Works
-            </a>
+            </Link>
             <Link href="/pricing" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-pricing">
               Pricing
             </Link>
-            <a href="#dashboard" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-dashboard">
-              Dashboard
-            </a>
+            <Link href="/showcase" className="text-sm font-semibold text-foreground/70 hover:text-primary hover-elevate active-elevate-2 px-3 py-2 rounded-lg transition-all" data-testid="link-showcase">
+              Showcase
+            </Link>
           </div>
           
           <div className="flex items-center gap-4">

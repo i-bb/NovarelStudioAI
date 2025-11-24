@@ -43,10 +43,10 @@ export default function Footer() {
           <div className="md:col-span-3 flex flex-col gap-4 text-sm">
             <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Product</h4>
             <nav className="flex flex-col gap-2.5 text-muted-foreground/90">
-              <FooterLink href="#features">Features</FooterLink>
-              <FooterLink href="#how-it-works">How it works</FooterLink>
+              <FooterLink href="/#features">Features</FooterLink>
+              <FooterLink href="/how-it-works">How it works</FooterLink>
               <FooterLink href="/pricing">Pricing</FooterLink>
-              <FooterLink href="#showcase">Creator showcase</FooterLink>
+              <FooterLink href="/showcase">Creator showcase</FooterLink>
             </nav>
           </div>
 
