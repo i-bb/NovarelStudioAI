@@ -5,9 +5,11 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev:v2": "NODE_ENV=development PORT=5001 tsx server/index-v2.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
+    "check:v2": "tsc --project client-v2/tsconfig.json",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
