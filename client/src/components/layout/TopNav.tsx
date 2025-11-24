@@ -43,7 +43,9 @@ export function TopNav() {
           {["Features", "How it works", "Pricing", "Showcase"].map((item) => (
             <a
               key={item}
-              href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+              href={item === "Pricing" ? "/pricing" : `#${item.toLowerCase().replace(/\s+/g, '-')}`}
+              target={item === "Pricing" ? "_blank" : undefined}
+              rel={item === "Pricing" ? "noreferrer" : undefined}
               className="relative inline-flex items-center gap-1 py-1 transition-colors hover:text-foreground"
             >
               <span>{item}</span>

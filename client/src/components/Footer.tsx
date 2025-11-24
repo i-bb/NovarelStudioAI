@@ -45,7 +45,7 @@ export default function Footer() {
             <nav className="flex flex-col gap-2.5 text-muted-foreground/90">
               <FooterLink href="#features">Features</FooterLink>
               <FooterLink href="#how-it-works">How it works</FooterLink>
-              <FooterLink href="#pricing">Pricing</FooterLink>
+              <FooterLink href="/pricing" target="_blank">Pricing</FooterLink>
               <FooterLink href="#showcase">Creator showcase</FooterLink>
             </nav>
           </div>
@@ -89,10 +89,12 @@ export default function Footer() {
   );
 }
 
-function FooterLink({ children, href }: { children: React.ReactNode; href: string }) {
+function FooterLink({ children, href, target }: { children: React.ReactNode; href: string; target?: string }) {
   return (
     <a
       href={href}
+      target={target}
+      rel={target === "_blank" ? "noreferrer" : undefined}
       className="relative inline-flex items-center text-muted-foreground/90 hover:text-foreground transition-colors"
     >
       <span>{children}</span>

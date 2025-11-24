@@ -28,7 +28,7 @@ export default function ProcessTimeline({ steps }: ProcessTimelineProps) {
                 <Badge variant="secondary" className="text-xs" data-testid={`badge-step-level-${step.level}`}>
                   Level {step.level}
                 </Badge>
-                <h3 className="font-semibold text-foreground">{step.title}</h3>
+                <h3 className="font-display font-semibold text-foreground">{step.title}</h3>
                 <p className="text-xs text-muted-foreground">{step.description}</p>
               </div>
             </Card>

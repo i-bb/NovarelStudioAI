@@ -31,7 +31,7 @@ export default function FeatureCard({ icon: Icon, title, description, level = 1,
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-bold text-foreground">{title}</h3>
+              <h3 className="font-display text-lg font-bold text-foreground">{title}</h3>
               {level && (
                 <Badge className={`text-xs font-bold ${color === 'primary' ? 'bg-primary/20 text-primary border-primary/40' : 'bg-accent/20 text-accent border-accent/40'}`} data-testid={`badge-level-${level}`}>
                   <Zap className="w-3 h-3 mr-1" fill="currentColor" />

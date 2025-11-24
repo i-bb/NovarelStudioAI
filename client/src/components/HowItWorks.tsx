@@ -51,7 +51,7 @@ function StepCard({ step, title, description }: { step: string, title: string, d
         </span>
       </div>
       <div>
-        <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1.5">{title}</h3>
+        <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-1.5">{title}</h3>
         <p className="text-xs sm:text-sm text-muted-foreground/90 leading-relaxed">{description}</p>
       </div>
       <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.25),_transparent_60%)]" />
