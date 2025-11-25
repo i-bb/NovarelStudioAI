@@ -79,7 +79,7 @@ export default function DashboardPreview() {
               <TabsContent value="projects" className="px-4 sm:px-6 py-5 space-y-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
                   <div>
-                    <h3 className="font-subhead text-base sm:text-lg font-semibold text-foreground">Recent streams</h3>
+                    <h3 className="font-subhead text-base sm:text-lg font-normal text-foreground">Recent streams</h3>
                     <p className="text-[11px] text-muted-foreground">Each card is one stream run through NovarelStudio.</p>
                   </div>
                   <Button
@@ -171,7 +171,7 @@ export default function DashboardPreview() {
               <TabsContent value="ai-clipping" className="px-4 sm:px-6 py-10">
                 <div className="mx-auto max-w-md text-center">
                   <Scissors className="mx-auto mb-4 h-10 w-10 text-primary" />
-                  <h3 className="font-subhead mb-2 text-lg sm:text-xl font-semibold text-foreground">AI clipping engine</h3>
+                  <h3 className="font-subhead mb-2 text-lg sm:text-xl font-normal text-foreground">AI clipping engine</h3>
                   <p className="mb-5 text-xs sm:text-sm text-muted-foreground/90">
                     Drag in a VOD or let us ingest your next live session automatically. Everything else—from detection to captioning—runs hands-off.
                   </p>
@@ -183,7 +183,7 @@ export default function DashboardPreview() {
 
               <TabsContent value="settings" className="px-4 sm:px-6 py-5">
                 <div className="max-w-xl space-y-4">
-                  <h3 className="font-subhead text-base sm:text-lg font-semibold text-foreground mb-1">Posting rules</h3>
+                  <h3 className="font-subhead text-base sm:text-lg font-normal text-foreground mb-1">Posting rules</h3>
                   <p className="text-[11px] text-muted-foreground">
                     Set once, then let NovarelStudio obey those rules on every stream.
                   </p>

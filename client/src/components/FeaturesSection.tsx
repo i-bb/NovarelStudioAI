@@ -132,7 +132,7 @@ function FeatureCard({
           <Icon className="w-4.5 h-4.5" />
         </div>
         <div>
-          <h3 className="font-subhead text-lg sm:text-xl font-semibold text-foreground mb-1.5">{title}</h3>
+          <h3 className="font-subhead text-lg sm:text-xl font-normal text-foreground mb-1.5">{title}</h3>
           <p className="text-xs sm:text-sm text-muted-foreground/90 leading-relaxed">{description}</p>
         </div>
       </div>
