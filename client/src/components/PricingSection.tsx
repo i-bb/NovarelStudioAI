@@ -2,22 +2,41 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Check, ChevronDown } from "lucide-react";
+
+type CreditTier = {
+  credits: string;
+  monthlyPrice: number;
+  annualPrice: number;
+};
+
+type Plan = {
+  id: string;
+  name: string;
+  tagline: string;
+  badge: string | null;
+  bullet: string;
+  features: string[];
+  cta: string;
+  popular: boolean;
+  creditTiers: CreditTier[] | null;
+  fixedMonthlyPrice?: string;
+  fixedAnnualPrice?: string;
+};
 
 export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
+  const [creatorTier, setCreatorTier] = useState(0);
+  const [studioTier, setStudioTier] = useState(0);
 
-  const plans = [
+  const plans: Plan[] = [
     {
       id: "starter",
       name: "Starter",
       tagline: "Try NovarelStudio on nights and weekends.",
-      monthlyPrice: "$0",
-      annualPrice: "$0",
-      period: "",
-      annualBilling: null,
       badge: null,
-      bullet: "Best if you&apos;re testing the waters.",
+      bullet: "Best if you're testing the waters.",
       features: [
         "Up to 10 AI clips / month",
         "720p exports",
@@ -27,19 +46,17 @@ export default function PricingSection() {
       ],
       cta: "Start free",
       popular: false,
+      creditTiers: null,
+      fixedMonthlyPrice: "$0",
+      fixedAnnualPrice: "$0",
     },
     {
       id: "creator",
       name: "Creator",
       tagline: "For channels that treat streaming like a job.",
-      monthlyPrice: "$35",
-      annualPrice: "$23",
-      period: "/month",
-      annualBilling: "$273 billed annually",
       badge: "Most picked by full-time creators",
       bullet: "Best if you stream 3–6 nights a week.",
       features: [
-        "Up to 5 clips / day",
         "4K exports",
         "Advanced chat + audio detection",
         "Instagram Reels auto-posting",
@@ -49,19 +66,20 @@ export default function PricingSection() {
       ],
       cta: "Use on my next stream",
       popular: true,
+      creditTiers: [
+        { credits: "150 clips/month", monthlyPrice: 35, annualPrice: 23 },
+        { credits: "300 clips/month", monthlyPrice: 55, annualPrice: 36 },
+        { credits: "500 clips/month", monthlyPrice: 75, annualPrice: 49 },
+        { credits: "750 clips/month", monthlyPrice: 95, annualPrice: 62 },
+      ],
     },
     {
       id: "studio",
       name: "Studio",
       tagline: "For partnered channels and small teams.",
-      monthlyPrice: "$100",
-      annualPrice: "$65",
-      period: "/month",
-      annualBilling: "$780 billed annually",
       badge: "For serious growth pushes",
       bullet: "Best if you run multiple channels or games.",
       features: [
-        "Up to 12 clips / day",
         "Everything in Creator",
         "Multi-channel & multi-game workspaces",
         "Team access (up to 5 seats)",
@@ -71,8 +89,43 @@ export default function PricingSection() {
       ],
       cta: "Talk to the team",
       popular: false,
+      creditTiers: [
+        { credits: "360 clips/month", monthlyPrice: 100, annualPrice: 65 },
+        { credits: "600 clips/month", monthlyPrice: 150, annualPrice: 98 },
+        { credits: "1,000 clips/month", monthlyPrice: 200, annualPrice: 130 },
+        { credits: "1,500 clips/month", monthlyPrice: 275, annualPrice: 179 },
+      ],
     },
   ];
+
+  const getSelectedTier = (planId: string) => {
+    if (planId === "creator") return creatorTier;
+    if (planId === "studio") return studioTier;
+    return 0;
+  };
+
+  const setSelectedTier = (planId: string, value: number) => {
+    if (planId === "creator") setCreatorTier(value);
+    if (planId === "studio") setStudioTier(value);
+  };
+
+  const getPrice = (plan: Plan) => {
+    if (plan.creditTiers) {
+      const tier = plan.creditTiers[getSelectedTier(plan.id)];
+      const price = billingPeriod === "monthly" ? tier.monthlyPrice : tier.annualPrice;
+      return `$${price}`;
+    }
+    return billingPeriod === "monthly" ? plan.fixedMonthlyPrice : plan.fixedAnnualPrice;
+  };
+
+  const getAnnualBilling = (plan: Plan) => {
+    if (plan.creditTiers) {
+      const tier = plan.creditTiers[getSelectedTier(plan.id)];
+      const annual = tier.annualPrice * 12;
+      return `$${annual} billed annually`;
+    }
+    return null;
+  };
 
   return (
     <section id="pricing" className="relative py-20">
@@ -145,15 +198,44 @@ export default function PricingSection() {
                 <div className="mt-5">
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl sm:text-4xl font-display font-semibold text-foreground">
-                      {billingPeriod === "monthly" ? plan.monthlyPrice : plan.annualPrice}
+                      {getPrice(plan)}
                     </span>
-                    {plan.period && <span className="text-xs sm:text-sm text-muted-foreground">{plan.period}</span>}
+                    {plan.creditTiers && <span className="text-xs sm:text-sm text-muted-foreground">/month</span>}
                   </div>
-                  {billingPeriod === "annual" && plan.annualBilling && (
-                    <p className="mt-1 text-[11px] text-muted-foreground/80">{plan.annualBilling}</p>
+                  {billingPeriod === "annual" && plan.creditTiers && (
+                    <p className="mt-1 text-[11px] text-muted-foreground/80">{getAnnualBilling(plan)}</p>
                   )}
                   <p className="mt-2 text-[11px] text-muted-foreground/90">{plan.bullet}</p>
                 </div>
+
+                {plan.creditTiers && (
+                  <div className="mt-4">
+                    <p className="text-[11px] text-muted-foreground mb-2">1 credit = 1 AI-generated clip</p>
+                    <Select
+                      value={getSelectedTier(plan.id).toString()}
+                      onValueChange={(value) => setSelectedTier(plan.id, parseInt(value))}
+                    >
+                      <SelectTrigger 
+                        className="w-full bg-black/60 border-white/15 text-sm text-foreground"
+                        data-testid={`select-credits-${plan.id}`}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black/95 border-white/15 backdrop-blur-xl">
+                        {plan.creditTiers.map((tier, idx) => (
+                          <SelectItem 
+                            key={idx} 
+                            value={idx.toString()}
+                            className="text-sm text-foreground hover:bg-white/10"
+                            data-testid={`option-credits-${plan.id}-${idx}`}
+                          >
+                            {tier.credits}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </CardHeader>
 
               <CardContent className="flex-1 space-y-3 pb-4">
