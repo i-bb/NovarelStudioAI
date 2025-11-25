@@ -16,7 +16,7 @@ export default function VideoShowcase() {
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
-            <h2 className="font-subhead text-3xl sm:text-4xl font-normal tracking-tight text-foreground mb-3">
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
               What your stream turns into overnight
             </h2>
             <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">

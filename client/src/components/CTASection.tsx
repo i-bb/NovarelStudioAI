@@ -21,7 +21,7 @@ export default function CTASection() {
       <div className="relative max-w-4xl mx-auto px-4 md:px-0">
         <Card className="relative overflow-hidden rounded-3xl border border-white/15 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.25),_transparent_55%),_#020617] px-6 py-8 sm:px-10 sm:py-10 text-center">
           <div className="mx-auto max-w-2xl">
-            <h2 className="font-subhead text-3xl sm:text-4xl font-normal tracking-tight text-foreground mb-3">
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
               Put your next stream on autopilot
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground/90 mb-6">
