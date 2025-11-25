@@ -2,6 +2,7 @@ import { SiTiktok, SiInstagram, SiYoutube } from "react-icons/si";
 import { Sparkles, Share2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import gamerImage from "@assets/stock_images/young_gamer_streamin_cbac079e.jpg";
 
 export default function ClipPreviewMockup() {
   return (
@@ -16,15 +17,14 @@ export default function ClipPreviewMockup() {
         <div className="relative flex-shrink-0">
           <div className="relative w-[180px] sm:w-[200px] mx-auto lg:mx-0">
             <div className="aspect-[9/16] rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-white/10 overflow-hidden shadow-xl">
-              <div className="h-full w-full bg-gradient-to-br from-primary/20 via-slate-900 to-emerald-900/20 flex flex-col items-center justify-center p-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-emerald-500 mb-3 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-white">N</span>
-                </div>
-                <div className="space-y-2 w-full">
-                  <div className="h-2 bg-white/20 rounded-full w-3/4 mx-auto" />
-                  <div className="h-2 bg-white/10 rounded-full w-1/2 mx-auto" />
-                </div>
-                <div className="mt-auto pt-6 w-full">
+              <div className="h-full w-full relative">
+                <img 
+                  src={gamerImage} 
+                  alt="Streamer clip preview" 
+                  className="absolute inset-0 w-full h-full object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="absolute bottom-3 left-3 right-3">
                   <div className="bg-black/60 backdrop-blur-sm rounded-lg p-2 border border-white/10">
                     <p className="font-subhead text-[10px] sm:text-xs text-white text-center leading-tight">
                       VIRAL MOMENT
