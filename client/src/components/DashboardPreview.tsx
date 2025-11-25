@@ -188,7 +188,7 @@ export default function DashboardPreview() {
                     Set once, then let NovarelStudio obey those rules on every stream.
                   </p>
                   <div className="space-y-3">
-                    <RuleRow label="Instagram Reels" value="On • 3 clips per stream" testId="badge-instagram-status" />
+                    <RuleRow label="Instagram Reels" value="On" testId="badge-instagram-status" />
                     <RuleRow label="TikTok" value="Off • in beta" testId="badge-tiktok-status" />
                     <RuleRow label="YouTube Shorts" value="Off • queued" testId="badge-youtube-status" />
                   </div>
