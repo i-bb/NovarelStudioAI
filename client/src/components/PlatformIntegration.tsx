@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import PlatformBadge from "./PlatformBadge";
-import platformImage from "@assets/stock_images/young_gamer_streamin_cbac079e.jpg";
+import ClipPreviewMockup from "./ClipPreviewMockup";
 
 export default function PlatformIntegration() {
   return (
@@ -23,12 +23,7 @@ export default function PlatformIntegration() {
 
         <div className="grid gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.9fr)] items-center">
           <div className="relative">
-            <div className="absolute -inset-6 rounded-3xl bg-gradient-to-tr from-slate-900 via-slate-950 to-black shadow-[0_24px_80px_rgba(15,23,42,0.95)]" />
-            <img
-              src={platformImage}
-              alt="Platform integration overview"
-              className="relative z-10 w-full h-auto rounded-3xl border border-white/10"
-            />
+            <ClipPreviewMockup />
           </div>
 
           <div className="space-y-4">
