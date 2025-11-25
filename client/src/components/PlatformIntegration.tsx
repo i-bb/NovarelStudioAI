@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import PlatformBadge from "./PlatformBadge";
-import platformImage from "@assets/stock_images/young_gamer_streamin_e10857dc.jpg";
+import platformImage from "@assets/stock_images/young_gamer_streamin_cbac079e.jpg";
 
 export default function PlatformIntegration() {
   return (
