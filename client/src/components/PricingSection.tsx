@@ -88,7 +88,7 @@ export default function PricingSection() {
             >
               Pricing
             </Badge>
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
+            <h2 className="font-subhead text-3xl sm:text-4xl font-normal tracking-tight text-foreground mb-3">
               Pay for the clips that actually move your channel
             </h2>
             <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
@@ -144,7 +144,7 @@ export default function PricingSection() {
 
                 <div className="mt-5">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl sm:text-4xl font-display font-semibold text-foreground">
+                    <span className="text-3xl sm:text-4xl font-subhead font-normal text-foreground">
                       {billingPeriod === "monthly" ? plan.monthlyPrice : plan.annualPrice}
                     </span>
                     {plan.period && <span className="text-xs sm:text-sm text-muted-foreground">{plan.period}</span>}

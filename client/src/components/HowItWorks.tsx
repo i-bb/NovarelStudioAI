@@ -5,7 +5,7 @@ export default function HowItWorks() {
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
+            <h2 className="font-subhead text-3xl sm:text-4xl font-normal tracking-tight text-foreground mb-3">
               From "Go Live" to multi-platform drops
             </h2>
             <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
@@ -43,7 +43,7 @@ function StepCard({ step, title, description }: { step: string, title: string, d
   return (
     <li className="relative group rounded-3xl border border-white/8 bg-black/70 px-5 py-6 sm:px-6 sm:py-7 flex flex-col gap-4 overflow-hidden">
       <div className="flex items-center justify-between gap-4">
-        <span className="font-display text-4xl sm:text-5xl font-semibold text-white/8 group-hover:text-primary/20 transition-colors select-none">
+        <span className="font-subhead text-4xl sm:text-5xl font-normal text-white/8 group-hover:text-primary/20 transition-colors select-none">
           {step}
         </span>
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
@@ -51,7 +51,7 @@ function StepCard({ step, title, description }: { step: string, title: string, d
         </span>
       </div>
       <div>
-        <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-1.5">{title}</h3>
+        <h3 className="font-subhead text-lg sm:text-xl font-normal text-foreground mb-1.5">{title}</h3>
         <p className="text-xs sm:text-sm text-muted-foreground/90 leading-relaxed">{description}</p>
       </div>
       <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.25),_transparent_60%)]" />
