@@ -39,17 +39,18 @@ export default function CTASection() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="rounded-full border-white/20 bg-black/60 px-4 text-sm"
+                  className="rounded-full border-white/20 bg-black/60 px-4 text-sm min-w-0"
                   data-testid="input-email-waitlist"
                 />
                 <Button
                   type="submit"
                   size="sm"
-                  className="rounded-full px-6 text-xs sm:text-sm font-semibold bg-white text-black hover:bg-slate-100 shadow-[0_16px_60px_rgba(15,23,42,0.95)] group"
+                  className="rounded-full px-4 sm:px-6 text-xs sm:text-sm font-semibold bg-white text-black hover:bg-slate-100 shadow-[0_16px_60px_rgba(15,23,42,0.95)] group flex-shrink-0"
                   data-testid="button-join-waitlist"
                 >
-                  Get access for my stream
-                  <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  <span className="hidden sm:inline">Get access for my stream</span>
+                  <span className="sm:hidden">Get access</span>
+                  <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                 </Button>
               </form>
             ) : (

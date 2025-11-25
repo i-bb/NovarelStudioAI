@@ -42,35 +42,35 @@ export default function DashboardPreview() {
                   <TabsList className="grid grid-cols-4 w-full max-w-xl bg-black/60 border border-white/10" data-testid="tabs-dashboard">
                     <TabsTrigger
                       value="projects"
-                      className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-[11px] font-medium"
+                      className="gap-1 sm:gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-[9px] sm:text-[11px] font-medium px-1 sm:px-3"
                       data-testid="tab-projects"
                     >
-                      <LayoutDashboard className="w-3.5 h-3.5" />
-                      Streams
+                      <LayoutDashboard className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                      <span className="hidden sm:inline">Streams</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="analytics"
-                      className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-[11px] font-medium"
+                      className="gap-1 sm:gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-[9px] sm:text-[11px] font-medium px-1 sm:px-3"
                       data-testid="tab-analytics"
                     >
-                      <BarChart3 className="w-3.5 h-3.5" />
-                      Impact
+                      <BarChart3 className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                      <span className="hidden sm:inline">Impact</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="ai-clipping"
-                      className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-[11px] font-medium"
+                      className="gap-1 sm:gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-[9px] sm:text-[11px] font-medium px-1 sm:px-3"
                       data-testid="tab-ai-clipping"
                     >
-                      <Scissors className="w-3.5 h-3.5" />
-                      Clipping
+                      <Scissors className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                      <span className="hidden sm:inline">Clipping</span>
                     </TabsTrigger>
                     <TabsTrigger
                       value="settings"
-                      className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-[11px] font-medium"
+                      className="gap-1 sm:gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-[9px] sm:text-[11px] font-medium px-1 sm:px-3"
                       data-testid="tab-settings"
                     >
-                      <Settings className="w-3.5 h-3.5" />
-                      Rules
+                      <Settings className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                      <span className="hidden sm:inline">Rules</span>
                     </TabsTrigger>
                   </TabsList>
                 </div>

@@ -64,11 +64,11 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="you@yourchannel.gg"
-                className="flex-1 rounded-full border border-white/15 bg-black/40 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="flex-1 min-w-0 rounded-full border border-white/15 bg-black/40 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
               <button
                 type="submit"
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-black shadow-[0_10px_40px_rgba(15,23,42,0.9)] hover:bg-slate-100"
+                className="rounded-full bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-black shadow-[0_10px_40px_rgba(15,23,42,0.9)] hover:bg-slate-100 flex-shrink-0 whitespace-nowrap"
               >
                 Get updates
               </button>

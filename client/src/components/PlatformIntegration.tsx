@@ -27,10 +27,10 @@ export default function PlatformIntegration() {
           </div>
 
           <div className="space-y-4">
-            <Card className="relative border border-emerald-400/40 bg-black/70 backdrop-blur-xl p-5" data-testid="card-platform-instagram">
-              <div className="flex items-center justify-between mb-4">
+            <Card className="relative border border-emerald-400/40 bg-black/70 backdrop-blur-xl p-4 sm:p-5" data-testid="card-platform-instagram">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4">
                 <PlatformBadge platform="instagram" connected />
-                <span className="inline-flex items-center gap-2 text-[11px] font-medium text-emerald-300">
+                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-medium text-emerald-300">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Connected • Auto-posting
                 </span>
@@ -42,10 +42,10 @@ export default function PlatformIntegration() {
               </div>
             </Card>
 
-            <Card className="border border-white/10 bg-black/60 backdrop-blur-xl p-5" data-testid="card-platform-tiktok">
-              <div className="flex items-center justify-between mb-2">
+            <Card className="border border-white/10 bg-black/60 backdrop-blur-xl p-4 sm:p-5" data-testid="card-platform-tiktok">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-2">
                 <PlatformBadge platform="tiktok" />
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-2 sm:px-3 py-1 text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.12em] sm:tracking-[0.16em] text-muted-foreground">
                   Coming soon
                 </span>
               </div>
@@ -54,10 +54,10 @@ export default function PlatformIntegration() {
               </p>
             </Card>
 
-            <Card className="border border-white/10 bg-black/60 backdrop-blur-xl p-5" data-testid="card-platform-youtube">
-              <div className="flex items-center justify-between mb-2">
+            <Card className="border border-white/10 bg-black/60 backdrop-blur-xl p-4 sm:p-5" data-testid="card-platform-youtube">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-2">
                 <PlatformBadge platform="youtube" />
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-2 sm:px-3 py-1 text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.12em] sm:tracking-[0.16em] text-muted-foreground">
                   Coming soon
                 </span>
               </div>

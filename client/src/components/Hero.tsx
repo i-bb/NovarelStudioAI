@@ -32,38 +32,42 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
-            <Button className="h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-semibold rounded-full bg-white text-black hover:bg-slate-100 shadow-[0_18px_60px_rgba(15,23,42,0.8)]">
-              Start free for your next stream
-              <ArrowRight className="ml-2 h-4 w-4" />
+            <Button className="h-12 sm:h-14 px-5 sm:px-8 text-xs sm:text-sm md:text-base font-semibold rounded-full bg-white text-black hover:bg-slate-100 shadow-[0_18px_60px_rgba(15,23,42,0.8)]">
+              <span className="hidden sm:inline">Start free for your next stream</span>
+              <span className="sm:hidden">Start free</span>
+              <ArrowRight className="ml-2 h-4 w-4 flex-shrink-0" />
             </Button>
             <Button
               variant="outline"
-              className="h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base rounded-full border-white/15 bg-black/40 hover:bg-white/5 text-foreground flex items-center"
+              className="h-12 sm:h-14 px-5 sm:px-8 text-xs sm:text-sm md:text-base rounded-full border-white/15 bg-black/40 hover:bg-white/5 text-foreground flex items-center"
             >
-              <Play className="mr-2 h-4 w-4 fill-current" />
-              Watch 60s product tour
+              <Play className="mr-2 h-4 w-4 fill-current flex-shrink-0" />
+              <span className="hidden sm:inline">Watch 60s tour</span>
+              <span className="sm:hidden">Watch tour</span>
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-muted-foreground/80">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] sm:text-xs md:text-sm text-muted-foreground/80">
             <div className="flex -space-x-3">
               {["#10b981", "#6366f1", "#f97316"].map((color, i) => (
                 <div
                   key={i}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-background/80 bg-slate-900 text-[10px] font-semibold"
+                  className="inline-flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full border border-background/80 bg-slate-900 text-[10px] font-semibold"
                   style={{ boxShadow: "0 0 0 1.5px rgba(15,23,42,0.9)" }}
                 >
-                  <span className="h-6 w-6 rounded-full" style={{ background: color }} />
+                  <span className="h-5 w-5 sm:h-6 sm:w-6 rounded-full" style={{ background: color }} />
                 </div>
               ))}
             </div>
             <span className="flex items-center gap-1">
-              <Users className="h-3.5 w-3.5 text-emerald-400" />
-              Trusted by early teams from top Twitch categories
+              <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-400 flex-shrink-0" />
+              <span className="hidden sm:inline">Trusted by early teams from top Twitch categories</span>
+              <span className="sm:hidden">Trusted by top streamers</span>
             </span>
             <span className="flex items-center gap-1">
-              <Clock3 className="h-3.5 w-3.5 text-sky-400" />
-              Goes live in under 5 minutes
+              <Clock3 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-sky-400 flex-shrink-0" />
+              <span className="hidden sm:inline">Goes live in under 5 minutes</span>
+              <span className="sm:hidden">Live in 5 mins</span>
             </span>
           </div>
         </div>

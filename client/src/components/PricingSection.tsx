@@ -191,8 +191,8 @@ export default function PricingSection() {
               data-testid={`card-pricing-${plan.id}`}
             >
               {plan.badge && (
-                <div className="absolute inset-x-4 top-4 z-10 flex justify-end">
-                  <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-100 border border-white/30">
+                <div className="absolute inset-x-3 sm:inset-x-4 top-3 sm:top-4 z-10 flex justify-end">
+                  <span className="inline-flex items-center rounded-full bg-white/10 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.18em] text-slate-100 border border-white/30 text-center leading-tight">
                     {plan.badge}
                   </span>
                 </div>
@@ -275,9 +275,9 @@ export default function PricingSection() {
                 </div>
               </CardContent>
 
-              <CardFooter className="pt-0 pb-5 px-6">
+              <CardFooter className="pt-0 pb-5 px-4 sm:px-6">
                 <Button
-                  className={`w-full rounded-full text-xs sm:text-sm font-semibold ${
+                  className={`w-full rounded-full text-[11px] sm:text-xs md:text-sm font-semibold ${
                     plan.popular
                       ? "bg-white text-black hover:bg-slate-100 shadow-[0_16px_60px_rgba(15,23,42,0.95)]"
                       : "bg-black/60 text-foreground border border-white/25 hover:bg-black"
@@ -286,7 +286,7 @@ export default function PricingSection() {
                   size="sm"
                   data-testid={`button-${plan.id}-cta`}
                 >
-                  {plan.cta}
+                  <span className="truncate">{plan.cta}</span>
                 </Button>
               </CardFooter>
             </Card>
