@@ -90,6 +90,7 @@ export default {
       fontFamily: {
         sans: ["var(--font-sans)"],
         display: ["var(--font-display)"],
+        subhead: ["var(--font-subhead)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
         cursive: ["var(--font-cursive)"],
