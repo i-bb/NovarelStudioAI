@@ -7,6 +7,7 @@ import { Check, ChevronDown } from "lucide-react";
 
 type CreditTier = {
   credits: string;
+  clipsPerDay: string;
   monthlyPrice: number;
   annualPrice: number;
 };
@@ -67,10 +68,10 @@ export default function PricingSection() {
       cta: "Use on my next stream",
       popular: true,
       creditTiers: [
-        { credits: "60 clips/month", monthlyPrice: 35, annualPrice: 23 },
-        { credits: "120 clips/month", monthlyPrice: 55, annualPrice: 36 },
-        { credits: "200 clips/month", monthlyPrice: 75, annualPrice: 49 },
-        { credits: "300 clips/month", monthlyPrice: 95, annualPrice: 62 },
+        { credits: "60 clips/month", clipsPerDay: "~2 clips/day", monthlyPrice: 35, annualPrice: 23 },
+        { credits: "120 clips/month", clipsPerDay: "~4 clips/day", monthlyPrice: 55, annualPrice: 36 },
+        { credits: "200 clips/month", clipsPerDay: "~7 clips/day", monthlyPrice: 75, annualPrice: 49 },
+        { credits: "300 clips/month", clipsPerDay: "~10 clips/day", monthlyPrice: 95, annualPrice: 62 },
       ],
     },
     {
@@ -90,10 +91,10 @@ export default function PricingSection() {
       cta: "Talk to the team",
       popular: false,
       creditTiers: [
-        { credits: "150 clips/month", monthlyPrice: 100, annualPrice: 65 },
-        { credits: "250 clips/month", monthlyPrice: 150, annualPrice: 98 },
-        { credits: "350 clips/month", monthlyPrice: 200, annualPrice: 130 },
-        { credits: "450 clips/month", monthlyPrice: 275, annualPrice: 179 },
+        { credits: "150 clips/month", clipsPerDay: "~5 clips/day", monthlyPrice: 100, annualPrice: 65 },
+        { credits: "250 clips/month", clipsPerDay: "~8 clips/day", monthlyPrice: 150, annualPrice: 98 },
+        { credits: "350 clips/month", clipsPerDay: "~12 clips/day", monthlyPrice: 200, annualPrice: 130 },
+        { credits: "450 clips/month", clipsPerDay: "~15 clips/day", monthlyPrice: 275, annualPrice: 179 },
       ],
     },
   ];
@@ -123,6 +124,14 @@ export default function PricingSection() {
       const tier = plan.creditTiers[getSelectedTier(plan.id)];
       const annual = tier.annualPrice * 12;
       return `$${annual} billed annually`;
+    }
+    return null;
+  };
+
+  const getClipsPerDay = (plan: Plan) => {
+    if (plan.creditTiers) {
+      const tier = plan.creditTiers[getSelectedTier(plan.id)];
+      return tier.clipsPerDay;
     }
     return null;
   };
@@ -240,6 +249,17 @@ export default function PricingSection() {
 
               <CardContent className="flex-1 space-y-3 pb-4">
                 <div className="space-y-2.5">
+                  {plan.creditTiers && (
+                    <div
+                      className="flex items-start gap-2.5"
+                      data-testid={`feature-${plan.id}-clips-per-day`}
+                    >
+                      <span className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary/20">
+                        <Check className="h-2.5 w-2.5 text-primary" strokeWidth={3} />
+                      </span>
+                      <span className="text-xs sm:text-sm text-foreground font-medium">{getClipsPerDay(plan)}</span>
+                    </div>
+                  )}
                   {plan.features.map((feature, idx) => (
                     <div
                       key={idx}
