@@ -67,10 +67,10 @@ export default function PricingSection() {
       cta: "Use on my next stream",
       popular: true,
       creditTiers: [
-        { credits: "150 clips/month", monthlyPrice: 35, annualPrice: 23 },
-        { credits: "300 clips/month", monthlyPrice: 55, annualPrice: 36 },
-        { credits: "500 clips/month", monthlyPrice: 75, annualPrice: 49 },
-        { credits: "750 clips/month", monthlyPrice: 95, annualPrice: 62 },
+        { credits: "60 clips/month", monthlyPrice: 35, annualPrice: 23 },
+        { credits: "120 clips/month", monthlyPrice: 55, annualPrice: 36 },
+        { credits: "200 clips/month", monthlyPrice: 75, annualPrice: 49 },
+        { credits: "300 clips/month", monthlyPrice: 95, annualPrice: 62 },
       ],
     },
     {
@@ -90,10 +90,10 @@ export default function PricingSection() {
       cta: "Talk to the team",
       popular: false,
       creditTiers: [
-        { credits: "360 clips/month", monthlyPrice: 100, annualPrice: 65 },
-        { credits: "600 clips/month", monthlyPrice: 150, annualPrice: 98 },
-        { credits: "1,000 clips/month", monthlyPrice: 200, annualPrice: 130 },
-        { credits: "1,500 clips/month", monthlyPrice: 275, annualPrice: 179 },
+        { credits: "150 clips/month", monthlyPrice: 100, annualPrice: 65 },
+        { credits: "250 clips/month", monthlyPrice: 150, annualPrice: 98 },
+        { credits: "350 clips/month", monthlyPrice: 200, annualPrice: 130 },
+        { credits: "450 clips/month", monthlyPrice: 275, annualPrice: 179 },
       ],
     },
   ];
