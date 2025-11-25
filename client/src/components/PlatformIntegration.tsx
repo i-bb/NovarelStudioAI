@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import PlatformBadge from "./PlatformBadge";
-import platformImage from "@assets/generated_images/irl_streamer_with_gimbal_outdoors.png";
+import platformImage from "@assets/stock_images/content_creator_edit_e3e811ea.jpg";
 
 export default function PlatformIntegration() {
   return (
