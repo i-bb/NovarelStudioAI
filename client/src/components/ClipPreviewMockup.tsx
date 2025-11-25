@@ -2,7 +2,7 @@ import { SiTiktok, SiInstagram, SiYoutube } from "react-icons/si";
 import { Sparkles, Share2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import gamerImage from "@assets/stock_images/young_gamer_streamin_cbac079e.jpg";
+import gamerImage from "@assets/generated_images/excited_streamer_vertical_portrait.png";
 
 export default function ClipPreviewMockup() {
   return (
