@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Play, Eye } from "lucide-react";
 import dashboardImage from "@assets/generated_images/dashboard_video_grid_interface.png";
-import logoImage from "@assets/novarel-logo.png";
 
 export default function VideoShowcase() {
   const clips = [
@@ -17,7 +16,6 @@ export default function VideoShowcase() {
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
-            <img src={logoImage} alt="NovarelStudio" className="w-20 h-20 rounded-2xl mb-6" />
             <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
               What your stream turns into overnight
             </h2>
