@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, ChevronDown } from "lucide-react";
+import logoImage from "@assets/ChatGPT Image Nov 26, 2025, 05_11_54 PM_1764195119264.png";
 
 type CreditTier = {
   credits: string;
@@ -145,6 +146,7 @@ export default function PricingSection() {
         <div className="mb-12">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
             <div>
+              <img src={logoImage} alt="NovarelStudio" className="w-24 h-24 rounded-3xl mb-6 opacity-90 mix-blend-lighten" />
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground mb-3">
                 Pay for the clips that actually move your channel
               </h2>
