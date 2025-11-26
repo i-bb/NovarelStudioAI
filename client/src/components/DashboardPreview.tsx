@@ -163,7 +163,7 @@ export default function DashboardPreview() {
               <TabsContent value="ai-clipping" className="px-4 sm:px-6 py-10">
                 <div className="mx-auto max-w-md text-center">
                   <Scissors className="mx-auto mb-4 h-10 w-10 text-primary" />
-                  <h3 className="font-subhead mb-2 text-lg sm:text-xl font-normal text-foreground">AI clipping engine</h3>
+                  <h3 className="font-subhead mb-2 text-lg sm:text-xl font-normal text-foreground">Clipping engine</h3>
                   <p className="mb-5 text-xs sm:text-sm text-muted-foreground/90">
                     Upload a VOD or let us capture your live stream.
                   </p>

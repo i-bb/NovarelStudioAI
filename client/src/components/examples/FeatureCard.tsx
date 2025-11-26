@@ -6,7 +6,7 @@ export default function FeatureCardExample() {
     <div className="p-8 max-w-md">
       <FeatureCard
         icon={Sparkles}
-        title="AI Clipping"
+        title="Clipping"
         description="Automatically detect and extract the most engaging moments from your streams with advanced AI analysis."
         level={3}
         color="primary"

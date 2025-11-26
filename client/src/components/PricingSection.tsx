@@ -39,7 +39,7 @@ export default function PricingSection() {
       badge: null,
       bullet: "Best if you're testing the waters.",
       features: [
-        "Up to 10 AI clips / month",
+        "Up to 10 clips / month",
         "720p exports",
         "Basic moment detection",
         "1 connected platform",
@@ -210,7 +210,7 @@ export default function PricingSection() {
 
                 {plan.creditTiers && (
                   <div className="mt-4">
-                    <p className="text-[11px] text-muted-foreground mb-2">1 credit = 1 AI-generated clip</p>
+                    <p className="text-[11px] text-muted-foreground mb-2">1 credit = 1 clip</p>
                     <Select
                       value={getSelectedTier(plan.id).toString()}
                       onValueChange={(value) => setSelectedTier(plan.id, parseInt(value))}
@@ -285,7 +285,7 @@ export default function PricingSection() {
         </div>
 
         <div className="mt-8 flex flex-col items-center gap-1 text-[11px] sm:text-xs text-muted-foreground/85 text-center">
-          <p>All plans include AI-powered clipping, automated posting and 24/7 monitoring of your streams.</p>
+          <p>All plans include clipping, automated posting and 24/7 monitoring of your streams.</p>
           <p>No credit card required for Starter. Upgrade once you&apos;re happy with what lands in your feeds.</p>
         </div>
       </div>
