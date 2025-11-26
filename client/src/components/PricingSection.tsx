@@ -140,7 +140,7 @@ export default function PricingSection() {
   return (
     <section id="pricing" className="relative py-20">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.2),_transparent_60%)] opacity-70" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(88,28,135,0.5),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.2),_transparent_60%)] opacity-70" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
         <div className="mb-12 flex flex-col items-center text-center">
