@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
       <div className="absolute inset-x-0 -bottom-40 h-80 bg-[radial-gradient(circle_at_center,_rgba(15,23,42,0.9),_transparent_70%)] opacity-80" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 md:px-8 lg:px-12">
         <div className="grid gap-10 md:grid-cols-12">
           <div className="md:col-span-5 flex flex-col gap-5">
             <div className="flex items-center gap-3">

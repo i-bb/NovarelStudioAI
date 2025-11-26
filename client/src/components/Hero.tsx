@@ -9,7 +9,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(22,163,74,0.25),_transparent_55%)]" />
       <div className="absolute inset-0 bg-noise opacity-40" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12 w-full grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-12 items-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 md:px-8 lg:px-12 w-full grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-8 lg:gap-12 items-center">
         {/* Left: Narrative & CTA */}
         <div>
           <Badge className="mb-6 border-white/15 bg-white/5 text-xs font-medium tracking-[0.18em] uppercase rounded-full px-4 py-1.5 text-muted-foreground flex items-center gap-2">
