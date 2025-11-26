@@ -97,14 +97,12 @@ export default function Hero() {
 
             <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-0">
               {/* Live stream preview */}
-              <div className="relative border-r border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)]">
-                <div className="h-full w-full overflow-hidden">
-                  <img 
-                    src={streamerImage} 
-                    alt="Live streaming" 
-                    className="relative h-full w-full object-cover object-center mask-fade-b"
-                  />
-                </div>
+              <div className="relative border-r border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)] min-h-[320px]">
+                <img 
+                  src={streamerImage} 
+                  alt="Live streaming" 
+                  className="absolute inset-0 h-full w-full object-cover object-top"
+                />
                 <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
                   <div className="flex items-center gap-3 text-xs">
                     <div className="flex items-center gap-1 rounded-full bg-rose-600/90 px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase text-white shadow-lg shadow-rose-500/40">
