@@ -148,10 +148,9 @@
     text-transform: uppercase;
   }
 
-  /* Sub-headings use Share Tech Mono */
+  /* Sub-headings use VT323 */
   h4, h5, h6, .subhead {
     font-family: var(--font-subhead);
-    letter-spacing: 0.02em;
   }
 
   /* Share Tech Mono body styling */
@@ -160,9 +159,11 @@
     line-height: 1.6;
   }
 
-  /* VT323 sub-heads need larger size for legibility */
-  h4, h5, h6, .subhead {
+  /* VT323 needs wider letter-spacing and larger size for legibility */
+  .font-subhead, h4, h5, h6, .subhead {
     font-size: 1.25rem;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
   }
 
   /* Button text should also use the body font */
