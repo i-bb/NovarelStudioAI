@@ -7,7 +7,7 @@ export default function HowItWorks() {
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
-            <img src={logoImage} alt="NovarelStudio" className="w-16 h-16 rounded-2xl mb-6" />
+            <img src={logoImage} alt="NovarelStudio" className="w-24 h-24 rounded-3xl mb-6 opacity-90 mix-blend-lighten" />
             <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
               From "Go Live" to multi-platform drops
             </h2>
