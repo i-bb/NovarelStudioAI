@@ -143,36 +143,32 @@ export default function PricingSection() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.2),_transparent_60%)] opacity-70" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
-        <div className="mb-12">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
-            <div>
-              <img src={logoImage} alt="NovarelStudio" className="w-24 h-24 rounded-3xl mb-6 opacity-90 mix-blend-lighten" />
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground mb-3">
-                Pay for the clips that actually move your channel
-              </h2>
-              <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
-                All tiers include always-on clipping. Pick how aggressive you want NovarelStudio to be about turning streams into posts.
-              </p>
+        <div className="mb-12 flex flex-col items-center text-center">
+          <img src={logoImage} alt="NovarelStudio" className="w-24 h-24 rounded-3xl mb-6 opacity-90 mix-blend-lighten" />
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground mb-4">
+            Pay for the clips that actually move your channel
+          </h2>
+          <p className="max-w-2xl text-sm sm:text-base text-muted-foreground/90 mb-8">
+            All tiers include always-on clipping. Pick how aggressive you want NovarelStudio to be about turning streams into posts.
+          </p>
+          <div className="flex flex-col items-center gap-3">
+            <div className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/60 p-1">
+              <BillingToggleButton
+                active={billingPeriod === "monthly"}
+                onClick={() => setBillingPeriod("monthly")}
+                label="Monthly"
+                testId="button-billing-monthly"
+              />
+              <BillingToggleButton
+                active={billingPeriod === "annual"}
+                onClick={() => setBillingPeriod("annual")}
+                label="Annual"
+                testId="button-billing-annual"
+              />
             </div>
-            <div className="flex flex-col items-start md:items-end gap-3">
-              <div className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/60 p-1">
-                <BillingToggleButton
-                  active={billingPeriod === "monthly"}
-                  onClick={() => setBillingPeriod("monthly")}
-                  label="Monthly"
-                  testId="button-billing-monthly"
-                />
-                <BillingToggleButton
-                  active={billingPeriod === "annual"}
-                  onClick={() => setBillingPeriod("annual")}
-                  label="Annual"
-                  testId="button-billing-annual"
-                />
-              </div>
-              <div className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
-                <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">Save 35%</span>
-                on annual billing
-              </div>
+            <div className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
+              <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">Save 35%</span>
+              on annual billing
             </div>
           </div>
         </div>
