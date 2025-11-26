@@ -68,10 +68,10 @@ export default function PricingSection() {
       cta: "Use on my next stream",
       popular: true,
       creditTiers: [
-        { credits: "60 clips/month", clipsPerDay: "~2 clips/day", monthlyPrice: 35, annualPrice: 23 },
-        { credits: "120 clips/month", clipsPerDay: "~4 clips/day", monthlyPrice: 55, annualPrice: 36 },
-        { credits: "200 clips/month", clipsPerDay: "~7 clips/day", monthlyPrice: 75, annualPrice: 49 },
-        { credits: "300 clips/month", clipsPerDay: "~10 clips/day", monthlyPrice: 95, annualPrice: 62 },
+        { credits: "60 clips/month", clipsPerDay: "About 2 clips/day", monthlyPrice: 35, annualPrice: 23 },
+        { credits: "120 clips/month", clipsPerDay: "About 4 clips/day", monthlyPrice: 55, annualPrice: 36 },
+        { credits: "200 clips/month", clipsPerDay: "About 7 clips/day", monthlyPrice: 75, annualPrice: 49 },
+        { credits: "300 clips/month", clipsPerDay: "About 10 clips/day", monthlyPrice: 95, annualPrice: 62 },
       ],
     },
     {
@@ -91,10 +91,10 @@ export default function PricingSection() {
       cta: "Talk to the team",
       popular: false,
       creditTiers: [
-        { credits: "150 clips/month", clipsPerDay: "~5 clips/day", monthlyPrice: 100, annualPrice: 65 },
-        { credits: "250 clips/month", clipsPerDay: "~8 clips/day", monthlyPrice: 150, annualPrice: 98 },
-        { credits: "350 clips/month", clipsPerDay: "~12 clips/day", monthlyPrice: 200, annualPrice: 130 },
-        { credits: "450 clips/month", clipsPerDay: "~15 clips/day", monthlyPrice: 275, annualPrice: 179 },
+        { credits: "150 clips/month", clipsPerDay: "About 5 clips/day", monthlyPrice: 100, annualPrice: 65 },
+        { credits: "250 clips/month", clipsPerDay: "About 8 clips/day", monthlyPrice: 150, annualPrice: 98 },
+        { credits: "350 clips/month", clipsPerDay: "About 12 clips/day", monthlyPrice: 200, annualPrice: 130 },
+        { credits: "450 clips/month", clipsPerDay: "About 15 clips/day", monthlyPrice: 275, annualPrice: 179 },
       ],
     },
   ];
@@ -182,15 +182,14 @@ export default function PricingSection() {
               }`}
               data-testid={`card-pricing-${plan.id}`}
             >
-              {plan.badge && (
-                <div className="absolute inset-x-3 sm:inset-x-4 top-3 sm:top-4 z-10 flex justify-end">
-                  <span className="inline-flex items-center rounded-full bg-white/10 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.18em] text-slate-100 border border-white/30 text-center leading-tight">
-                    {plan.badge}
-                  </span>
-                </div>
-              )}
-
-              <CardHeader className="pt-8 pb-4">
+              <CardHeader className={`pb-4 ${plan.badge ? 'pt-5' : 'pt-8'}`}>
+                {plan.badge && (
+                  <div className="flex justify-end mb-3">
+                    <span className="inline-flex items-center rounded-full bg-white/10 px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.18em] text-slate-100 border border-white/30 text-center leading-tight">
+                      {plan.badge}
+                    </span>
+                  </div>
+                )}
                 <CardTitle className="mb-1 text-xl font-semibold text-foreground">{plan.name}</CardTitle>
                 <CardDescription className="text-xs sm:text-sm text-muted-foreground/90">
                   {plan.tagline}
