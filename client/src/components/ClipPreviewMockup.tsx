@@ -43,7 +43,7 @@ export default function ClipPreviewMockup() {
             <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-1.5 block">Title</label>
             <div className="relative">
               <div className="rounded-lg bg-slate-800/80 border border-white/10 px-3 py-2.5 text-sm text-foreground">
-                AI-generated viral clip title
+                Your viral clip title goes here
               </div>
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded-md bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary">
