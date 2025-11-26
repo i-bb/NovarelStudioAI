@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, ChevronDown } from "lucide-react";
+import logoImage from "@assets/Screenshot 2025-11-26 at 4.56.15 PM_1764194176876.png";
 
 type CreditTier = {
   credits: string;
@@ -143,6 +144,7 @@ export default function PricingSection() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
         <div className="mb-12 flex flex-col items-center text-center">
+          <img src={logoImage} alt="NovarelStudio" className="w-14 h-14 rounded-xl mb-6 self-start md:self-center md:-ml-0 -ml-1" />
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground mb-4">
             Pay for the clips that actually move your channel
           </h2>

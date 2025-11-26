@@ -1,3 +1,5 @@
+import logoImage from "@assets/Screenshot 2025-11-26 at 4.56.15 PM_1764194176876.png";
+
 export default function HowItWorks() {
   return (
     <section id="how-it-works" className="relative">
@@ -5,6 +7,7 @@ export default function HowItWorks() {
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
+            <img src={logoImage} alt="NovarelStudio" className="w-14 h-14 rounded-xl mb-6" />
             <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
               From "Go Live" to multi-platform drops
             </h2>
