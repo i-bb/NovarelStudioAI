@@ -28,7 +28,7 @@ export default function HowItWorks() {
           />
           <StepCard
             step="02"
-            title="AI sits in on every stream"
+            title="Novarel sits in on every stream"
             description="As you go live, we watch audio, chat spikes and in-game events to flag the 1–2% of moments actually worth posting."
           />
           <StepCard
