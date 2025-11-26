@@ -6,7 +6,7 @@ export default function TermsPage() {
   return (
     <AppLayout>
       <main className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95 pt-24 pb-16">
-        <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-8">
+        <div className="w-full max-w-4xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="mb-12">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary mb-6">
               <FileText className="h-3.5 w-3.5" />

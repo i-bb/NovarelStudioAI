@@ -18,7 +18,7 @@ export default function CTASection() {
   return (
     <section className="relative py-16">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-      <div className="relative max-w-4xl mx-auto px-3 sm:px-4 md:px-0">
+      <div className="relative w-full max-w-4xl mx-auto px-0">
         <Card className="relative overflow-hidden rounded-3xl border border-white/15 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.25),_transparent_55%),_#020617] px-6 py-8 sm:px-10 sm:py-10 text-center">
           <div className="mx-auto max-w-2xl">
             <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">

@@ -21,7 +21,7 @@ export default function PlatformIntegration() {
           </p>
         </div>
 
-        <div className="grid gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.9fr)] items-center">
+        <div className="grid gap-6 md:gap-8 lg:gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.9fr)] items-center">
           <div className="relative">
             <ClipPreviewMockup />
           </div>
