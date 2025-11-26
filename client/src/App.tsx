@@ -9,6 +9,8 @@ import Pricing from "@/pages/pricing";
 import ShowcasePage from "@/pages/showcase";
 import LoginPage from "@/pages/login";
 import SignupPage from "@/pages/signup";
+import PrivacyPage from "@/pages/privacy";
+import TermsPage from "@/pages/terms";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +22,8 @@ function Router() {
       <Route path="/showcase" component={ShowcasePage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/signup" component={SignupPage} />
+      <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/terms" component={TermsPage} />
       <Route component={NotFound} />
     </Switch>
   );

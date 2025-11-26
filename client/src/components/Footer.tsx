@@ -47,6 +47,8 @@ export default function Footer() {
               <FooterLink href="/how-it-works">How it works</FooterLink>
               <FooterLink href="/pricing">Pricing</FooterLink>
               <FooterLink href="/showcase">Creator showcase</FooterLink>
+              <FooterLink href="/privacy">Privacy Policy</FooterLink>
+              <FooterLink href="/terms">Terms of Service</FooterLink>
             </nav>
           </div>
 
@@ -79,8 +81,8 @@ export default function Footer() {
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-[11px] sm:text-xs text-muted-foreground/80 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} NovarelStudio. All rights reserved.</p>
           <div className="flex flex-wrap gap-4">
-            <FooterLink href="#">Privacy</FooterLink>
-            <FooterLink href="#">Terms</FooterLink>
+            <FooterLink href="/privacy">Privacy</FooterLink>
+            <FooterLink href="/terms">Terms</FooterLink>
             <FooterLink href="#">Status</FooterLink>
           </div>
         </div>
