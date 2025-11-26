@@ -9,7 +9,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(22,163,74,0.25),_transparent_55%)]" />
       <div className="absolute inset-0 bg-noise opacity-40" />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-6 md:gap-8 lg:gap-12 items-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-6 md:gap-8 lg:gap-12 items-stretch">
         {/* Left: Narrative & CTA */}
         <div>
           <Badge className="mb-6 border-white/15 bg-white/5 text-xs font-medium tracking-[0.18em] uppercase rounded-full px-4 py-1.5 text-muted-foreground flex items-center gap-2">
@@ -73,9 +73,9 @@ export default function Hero() {
         </div>
 
         {/* Right: Product Surface */}
-        <div className="relative">
+        <div className="relative self-stretch flex flex-col">
           <div className="absolute -inset-10 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.22),_transparent_60%)] opacity-70" />
-          <div className="relative rounded-3xl border border-white/8 bg-gradient-to-b from-slate-900/80 via-slate-950/95 to-black/95 shadow-[0_24px_80px_rgba(15,23,42,0.95)] overflow-hidden">
+          <div className="relative flex-1 rounded-3xl border border-white/8 bg-gradient-to-b from-slate-900/80 via-slate-950/95 to-black/95 shadow-[0_24px_80px_rgba(15,23,42,0.95)] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-slate-900/60">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div className="flex gap-1.5">
@@ -95,9 +95,9 @@ export default function Hero() {
               </div>
             </div>
 
-            <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-0">
+            <div className="flex-1 grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-0">
               {/* Live stream preview */}
-              <div className="relative border-r border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)] min-h-[320px]">
+              <div className="relative border-r border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)]">
                 <img 
                   src={streamerImage} 
                   alt="Live streaming" 
