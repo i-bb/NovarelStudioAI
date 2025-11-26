@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Play, Zap, Users, Clock3 } from "lucide-react";
+import { ArrowRight, Play, Zap, Users, Clock3, TrendingUp, Scissors, MessageCircle, Upload, RefreshCw } from "lucide-react";
 import streamerImage from "@assets/generated_images/young_black_teen_streamer_full_body.png";
 
 export default function Hero() {
@@ -119,15 +119,12 @@ export default function Hero() {
                     </div>
                   </div>
                   <div className="flex gap-1.5">
-                    {["Clip queued", "Moment detected"].map((label, i) => (
-                      <span
-                        key={label}
-                        className="rounded-full bg-black/75 px-2.5 py-1 text-[10px] font-medium text-slate-100 border border-emerald-400/30 flex items-center gap-1"
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        {i === 0 ? "Clip queued" : "Chat spike"}
-                      </span>
-                    ))}
+                    <span className="rounded-full bg-black/75 p-1.5 border border-emerald-400/30 flex items-center justify-center" title="Clip queued">
+                      <Scissors className="h-3 w-3 text-emerald-400" />
+                    </span>
+                    <span className="rounded-full bg-black/75 p-1.5 border border-emerald-400/30 flex items-center justify-center" title="Chat spike">
+                      <MessageCircle className="h-3 w-3 text-emerald-400" />
+                    </span>
                   </div>
                 </div>
               </div>
@@ -148,9 +145,9 @@ export default function Hero() {
 
                 <div className="space-y-2.5">
                   {[
-                    { title: "Ace clutch on Ascent", perf: "+214%", tag: "Gameplay" },
-                    { title: "Chat loses it at 3AM", perf: "+181%", tag: "Chat moment" },
-                    { title: "Streamer explains setup", perf: "+96%", tag: "Creator story" },
+                    { title: "Ace clutch on Ascent", tag: "Gameplay" },
+                    { title: "Chat loses it at 3AM", tag: "Chat moment" },
+                    { title: "Streamer explains setup", tag: "Creator story" },
                   ].map((clip, idx) => (
                     <div
                       key={clip.title}
@@ -163,13 +160,13 @@ export default function Hero() {
                           0{idx + 1}:23
                         </span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="truncate text-[13px] font-medium text-slate-50">{clip.title}</p>
-                        <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                          <span className="rounded-full bg-slate-900/80 px-1.5 py-0.5 border border-white/10">{clip.tag}</span>
-                          <span className="flex items-center gap-1 text-emerald-400">
-                            {clip.perf} better than avg
-                          </span>
+                      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+                        <div>
+                          <p className="truncate text-[13px] font-medium text-slate-50">{clip.title}</p>
+                          <span className="mt-0.5 inline-flex rounded-full bg-slate-900/80 px-1.5 py-0.5 border border-white/10 text-[11px] text-muted-foreground">{clip.tag}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-emerald-400">
+                          <TrendingUp className="h-3.5 w-3.5" />
                         </div>
                       </div>
                     </div>
@@ -177,10 +174,13 @@ export default function Hero() {
                 </div>
 
                 <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span>Auto-posts to TikTok, Reels & Shorts while you sleep.</span>
-                  <span className="flex items-center gap-1 text-emerald-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Running on your next stream
+                  <span className="flex items-center gap-1.5">
+                    <Upload className="h-3 w-3 text-muted-foreground/70" />
+                    <span className="hidden sm:inline">Auto-posts</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 text-emerald-400">
+                    <RefreshCw className="h-3 w-3 animate-spin" style={{ animationDuration: '3s' }} />
+                    <span className="hidden sm:inline">Active</span>
                   </span>
                 </div>
               </div>

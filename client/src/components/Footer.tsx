@@ -23,16 +23,13 @@ export default function Footer() {
                 <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">AI for stream-first creators</p>
               </div>
             </div>
-            <p className="max-w-md text-sm text-muted-foreground/90 leading-relaxed">
-              Built for Twitch and Kick creators who treat their channel like a studio. We handle the pipeline from chaotic stream to intentional, on-brand clips.
+            <p className="max-w-sm text-sm text-muted-foreground/90">
+              Stream-to-clip automation for Twitch and Kick creators.
             </p>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground/80">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 font-medium text-emerald-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Early access for high-intent channels
-              </span>
-              <span className="hidden sm:inline">No generic SaaS vibes. Just built-for-streamers tools.</span>
-            </div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Early access open
+            </span>
             <div className="flex gap-3 mt-1">
               <SocialLink icon={Twitter} href="#" label="Twitter" />
               <SocialLink icon={Github} href="#" label="GitHub" />
@@ -53,10 +50,7 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-4 flex flex-col gap-4 text-sm">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Stay close to the roadmap</h4>
-            <p className="text-xs sm:text-sm text-muted-foreground/90 max-w-sm">
-              Get a short monthly breakdown of new workflows, performance learnings and launch slots. No fluff, just things you can plug into your channel.
-            </p>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Get updates</h4>
             <form
               className="flex flex-col sm:flex-row gap-3"
               onSubmit={(e) => {

@@ -16,17 +16,12 @@ export default function DashboardPreview() {
     <section id="dashboard" className="relative">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
       <div className="relative max-w-7xl mx-auto">
-        <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div>
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
-              Your channel&apos;s control room
-            </h2>
-            <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
-              One place to see what streams ran, what clips were generated and what actually moved your follower and view curves.
-            </p>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground/80 max-w-xs">
-            The goal isn&apos;t more data—it&apos;s a simple read on whether last night&apos;s stream made progress for the channel.
+        <div className="mb-8 md:mb-10">
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
+            Your control room
+          </h2>
+          <p className="max-w-md text-sm sm:text-base text-muted-foreground/90">
+            Track streams, clips, and growth in one place.
           </p>
         </div>
 
@@ -78,10 +73,7 @@ export default function DashboardPreview() {
 
               <TabsContent value="projects" className="px-4 sm:px-6 py-5 space-y-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
-                  <div>
-                    <h3 className="font-subhead text-base sm:text-lg font-normal text-foreground">Recent streams</h3>
-                    <p className="text-[11px] text-muted-foreground">Each card is one stream run through NovarelStudio.</p>
-                  </div>
+                  <h3 className="font-subhead text-base sm:text-lg font-normal text-foreground">Recent streams</h3>
                   <Button
                     size="sm"
                     className="gap-2 rounded-full bg-white text-black hover:bg-slate-100 text-xs font-semibold shadow-[0_12px_40px_rgba(15,23,42,0.9)]"
@@ -173,20 +165,17 @@ export default function DashboardPreview() {
                   <Scissors className="mx-auto mb-4 h-10 w-10 text-primary" />
                   <h3 className="font-subhead mb-2 text-lg sm:text-xl font-normal text-foreground">AI clipping engine</h3>
                   <p className="mb-5 text-xs sm:text-sm text-muted-foreground/90">
-                    Drag in a VOD or let us ingest your next live session automatically. Everything else—from detection to captioning—runs hands-off.
+                    Upload a VOD or let us capture your live stream.
                   </p>
                   <Button size="sm" className="rounded-full px-5 text-xs font-semibold" data-testid="button-start-clipping">
-                    Start a manual run
+                    Start a run
                   </Button>
                 </div>
               </TabsContent>
 
               <TabsContent value="settings" className="px-4 sm:px-6 py-5">
                 <div className="max-w-xl space-y-4">
-                  <h3 className="font-subhead text-base sm:text-lg font-normal text-foreground mb-1">Posting rules</h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    Set once, then let NovarelStudio obey those rules on every stream.
-                  </p>
+                  <h3 className="font-subhead text-base sm:text-lg font-normal text-foreground mb-3">Posting rules</h3>
                   <div className="space-y-3">
                     <RuleRow label="Instagram Reels" value="On" testId="badge-instagram-status" />
                     <RuleRow label="TikTok" value="Off • in beta" testId="badge-tiktok-status" />

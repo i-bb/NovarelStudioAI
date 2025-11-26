@@ -25,7 +25,7 @@ export default function CTASection() {
               Put your next stream on autopilot
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground/90 mb-6">
-              Drop in your email and we&apos;ll send you a link to spin up NovarelStudio before you go live tonight. No credit card, no contracts—just see if the clips are worth it.
+              Enter your email. Start clipping tonight.
             </p>
 
             {!submitted ? (
@@ -59,12 +59,12 @@ export default function CTASection() {
                 data-testid="text-success-message"
               >
                 <CheckCircle className="h-4 w-4" />
-                <span>We&apos;ll email you setup instructions for your next stream.</span>
+                <span>Check your inbox!</span>
               </div>
             )}
 
             <p className="mt-4 text-[11px] text-muted-foreground/85">
-              No credit card required • First clips on us • You decide if it stays in your stack.
+              No credit card • Free trial • Cancel anytime
             </p>
           </div>
         </Card>

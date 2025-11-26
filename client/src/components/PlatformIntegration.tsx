@@ -7,17 +7,12 @@ export default function PlatformIntegration() {
     <section className="relative">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.2),_transparent_55%)] opacity-70" />
       <div className="relative max-w-7xl mx-auto">
-        <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div>
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
-              Ship to every feed without touching a timeline
-            </h2>
-            <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
-              Approve once in NovarelStudio and we handle the rest—cropping, captioning and publishing tuned to TikTok, Reels and Shorts.
-            </p>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground/80 max-w-xs">
-            No extra bots or Zapier chains. One source of truth for what left your channel and where it landed.
+        <div className="mb-8 md:mb-10">
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
+            Ship to every feed
+          </h2>
+          <p className="max-w-md text-sm sm:text-base text-muted-foreground/90">
+            Approve once. Auto-publish to all platforms.
           </p>
         </div>
 
@@ -43,27 +38,21 @@ export default function PlatformIntegration() {
             </Card>
 
             <Card className="border border-white/10 bg-black/60 backdrop-blur-xl p-4 sm:p-5" data-testid="card-platform-tiktok">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-2">
+              <div className="flex items-center justify-between gap-4">
                 <PlatformBadge platform="tiktok" />
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-2 sm:px-3 py-1 text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.12em] sm:tracking-[0.16em] text-muted-foreground">
                   Coming soon
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground/90">
-                Built-in TikTok posting is in active development with early partners. You&apos;ll be able to mirror the same flows you set for Reels.
-              </p>
             </Card>
 
             <Card className="border border-white/10 bg-black/60 backdrop-blur-xl p-4 sm:p-5" data-testid="card-platform-youtube">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-2">
+              <div className="flex items-center justify-between gap-4">
                 <PlatformBadge platform="youtube" />
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-2 sm:px-3 py-1 text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.12em] sm:tracking-[0.16em] text-muted-foreground">
                   Coming soon
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground/90">
-                Shorts support follows right after TikTok, so your stream moments can hit every vertical feed from a single setup.
-              </p>
             </Card>
           </div>
         </div>
