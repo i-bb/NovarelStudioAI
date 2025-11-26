@@ -20,7 +20,7 @@ export default function Footer() {
                 <p className="font-display text-lg font-semibold tracking-tight text-foreground">
                   Novarel<span className="text-primary">Studio</span>
                 </p>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">AI for stream-first creators</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Stream-to-clip autopilot</p>
               </div>
             </div>
             <p className="max-w-sm text-sm text-muted-foreground/90">
