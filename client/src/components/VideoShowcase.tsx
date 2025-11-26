@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Play, Eye } from "lucide-react";
 import dashboardImage from "@assets/generated_images/dashboard_video_grid_interface.png";
-import logoImage from "@assets/novarel-logo.png";
+import logoImage from "@assets/generated_images/purple_lightning_bolt_logo_icon.png";
 
 export default function VideoShowcase() {
   const clips = [

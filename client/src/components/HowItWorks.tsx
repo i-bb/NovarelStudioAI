@@ -1,4 +1,4 @@
-import logoImage from "@assets/novarel-logo.png";
+import logoImage from "@assets/generated_images/purple_lightning_bolt_logo_icon.png";
 
 export default function HowItWorks() {
   return (
