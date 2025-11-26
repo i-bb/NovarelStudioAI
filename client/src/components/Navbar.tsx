@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, Zap } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Link } from "wouter";
+import logoImage from "@assets/Screenshot 2025-11-26 at 4.56.15 PM_1764194176876.png";
 
 export default function Navbar() {
   return (
@@ -9,10 +10,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 hover-elevate active-elevate-2 px-2 group" data-testid="link-logo">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-xl group-hover:blur-2xl transition-all" />
-              <Zap className="w-8 h-8 text-primary relative z-10" fill="currentColor" />
-            </div>
+            <img src={logoImage} alt="NovarelStudio" className="w-9 h-9 rounded-lg" />
             <span className="text-2xl font-display text-primary">NovarelStudio</span>
             <Badge variant="secondary" className="bg-accent/20 text-accent-foreground border-accent/30 text-xs">LIVE</Badge>
           </Link>
