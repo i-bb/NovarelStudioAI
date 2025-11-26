@@ -1,4 +1,4 @@
-import logoImage from "@assets/generated_images/purple_lightning_bolt_logo_icon.png";
+import logoImage from "@assets/novarel-logo.png";
 
 export default function HowItWorks() {
   return (
@@ -7,7 +7,7 @@ export default function HowItWorks() {
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
-            <img src={logoImage} alt="NovarelStudio" className="w-14 h-14 rounded-xl mb-6" />
+            <img src={logoImage} alt="NovarelStudio" className="w-20 h-20 rounded-2xl mb-6" />
             <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
               From "Go Live" to multi-platform drops
             </h2>
