@@ -144,7 +144,7 @@ export default function PricingSection() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
         <div className="mb-12 flex flex-col items-center text-center">
-          <img src={logoImage} alt="NovarelStudio" className="w-24 h-24 rounded-3xl mb-6 grayscale self-start" />
+          <img src={logoImage} alt="NovarelStudio" className="w-24 h-24 rounded-full mb-6 grayscale mix-blend-lighten self-start" />
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground mb-4">
             Pay for the clips that actually move your channel
           </h2>
