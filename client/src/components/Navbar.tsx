@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Menu } from "lucide-react";
 import { Link } from "wouter";
-import logoImage from "@assets/Screenshot 2025-11-26 at 4.56.15 PM_1764194176876.png";
+import logoImage from "@assets/novarel-logo.png";
 
 export default function Navbar() {
   return (

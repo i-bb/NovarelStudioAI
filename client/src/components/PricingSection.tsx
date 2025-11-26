@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, ChevronDown } from "lucide-react";
-import logoImage from "@assets/Screenshot 2025-11-26 at 4.56.15 PM_1764194176876.png";
+import logoImage from "@assets/novarel-logo.png";
 
 type CreditTier = {
   credits: string;
