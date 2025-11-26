@@ -75,8 +75,8 @@ export default function Hero() {
         {/* Right: Product Surface */}
         <div className="relative self-stretch flex flex-col">
           <div className="absolute -inset-10 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.22),_transparent_60%)] opacity-70" />
-          <div className="relative flex-1 rounded-3xl border border-white/8 bg-gradient-to-b from-slate-900/80 via-slate-950/95 to-black/95 shadow-[0_24px_80px_rgba(15,23,42,0.95)] overflow-hidden flex flex-col py-4">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-slate-900/60 mx-4 rounded-xl">
+          <div className="relative flex-1 rounded-3xl border border-white/8 bg-gradient-to-b from-slate-900/80 via-slate-950/95 to-black/95 shadow-[0_24px_80px_rgba(15,23,42,0.95)] overflow-hidden flex flex-col min-h-[520px]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-slate-900/60">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div className="flex gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
@@ -95,7 +95,7 @@ export default function Hero() {
               </div>
             </div>
 
-            <div className="flex-1 grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-0 mt-4 mx-4 rounded-xl overflow-hidden">
+            <div className="flex-1 grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-0">
               {/* Live stream preview */}
               <div className="relative border-r border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)]">
                 <img 
