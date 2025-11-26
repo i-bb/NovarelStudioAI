@@ -145,9 +145,9 @@ export default function Hero() {
 
                 <div className="space-y-2.5">
                   {[
-                    { title: "Ace clutch on Ascent", tag: "Gameplay" },
-                    { title: "Chat loses it at 3AM", tag: "Chat moment" },
-                    { title: "Streamer explains setup", tag: "Creator story" },
+                    { title: "Ace clutch", tag: "Gameplay" },
+                    { title: "Chat moment", tag: "Viral" },
+                    { title: "Setup story", tag: "Creator" },
                   ].map((clip, idx) => (
                     <div
                       key={clip.title}
