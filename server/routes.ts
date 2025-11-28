@@ -97,6 +97,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Connected accounts routes
+  app.get('/api/connected-accounts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const accounts = await storage.getConnectedAccounts(userId);
+      res.json(accounts);
+    } catch (error) {
+      console.error("Error fetching connected accounts:", error);
+      res.status(500).json({ message: "Failed to fetch connected accounts" });
+    }
+  });
+
+  app.post('/api/connected-accounts/:platform/connect', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { platform } = req.params;
+      const { platformUsername } = req.body || {};
+      const user = await storage.getUser(userId);
+
+      const validPlatforms = ['twitch', 'kick', 'instagram', 'youtube', 'tiktok'];
+      if (!validPlatforms.includes(platform)) {
+        return res.status(400).json({ message: "Invalid platform" });
+      }
+
+      // For demo purposes, generate a username based on user's name
+      // In production, this would use OAuth tokens from each platform
+      const demoUsername = platformUsername || 
+        (user?.firstName ? `${user.firstName.toLowerCase()}_${platform}` : `user_${platform}`);
+
+      const account = await storage.upsertConnectedAccount({
+        userId,
+        platform,
+        platformUsername: demoUsername,
+        platformUserId: `${platform}_${Date.now()}`,
+        isActive: 1,
+        connectedAt: new Date(),
+      });
+
+      res.json(account);
+    } catch (error) {
+      console.error("Error connecting account:", error);
+      res.status(500).json({ message: "Failed to connect account" });
+    }
+  });
+
+  app.delete('/api/connected-accounts/:platform', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { platform } = req.params;
+
+      await storage.disconnectAccount(userId, platform);
+      res.json({ message: "Account disconnected" });
+    } catch (error) {
+      console.error("Error disconnecting account:", error);
+      res.status(500).json({ message: "Failed to disconnect account" });
+    }
+  });
+
   // Seed demo data for the authenticated user
   app.post('/api/seed-demo', isAuthenticated, async (req: any, res) => {
     try {

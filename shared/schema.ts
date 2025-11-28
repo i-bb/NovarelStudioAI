@@ -6,6 +6,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -104,3 +105,24 @@ export const socialPosts = pgTable("social_posts", {
 export const insertSocialPostSchema = createInsertSchema(socialPosts).omit({ id: true, createdAt: true });
 export type InsertSocialPost = z.infer<typeof insertSocialPostSchema>;
 export type SocialPost = typeof socialPosts.$inferSelect;
+
+// Connected accounts - user's linked streaming and social platforms
+export const connectedAccounts = pgTable("connected_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  platform: varchar("platform").notNull(), // "twitch", "kick", "instagram", "youtube", "tiktok"
+  platformUserId: varchar("platform_user_id"),
+  platformUsername: varchar("platform_username"),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  tokenExpiresAt: timestamp("token_expires_at"),
+  isActive: integer("is_active").default(1),
+  connectedAt: timestamp("connected_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("IDX_connected_accounts_user_platform").on(table.userId, table.platform),
+]);
+
+export const insertConnectedAccountSchema = createInsertSchema(connectedAccounts).omit({ id: true, createdAt: true });
+export type InsertConnectedAccount = z.infer<typeof insertConnectedAccountSchema>;
+export type ConnectedAccount = typeof connectedAccounts.$inferSelect;

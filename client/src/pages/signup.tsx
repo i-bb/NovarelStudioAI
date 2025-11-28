@@ -1,21 +1,37 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Link } from "wouter";
-import { Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Zap, Loader2 } from "lucide-react";
+import { SiReplit } from "react-icons/si";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 
 export default function SignupPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement registration logic
-    console.log("Signup attempt:", { name, email, password });
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      setLocation("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, setLocation]);
+
+  const handleSignup = () => {
+    window.location.href = "/api/login";
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <main className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95 pt-24">
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </main>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -35,74 +51,26 @@ export default function SignupPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium text-foreground">
-                  Channel name
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="YourChannelName"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="bg-black/40 border-white/20"
-                  data-testid="input-name"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-foreground">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@yourchannel.gg"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-black/40 border-white/20"
-                  data-testid="input-email"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-foreground">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Create a strong password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-black/40 border-white/20"
-                  data-testid="input-password"
-                />
-              </div>
-
+            <div className="space-y-4">
               <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-semibold"
+                onClick={handleSignup}
+                className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-semibold text-base gap-3"
                 data-testid="button-signup"
               >
-                Create Account
+                <SiReplit className="h-5 w-5" />
+                Get Started with Replit
               </Button>
 
-              <p className="text-xs text-muted-foreground text-center">
-                By signing up, you agree to our Terms of Service and Privacy Policy
-              </p>
-            </form>
-
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:text-primary/80 font-semibold" data-testid="link-login">
-                Sign in
-              </Link>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  Free to start • No credit card required
+                </p>
+              </div>
             </div>
+
+            <p className="mt-6 text-xs text-muted-foreground text-center">
+              By signing up, you agree to our Terms of Service and Privacy Policy
+            </p>
           </Card>
         </div>
       </main>

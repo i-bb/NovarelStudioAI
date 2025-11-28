@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "wouter";
 import { SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
-import { Play, Clock, Zap, LogOut, LayoutDashboard, Film, Loader2, Sparkles } from "lucide-react";
+import { Play, Clock, Zap, LogOut, LayoutDashboard, Film, Loader2, Sparkles, Link2 } from "lucide-react";
 import type { StreamExport } from "@shared/schema";
 
 function DashboardNav() {
@@ -42,6 +42,12 @@ function DashboardNav() {
               <Button variant="ghost" size="sm" className="text-muted-foreground" data-testid="nav-content-studio">
                 <Film className="h-4 w-4 mr-2" />
                 Content Studio
+              </Button>
+            </Link>
+            <Link href="/dashboard/accounts">
+              <Button variant="ghost" size="sm" className="text-muted-foreground" data-testid="nav-connected-accounts">
+                <Link2 className="h-4 w-4 mr-2" />
+                Connected Accounts
               </Button>
             </Link>
           </nav>

@@ -4,6 +4,7 @@ import {
   streamExports,
   clips,
   socialPosts,
+  connectedAccounts,
   type User,
   type UpsertUser,
   type StreamSession,
@@ -14,6 +15,8 @@ import {
   type InsertClip,
   type SocialPost,
   type InsertSocialPost,
+  type ConnectedAccount,
+  type InsertConnectedAccount,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count } from "drizzle-orm";
@@ -41,6 +44,12 @@ export interface IStorage {
   getSocialPostsByUser(userId: string): Promise<SocialPost[]>;
   getSocialPostCountByPlatform(userId: string): Promise<{ platform: string; count: number }[]>;
   createSocialPost(post: InsertSocialPost): Promise<SocialPost>;
+  
+  // Connected account operations
+  getConnectedAccounts(userId: string): Promise<ConnectedAccount[]>;
+  getConnectedAccount(userId: string, platform: string): Promise<ConnectedAccount | undefined>;
+  upsertConnectedAccount(account: InsertConnectedAccount): Promise<ConnectedAccount>;
+  disconnectAccount(userId: string, platform: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -126,6 +135,49 @@ export class DatabaseStorage implements IStorage {
   async createSocialPost(post: InsertSocialPost): Promise<SocialPost> {
     const [newPost] = await db.insert(socialPosts).values(post).returning();
     return newPost;
+  }
+
+  // Connected account operations
+  async getConnectedAccounts(userId: string): Promise<ConnectedAccount[]> {
+    return db.select().from(connectedAccounts).where(eq(connectedAccounts.userId, userId)).orderBy(connectedAccounts.platform);
+  }
+
+  async getConnectedAccount(userId: string, platform: string): Promise<ConnectedAccount | undefined> {
+    const [account] = await db.select().from(connectedAccounts).where(
+      and(eq(connectedAccounts.userId, userId), eq(connectedAccounts.platform, platform))
+    );
+    return account;
+  }
+
+  async upsertConnectedAccount(account: InsertConnectedAccount): Promise<ConnectedAccount> {
+    // Check if account already exists
+    const existing = await this.getConnectedAccount(account.userId, account.platform);
+    
+    if (existing) {
+      // Update existing account
+      const [result] = await db
+        .update(connectedAccounts)
+        .set({
+          ...account,
+          connectedAt: new Date(),
+        })
+        .where(and(eq(connectedAccounts.userId, account.userId), eq(connectedAccounts.platform, account.platform)))
+        .returning();
+      return result;
+    } else {
+      // Insert new account
+      const [result] = await db
+        .insert(connectedAccounts)
+        .values(account)
+        .returning();
+      return result;
+    }
+  }
+
+  async disconnectAccount(userId: string, platform: string): Promise<void> {
+    await db.delete(connectedAccounts).where(
+      and(eq(connectedAccounts.userId, userId), eq(connectedAccounts.platform, platform))
+    );
   }
 }
 
