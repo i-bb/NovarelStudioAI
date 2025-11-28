@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,9 +29,21 @@ type Plan = {
 };
 
 export default function PricingSection() {
+  const [, navigate] = useLocation();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
   const [creatorTier, setCreatorTier] = useState(0);
   const [studioTier, setStudioTier] = useState(0);
+
+  const handlePlanSelect = (planId: string) => {
+    const tier = getSelectedTier(planId);
+    const params = new URLSearchParams();
+    params.set('plan', planId);
+    if (planId !== 'starter') {
+      params.set('tier', tier.toString());
+      params.set('billing', billingPeriod);
+    }
+    navigate(`/signup?${params.toString()}`);
+  };
 
   const plans: Plan[] = [
     {
@@ -277,6 +290,7 @@ export default function PricingSection() {
                   }`}
                   variant={plan.popular ? "default" : "outline"}
                   size="sm"
+                  onClick={() => handlePlanSelect(plan.id)}
                   data-testid={`button-${plan.id}-cta`}
                 >
                   <span className="truncate">{plan.cta}</span>
