@@ -1,15 +1,18 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Zap, Loader2 } from "lucide-react";
-import { SiReplit } from "react-icons/si";
+import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -17,7 +20,12 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, isLoading, setLocation]);
 
-  const handleLogin = () => {
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    window.location.href = "/api/login";
+  };
+
+  const handleGoogleLogin = () => {
     window.location.href = "/api/login";
   };
 
@@ -47,22 +55,82 @@ export default function LoginPage() {
                 Welcome back
               </h1>
               <p className="text-sm text-muted-foreground text-center">
-                Sign in to access your NovarelStudio dashboard
+                Sign in to your NovarelStudio account
               </p>
             </div>
 
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium text-foreground">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@yourchannel.gg"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-black/40 border-white/20"
+                  data-testid="input-email"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium text-foreground">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-black/40 border-white/20"
+                  data-testid="input-password"
+                />
+              </div>
+
+              <div className="flex items-center justify-end text-sm">
+                <a href="#" className="text-primary hover:text-primary/80" data-testid="link-forgot-password">
+                  Forgot password?
+                </a>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-semibold"
+                data-testid="button-login"
+              >
+                Sign In
+              </Button>
+            </form>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-black/60 px-3 text-muted-foreground">or</span>
+              </div>
+            </div>
+
             <Button
-              onClick={handleLogin}
-              className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-semibold text-base gap-3"
-              data-testid="button-login"
+              type="button"
+              variant="outline"
+              onClick={handleGoogleLogin}
+              className="w-full h-11 gap-3 border-white/20 bg-white/5 hover:bg-white/10"
+              data-testid="button-google-login"
             >
-              <SiReplit className="h-5 w-5" />
-              Continue with Replit
+              <FcGoogle className="h-5 w-5" />
+              Continue with Google
             </Button>
 
-            <p className="mt-6 text-xs text-muted-foreground text-center">
-              By signing in, you agree to our Terms of Service and Privacy Policy
-            </p>
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link href="/signup" className="text-primary hover:text-primary/80 font-semibold" data-testid="link-signup">
+                Get started
+              </Link>
+            </div>
           </Card>
         </div>
       </main>
