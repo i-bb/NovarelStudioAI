@@ -1,38 +1,132 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import {
+  users,
+  streamSessions,
+  streamExports,
+  clips,
+  socialPosts,
+  type User,
+  type UpsertUser,
+  type StreamSession,
+  type InsertStreamSession,
+  type StreamExport,
+  type InsertStreamExport,
+  type Clip,
+  type InsertClip,
+  type SocialPost,
+  type InsertSocialPost,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, count } from "drizzle-orm";
 
 export interface IStorage {
+  // User operations - mandatory for Replit Auth
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Stream session operations
+  getStreamSessions(userId: string): Promise<StreamSession[]>;
+  createStreamSession(session: InsertStreamSession): Promise<StreamSession>;
+  
+  // Stream export operations
+  getStreamExports(userId: string, limit?: number): Promise<StreamExport[]>;
+  getStreamExport(id: string): Promise<StreamExport | undefined>;
+  createStreamExport(exportData: InsertStreamExport): Promise<StreamExport>;
+  
+  // Clip operations
+  getClipsByExport(exportId: string): Promise<Clip[]>;
+  getClip(id: string): Promise<Clip | undefined>;
+  createClip(clip: InsertClip): Promise<Clip>;
+  
+  // Social post operations
+  getSocialPostsByUser(userId: string): Promise<SocialPost[]>;
+  getSocialPostCountByPlatform(userId: string): Promise<{ platform: string; count: number }[]>;
+  createSocialPost(post: InsertSocialPost): Promise<SocialPost>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
+  // User operations - mandatory for Replit Auth
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Stream session operations
+  async getStreamSessions(userId: string): Promise<StreamSession[]> {
+    return db.select().from(streamSessions).where(eq(streamSessions.userId, userId)).orderBy(desc(streamSessions.createdAt));
+  }
+
+  async createStreamSession(session: InsertStreamSession): Promise<StreamSession> {
+    const [newSession] = await db.insert(streamSessions).values(session).returning();
+    return newSession;
+  }
+
+  // Stream export operations
+  async getStreamExports(userId: string, limit: number = 50): Promise<StreamExport[]> {
+    return db.select().from(streamExports).where(eq(streamExports.userId, userId)).orderBy(desc(streamExports.createdAt)).limit(limit);
+  }
+
+  async getStreamExport(id: string): Promise<StreamExport | undefined> {
+    const [exportData] = await db.select().from(streamExports).where(eq(streamExports.id, id));
+    return exportData;
+  }
+
+  async createStreamExport(exportData: InsertStreamExport): Promise<StreamExport> {
+    const [newExport] = await db.insert(streamExports).values(exportData).returning();
+    return newExport;
+  }
+
+  // Clip operations
+  async getClipsByExport(exportId: string): Promise<Clip[]> {
+    return db.select().from(clips).where(eq(clips.exportId, exportId)).orderBy(desc(clips.createdAt));
+  }
+
+  async getClip(id: string): Promise<Clip | undefined> {
+    const [clip] = await db.select().from(clips).where(eq(clips.id, id));
+    return clip;
+  }
+
+  async createClip(clip: InsertClip): Promise<Clip> {
+    const [newClip] = await db.insert(clips).values(clip).returning();
+    return newClip;
+  }
+
+  // Social post operations
+  async getSocialPostsByUser(userId: string): Promise<SocialPost[]> {
+    return db.select().from(socialPosts).where(eq(socialPosts.userId, userId)).orderBy(desc(socialPosts.createdAt));
+  }
+
+  async getSocialPostCountByPlatform(userId: string): Promise<{ platform: string; count: number }[]> {
+    const results = await db
+      .select({
+        platform: socialPosts.platform,
+        count: count(),
+      })
+      .from(socialPosts)
+      .where(and(eq(socialPosts.userId, userId), eq(socialPosts.status, "posted")))
+      .groupBy(socialPosts.platform);
+    
+    return results.map((r: { platform: string; count: number }) => ({ platform: r.platform, count: Number(r.count) }));
+  }
+
+  async createSocialPost(post: InsertSocialPost): Promise<SocialPost> {
+    const [newPost] = await db.insert(socialPosts).values(post).returning();
+    return newPost;
+  }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

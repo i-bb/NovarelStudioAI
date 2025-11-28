@@ -11,6 +11,9 @@ import LoginPage from "@/pages/login";
 import SignupPage from "@/pages/signup";
 import PrivacyPage from "@/pages/privacy";
 import TermsPage from "@/pages/terms";
+import Dashboard from "@/pages/dashboard";
+import DashboardContent from "@/pages/dashboard-content";
+import VideoDetail from "@/pages/video-detail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +27,9 @@ function Router() {
       <Route path="/signup" component={SignupPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/terms" component={TermsPage} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/dashboard/content" component={DashboardContent} />
+      <Route path="/dashboard/content/:id" component={VideoDetail} />
       <Route component={NotFound} />
     </Switch>
   );

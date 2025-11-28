@@ -1,18 +1,106 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { sql } from 'drizzle-orm';
+import {
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session storage table - mandatory for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table - mandatory for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Stream sessions - represents a live stream that was recorded
+export const streamSessions = pgTable("stream_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  platform: varchar("platform").notNull(), // "twitch" or "kick"
+  streamTitle: varchar("stream_title"),
+  startedAt: timestamp("started_at").notNull(),
+  endedAt: timestamp("ended_at"),
+  status: varchar("status").notNull().default("recording"), // "recording", "processing", "completed"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertStreamSessionSchema = createInsertSchema(streamSessions).omit({ id: true, createdAt: true });
+export type InsertStreamSession = z.infer<typeof insertStreamSessionSchema>;
+export type StreamSession = typeof streamSessions.$inferSelect;
+
+// Stream exports - 10 minute video segments exported from streams
+export const streamExports = pgTable("stream_exports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streamSessionId: varchar("stream_session_id").notNull().references(() => streamSessions.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title"),
+  durationSeconds: integer("duration_seconds").notNull(),
+  videoUrl: varchar("video_url"),
+  thumbnailUrl: varchar("thumbnail_url"),
+  exportedAt: timestamp("exported_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertStreamExportSchema = createInsertSchema(streamExports).omit({ id: true, createdAt: true });
+export type InsertStreamExport = z.infer<typeof insertStreamExportSchema>;
+export type StreamExport = typeof streamExports.$inferSelect;
+
+// Clips - viral moments extracted from stream exports
+export const clips = pgTable("clips", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  exportId: varchar("export_id").notNull().references(() => streamExports.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  clipUrl: varchar("clip_url"),
+  thumbnailUrl: varchar("thumbnail_url"),
+  durationSeconds: integer("duration_seconds"),
+  transcription: text("transcription"),
+  viralityScore: integer("virality_score"), // 0-100
+  viralityReason: text("virality_reason"),
+  startTime: integer("start_time"), // seconds from start of export
+  endTime: integer("end_time"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertClipSchema = createInsertSchema(clips).omit({ id: true, createdAt: true });
+export type InsertClip = z.infer<typeof insertClipSchema>;
+export type Clip = typeof clips.$inferSelect;
+
+// Social posts - tracks clips posted to social platforms
+export const socialPosts = pgTable("social_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  clipId: varchar("clip_id").notNull().references(() => clips.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  platform: varchar("platform").notNull(), // "instagram", "tiktok", "youtube"
+  status: varchar("status").notNull().default("pending"), // "pending", "posted", "failed"
+  postedAt: timestamp("posted_at"),
+  metrics: jsonb("metrics"), // { views, likes, comments, shares }
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSocialPostSchema = createInsertSchema(socialPosts).omit({ id: true, createdAt: true });
+export type InsertSocialPost = z.infer<typeof insertSocialPostSchema>;
+export type SocialPost = typeof socialPosts.$inferSelect;
