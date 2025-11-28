@@ -5,61 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Link, useParams } from "wouter";
-import { Play, Clock, Zap, LogOut, LayoutDashboard, Film, ArrowLeft, TrendingUp, FileText, Sparkles } from "lucide-react";
+import { Play, Clock, ArrowLeft, TrendingUp, FileText, Sparkles } from "lucide-react";
+import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import type { StreamExport, Clip } from "@shared/schema";
-
-function DashboardNav() {
-  const { user } = useAuth();
-  
-  const initials = user?.firstName && user?.lastName 
-    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-    : user?.email?.[0]?.toUpperCase() || "U";
-
-  return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
-      <div className="flex items-center justify-between px-6 py-3">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20 text-primary">
-              <Zap className="h-4 w-4" />
-            </div>
-            <span className="font-display text-lg font-semibold">
-              Novarel<span className="text-primary">Studio</span>
-            </span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-1">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="text-muted-foreground" data-testid="nav-dashboard">
-                <LayoutDashboard className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/dashboard/content">
-              <Button variant="ghost" size="sm" className="text-primary" data-testid="nav-content-studio">
-                <Film className="h-4 w-4 mr-2" />
-                Content Studio
-              </Button>
-            </Link>
-          </nav>
-        </div>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8" data-testid="avatar-user">
-            <AvatarImage src={user?.profileImageUrl || undefined} />
-            <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
-          </Avatar>
-          <a href="/api/logout">
-            <Button variant="ghost" size="icon" className="h-8 w-8" data-testid="button-logout">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </a>
-        </div>
-      </div>
-    </header>
-  );
-}
 
 function ClipCard({ clip }: { clip: Clip }) {
   const viralityColor = clip.viralityScore && clip.viralityScore >= 70 
@@ -175,7 +125,7 @@ export default function VideoDetail() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/login";
       }, 500);
     }
   }, [isAuthenticated, authLoading, toast]);
@@ -202,7 +152,7 @@ export default function VideoDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95">
-      <DashboardNav />
+      <DashboardNav activeTab="content" />
       
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         <div className="flex items-center gap-4 mb-6">

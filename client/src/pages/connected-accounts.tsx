@@ -6,66 +6,11 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "wouter";
 import { SiTwitch, SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
-import { LogOut, LayoutDashboard, Film, Link2, Check, Loader2, ArrowLeft, Unlink } from "lucide-react";
+import { Link2, Check, Loader2, ArrowLeft, Unlink } from "lucide-react";
+import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import type { ConnectedAccount } from "@shared/schema";
-
-function DashboardNav() {
-  const { user } = useAuth();
-  
-  const displayName = user?.firstName || user?.email?.split("@")[0] || "User";
-  const initials = displayName.slice(0, 2).toUpperCase();
-
-  return (
-    <header className="border-b border-white/10 bg-black/40 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 md:px-8">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2" data-testid="link-logo">
-            <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
-              <span className="text-primary font-bold text-sm">N</span>
-            </div>
-            <span className="font-display text-lg font-semibold">Novarel<span className="text-primary">Studio</span></span>
-          </Link>
-          
-          <nav className="hidden md:flex items-center gap-1">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" data-testid="link-dashboard">
-                <LayoutDashboard className="h-4 w-4" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/dashboard/content">
-              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" data-testid="link-content-studio">
-                <Film className="h-4 w-4" />
-                Content Studio
-              </Button>
-            </Link>
-            <Link href="/dashboard/accounts">
-              <Button variant="ghost" size="sm" className="gap-2 text-foreground bg-white/5" data-testid="link-connected-accounts">
-                <Link2 className="h-4 w-4" />
-                Connected Accounts
-              </Button>
-            </Link>
-          </nav>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.profileImageUrl || undefined} />
-            <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
-          </Avatar>
-          <a href="/api/logout">
-            <Button variant="ghost" size="icon" className="h-8 w-8" data-testid="button-logout">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </a>
-        </div>
-      </div>
-    </header>
-  );
-}
 
 interface PlatformConfig {
   id: string;
@@ -232,7 +177,7 @@ export default function ConnectedAccountsPage() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/login";
       }, 500);
     }
   }, [isAuthenticated, authLoading, toast]);
@@ -302,7 +247,7 @@ export default function ConnectedAccountsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95">
-      <DashboardNav />
+      <DashboardNav activeTab="accounts" />
       
       <main className="max-w-4xl mx-auto px-4 md:px-8 py-8">
         <div className="mb-8">
