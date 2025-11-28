@@ -58,12 +58,22 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ message: error.message });
       }
 
-      const { email, password, channelName } = result.data;
+      const { email, password, channelName, plan, planTier, billingPeriod } = result.data;
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "An account with this email already exists" });
+      }
+
+      // Calculate clip credits based on plan and tier
+      let clipCredits = 10; // Starter default
+      if (plan === 'creator') {
+        const creatorCredits = [60, 120, 200, 300];
+        clipCredits = creatorCredits[planTier || 0];
+      } else if (plan === 'studio') {
+        const studioCredits = [150, 250, 350, 450];
+        clipCredits = studioCredits[planTier || 0];
       }
 
       // Hash password and create user
@@ -72,6 +82,12 @@ export async function setupAuth(app: Express) {
         email,
         passwordHash,
         firstName: channelName || null,
+        plan: plan || 'starter',
+        planTier: planTier || 0,
+        billingPeriod: billingPeriod || 'monthly',
+        subscriptionStatus: plan === 'starter' ? 'active' : 'pending',
+        clipCreditsRemaining: clipCredits,
+        clipCreditsTotal: clipCredits,
       });
 
       // Set session
@@ -83,6 +99,11 @@ export async function setupAuth(app: Express) {
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
+        plan: user.plan,
+        planTier: user.planTier,
+        billingPeriod: user.billingPeriod,
+        subscriptionStatus: user.subscriptionStatus,
+        requiresPayment: plan !== 'starter',
       });
     } catch (error) {
       console.error("Signup error:", error);
@@ -160,6 +181,12 @@ export async function setupAuth(app: Express) {
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
+        plan: user.plan,
+        planTier: user.planTier,
+        billingPeriod: user.billingPeriod,
+        subscriptionStatus: user.subscriptionStatus,
+        clipCreditsRemaining: user.clipCreditsRemaining,
+        clipCreditsTotal: user.clipCreditsTotal,
       });
     } catch (error) {
       console.error("Get user error:", error);
