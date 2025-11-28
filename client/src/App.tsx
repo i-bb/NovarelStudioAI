@@ -15,6 +15,8 @@ import Dashboard from "@/pages/dashboard";
 import DashboardContent from "@/pages/dashboard-content";
 import VideoDetail from "@/pages/video-detail";
 import ConnectedAccountsPage from "@/pages/connected-accounts";
+import CheckoutSuccessPage from "@/pages/checkout-success";
+import CheckoutCancelPage from "@/pages/checkout-cancel";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +34,8 @@ function Router() {
       <Route path="/dashboard/content" component={DashboardContent} />
       <Route path="/dashboard/content/:id" component={VideoDetail} />
       <Route path="/dashboard/accounts" component={ConnectedAccountsPage} />
+      <Route path="/checkout/success" component={CheckoutSuccessPage} />
+      <Route path="/checkout/cancel" component={CheckoutCancelPage} />
       <Route component={NotFound} />
     </Switch>
   );
