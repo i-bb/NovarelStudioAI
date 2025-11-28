@@ -7,12 +7,16 @@ import { Zap, Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation, Link } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -20,13 +24,42 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, isLoading, setLocation]);
 
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await apiRequest("POST", "/api/auth/login", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      setLocation("/dashboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login failed",
+        description: error.message || "Invalid email or password",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = "/api/login";
+    if (!email || !password) {
+      toast({
+        title: "Missing fields",
+        description: "Please enter your email and password",
+        variant: "destructive",
+      });
+      return;
+    }
+    loginMutation.mutate({ email, password });
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "/api/login";
+    toast({
+      title: "Coming Soon",
+      description: "Google login will be available soon!",
+    });
   };
 
   if (isLoading) {
@@ -72,6 +105,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-black/40 border-white/20"
                   data-testid="input-email"
+                  disabled={loginMutation.isPending}
                 />
               </div>
 
@@ -87,6 +121,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-black/40 border-white/20"
                   data-testid="input-password"
+                  disabled={loginMutation.isPending}
                 />
               </div>
 
@@ -100,8 +135,16 @@ export default function LoginPage() {
                 type="submit"
                 className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-semibold"
                 data-testid="button-login"
+                disabled={loginMutation.isPending}
               >
-                Sign In
+                {loginMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </form>
 
@@ -120,6 +163,7 @@ export default function LoginPage() {
               onClick={handleGoogleLogin}
               className="w-full h-11 gap-3 border-white/20 bg-white/5 hover:bg-white/10"
               data-testid="button-google-login"
+              disabled={loginMutation.isPending}
             >
               <FcGoogle className="h-5 w-5" />
               Continue with Google

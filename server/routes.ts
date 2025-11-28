@@ -1,28 +1,16 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Set up Replit Auth
+  // Set up custom authentication
   await setupAuth(app);
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
 
   // Dashboard stats - get social post counts by platform
   app.get('/api/dashboard/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const platformCounts = await storage.getSocialPostCountByPlatform(userId);
       
       // Ensure all platforms are represented
@@ -48,7 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get stream exports (Content Studio)
   app.get('/api/exports', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const limit = parseInt(req.query.limit as string) || 20;
       const exports = await storage.getStreamExports(userId, limit);
       res.json(exports);
@@ -100,7 +88,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Connected accounts routes
   app.get('/api/connected-accounts', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const accounts = await storage.getConnectedAccounts(userId);
       res.json(accounts);
     } catch (error) {
@@ -111,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/connected-accounts/:platform/connect', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { platform } = req.params;
       const { platformUsername } = req.body || {};
       const user = await storage.getUser(userId);
@@ -144,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/connected-accounts/:platform', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { platform } = req.params;
 
       await storage.disconnectAccount(userId, platform);
@@ -158,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed demo data for the authenticated user
   app.post('/api/seed-demo', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Create a sample stream session
       const streamSession = await storage.createStreamSession({

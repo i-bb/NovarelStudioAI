@@ -7,13 +7,17 @@ import { Zap, Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation, Link } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SignupPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const [name, setName] = useState("");
+  const [channelName, setChannelName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -21,13 +25,54 @@ export default function SignupPage() {
     }
   }, [isAuthenticated, isLoading, setLocation]);
 
+  const signupMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string; channelName?: string }) => {
+      const response = await apiRequest("POST", "/api/auth/signup", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: "Account created!",
+        description: "Welcome to NovarelStudio",
+      });
+      setLocation("/dashboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Signup failed",
+        description: error.message || "Failed to create account",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = "/api/login";
+    if (!email || !password) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (password.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 8 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+    signupMutation.mutate({ email, password, channelName: channelName || undefined });
   };
 
   const handleGoogleSignup = () => {
-    window.location.href = "/api/login";
+    toast({
+      title: "Coming Soon",
+      description: "Google signup will be available soon!",
+    });
   };
 
   if (isLoading) {
@@ -62,17 +107,18 @@ export default function SignupPage() {
 
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium text-foreground">
+                <label htmlFor="channelName" className="text-sm font-medium text-foreground">
                   Channel name
                 </label>
                 <Input
-                  id="name"
+                  id="channelName"
                   type="text"
                   placeholder="YourChannelName"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={channelName}
+                  onChange={(e) => setChannelName(e.target.value)}
                   className="bg-black/40 border-white/20"
                   data-testid="input-name"
+                  disabled={signupMutation.isPending}
                 />
               </div>
 
@@ -88,6 +134,7 @@ export default function SignupPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-black/40 border-white/20"
                   data-testid="input-email"
+                  disabled={signupMutation.isPending}
                 />
               </div>
 
@@ -103,15 +150,25 @@ export default function SignupPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-black/40 border-white/20"
                   data-testid="input-password"
+                  disabled={signupMutation.isPending}
                 />
+                <p className="text-xs text-muted-foreground">Must be at least 8 characters</p>
               </div>
 
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 font-semibold"
                 data-testid="button-signup"
+                disabled={signupMutation.isPending}
               >
-                Create Account
+                {signupMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </form>
 
@@ -130,6 +187,7 @@ export default function SignupPage() {
               onClick={handleGoogleSignup}
               className="w-full h-11 gap-3 border-white/20 bg-white/5 hover:bg-white/10"
               data-testid="button-google-signup"
+              disabled={signupMutation.isPending}
             >
               <FcGoogle className="h-5 w-5" />
               Continue with Google
