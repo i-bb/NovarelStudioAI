@@ -6,11 +6,23 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Link } from "wouter";
 import { SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
-import { Play, Clock, Loader2, Sparkles, Film } from "lucide-react";
+import { Play, Clock, Loader2, Sparkles, Film, Zap, Crown, CreditCard } from "lucide-react";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import type { StreamExport } from "@shared/schema";
+
+type SubscriptionData = {
+  plan: string;
+  planTier: number | null;
+  billingPeriod: string | null;
+  subscriptionStatus: string | null;
+  currentPeriodEnd: string | null;
+  clipCreditsRemaining: number | null;
+  clipCreditsTotal: number | null;
+  stripeSubscriptionId: string | null;
+};
 
 function PlatformStatCard({ 
   platform, 
@@ -46,6 +58,115 @@ function PlatformStatCard({
         </h3>
         <p className="text-4xl font-bold text-foreground mb-1">{count}</p>
         <p className="text-sm text-muted-foreground">Video{count !== 1 ? "s" : ""} Posted</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PlanStatusCard({ subscription }: { subscription: SubscriptionData | undefined }) {
+  const { toast } = useToast();
+  
+  const portalMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/billing/portal");
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to open billing portal",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const planName = subscription?.plan || "starter";
+  const isPaid = planName !== "starter" && subscription?.subscriptionStatus === "active";
+  const creditsRemaining = subscription?.clipCreditsRemaining ?? 10;
+  const creditsTotal = subscription?.clipCreditsTotal ?? 10;
+  const usagePercentage = creditsTotal > 0 ? ((creditsTotal - creditsRemaining) / creditsTotal) * 100 : 0;
+
+  return (
+    <Card className="border-white/10 bg-black/40 overflow-hidden" data-testid="card-plan-status">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            {planName === "studio" ? (
+              <div className="p-2 rounded-lg bg-yellow-500/10">
+                <Crown className="h-5 w-5 text-yellow-400" />
+              </div>
+            ) : planName === "creator" ? (
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+            ) : (
+              <div className="p-2 rounded-lg bg-emerald-400/10">
+                <Zap className="h-5 w-5 text-emerald-400" />
+              </div>
+            )}
+            <div>
+              <h3 className="font-display text-lg font-semibold capitalize">{planName} Plan</h3>
+              {subscription?.subscriptionStatus && (
+                <Badge 
+                  variant={subscription.subscriptionStatus === "active" ? "default" : "secondary"} 
+                  className="text-[10px]"
+                >
+                  {subscription.subscriptionStatus}
+                </Badge>
+              )}
+            </div>
+          </div>
+          {isPaid ? (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => portalMutation.mutate()}
+              disabled={portalMutation.isPending}
+              data-testid="button-manage-billing"
+            >
+              {portalMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Manage Billing
+                </>
+              )}
+            </Button>
+          ) : (
+            <Link href="/#pricing">
+              <Button size="sm" data-testid="button-upgrade">
+                <Zap className="h-4 w-4 mr-2" />
+                Upgrade
+              </Button>
+            </Link>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Clip Credits</span>
+            <span className="font-medium">{creditsRemaining} / {creditsTotal} remaining</span>
+          </div>
+          <Progress value={usagePercentage} className="h-2" />
+          {creditsRemaining <= 5 && (
+            <p className="text-xs text-amber-400">
+              Running low on credits! Consider upgrading for more clips.
+            </p>
+          )}
+        </div>
+
+        {subscription?.currentPeriodEnd && (
+          <p className="text-xs text-muted-foreground mt-4">
+            {subscription.subscriptionStatus === "active" ? "Renews" : "Expires"} on{" "}
+            {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
@@ -126,6 +247,11 @@ export default function Dashboard() {
     enabled: isAuthenticated,
   });
 
+  const { data: subscription } = useQuery<SubscriptionData>({
+    queryKey: ["/api/subscription"],
+    enabled: isAuthenticated,
+  });
+
   const seedMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", "/api/seed-demo");
@@ -188,6 +314,11 @@ export default function Dashboard() {
             </Button>
           )}
         </div>
+
+        {/* Plan Status */}
+        <section className="mb-8">
+          <PlanStatusCard subscription={subscription} />
+        </section>
 
         {/* Platform Stats */}
         <section className="mb-12">
