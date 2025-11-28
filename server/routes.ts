@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up custom authentication
@@ -140,6 +143,223 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error disconnecting account:", error);
       res.status(500).json({ message: "Failed to disconnect account" });
+    }
+  });
+
+  // Stripe subscription routes
+  
+  // Get Stripe publishable key for frontend
+  app.get('/api/stripe/config', async (req, res) => {
+    try {
+      const publishableKey = await getStripePublishableKey();
+      res.json({ publishableKey });
+    } catch (error) {
+      console.error("Error fetching Stripe config:", error);
+      res.status(500).json({ message: "Failed to fetch Stripe config" });
+    }
+  });
+
+  // Get available pricing plans with Stripe price IDs
+  app.get('/api/plans', async (req, res) => {
+    try {
+      const result = await db.execute(sql`
+        SELECT 
+          p.id as product_id,
+          p.name as product_name,
+          p.description as product_description,
+          p.metadata as product_metadata,
+          pr.id as price_id,
+          pr.unit_amount,
+          pr.currency,
+          pr.recurring,
+          pr.metadata as price_metadata
+        FROM stripe.products p
+        LEFT JOIN stripe.prices pr ON pr.product = p.id AND pr.active = true
+        WHERE p.active = true AND p.metadata->>'app' = 'novarelstudio'
+        ORDER BY p.name, pr.unit_amount
+      `);
+
+      const productsMap = new Map();
+      for (const row of result.rows as any[]) {
+        if (!productsMap.has(row.product_id)) {
+          productsMap.set(row.product_id, {
+            id: row.product_id,
+            name: row.product_name,
+            description: row.product_description,
+            metadata: row.product_metadata,
+            prices: []
+          });
+        }
+        if (row.price_id) {
+          productsMap.get(row.product_id).prices.push({
+            id: row.price_id,
+            unit_amount: row.unit_amount,
+            currency: row.currency,
+            recurring: row.recurring,
+            metadata: row.price_metadata,
+          });
+        }
+      }
+
+      res.json({ products: Array.from(productsMap.values()) });
+    } catch (error) {
+      console.error("Error fetching plans:", error);
+      res.status(500).json({ message: "Failed to fetch plans" });
+    }
+  });
+
+  // Create Stripe checkout session for subscription
+  app.post('/api/checkout', isAuthenticated, async (req: any, res) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const user = req.user;
+      const { priceId, plan, tier, billing } = req.body;
+
+      if (!priceId) {
+        return res.status(400).json({ message: "Price ID is required" });
+      }
+
+      // Create or get Stripe customer
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { userId: user.id },
+        });
+        await storage.updateUserSubscription(user.id, {
+          stripeCustomerId: customer.id,
+        });
+        customerId = customer.id;
+      }
+
+      // Calculate credits based on plan and tier
+      let clipCredits = 10;
+      if (plan === 'creator') {
+        const creatorCredits = [60, 120, 200, 300];
+        clipCredits = creatorCredits[tier || 0];
+      } else if (plan === 'studio') {
+        const studioCredits = [150, 250, 350, 450];
+        clipCredits = studioCredits[tier || 0];
+      }
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        payment_method_types: ['card'],
+        line_items: [{ price: priceId, quantity: 1 }],
+        mode: 'subscription',
+        success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/checkout/cancel`,
+        metadata: {
+          userId: user.id,
+          plan,
+          tier: tier?.toString() || '0',
+          billing: billing || 'monthly',
+          clipCredits: clipCredits.toString(),
+        },
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).json({ message: error.message || "Failed to create checkout session" });
+    }
+  });
+
+  // Handle successful checkout - update user subscription
+  app.post('/api/checkout/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const { sessionId } = req.body;
+      const user = req.user;
+
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID is required" });
+      }
+
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (session.payment_status !== 'paid') {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+
+      const subscriptionId = session.subscription as string;
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      
+      const metadata = session.metadata || {};
+      const plan = metadata.plan || 'starter';
+      const tier = parseInt(metadata.tier || '0');
+      const billing = metadata.billing || 'monthly';
+      const clipCredits = parseInt(metadata.clipCredits || '10');
+
+      // Update user with subscription info
+      const updatedUser = await storage.updateUserSubscription(user.id, {
+        stripeSubscriptionId: subscriptionId,
+        plan,
+        planTier: tier,
+        billingPeriod: billing,
+        subscriptionStatus: 'active',
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        clipCreditsRemaining: clipCredits,
+        clipCreditsTotal: clipCredits,
+      });
+
+      res.json({
+        success: true,
+        user: {
+          id: updatedUser.id,
+          plan: updatedUser.plan,
+          planTier: updatedUser.planTier,
+          subscriptionStatus: updatedUser.subscriptionStatus,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error completing checkout:", error);
+      res.status(500).json({ message: error.message || "Failed to complete checkout" });
+    }
+  });
+
+  // Get user's current subscription
+  app.get('/api/subscription', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user;
+      
+      res.json({
+        plan: user.plan,
+        planTier: user.planTier,
+        billingPeriod: user.billingPeriod,
+        subscriptionStatus: user.subscriptionStatus,
+        currentPeriodEnd: user.currentPeriodEnd,
+        clipCreditsRemaining: user.clipCreditsRemaining,
+        clipCreditsTotal: user.clipCreditsTotal,
+        stripeSubscriptionId: user.stripeSubscriptionId,
+      });
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+      res.status(500).json({ message: "Failed to fetch subscription" });
+    }
+  });
+
+  // Create customer portal session for managing subscription
+  app.post('/api/billing/portal', isAuthenticated, async (req: any, res) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const user = req.user;
+
+      if (!user.stripeCustomerId) {
+        return res.status(400).json({ message: "No billing account found" });
+      }
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const session = await stripe.billingPortal.sessions.create({
+        customer: user.stripeCustomerId,
+        return_url: `${baseUrl}/dashboard`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating portal session:", error);
+      res.status(500).json({ message: error.message || "Failed to create billing portal" });
     }
   });
 
