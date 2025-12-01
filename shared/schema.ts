@@ -198,3 +198,14 @@ export const connectedAccounts = pgTable("connected_accounts", {
 export const insertConnectedAccountSchema = createInsertSchema(connectedAccounts).omit({ id: true, createdAt: true });
 export type InsertConnectedAccount = z.infer<typeof insertConnectedAccountSchema>;
 export type ConnectedAccount = typeof connectedAccounts.$inferSelect;
+
+// Newsletter signups - email list for updates
+export const newsletterSignups = pgTable("newsletter_signups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").unique().notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertNewsletterSignupSchema = createInsertSchema(newsletterSignups).omit({ id: true, createdAt: true });
+export type InsertNewsletterSignup = z.infer<typeof insertNewsletterSignupSchema>;
+export type NewsletterSignup = typeof newsletterSignups.$inferSelect;

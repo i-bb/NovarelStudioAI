@@ -2,17 +2,16 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function CTASection() {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // wire up to backend later
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    if (email) {
+      window.location.href = `/signup?email=${encodeURIComponent(email)}`;
+    }
   };
 
   return (
@@ -28,40 +27,30 @@ export default function CTASection() {
               Enter your email. Start clipping tonight.
             </p>
 
-            {!submitted ? (
-              <form
-                onSubmit={handleSubmit}
-                className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
+            <form
+              onSubmit={handleSubmit}
+              className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
+            >
+              <Input
+                type="email"
+                placeholder="you@yourchannel.gg"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="rounded-full border-white/20 bg-black/60 px-4 text-sm min-w-0"
+                data-testid="input-email-cta"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                className="rounded-full px-4 sm:px-6 text-xs sm:text-sm font-semibold bg-white text-black hover:bg-slate-100 shadow-[0_16px_60px_rgba(15,23,42,0.95)] group flex-shrink-0"
+                data-testid="button-cta-get-access"
               >
-                <Input
-                  type="email"
-                  placeholder="you@yourchannel.gg"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="rounded-full border-white/20 bg-black/60 px-4 text-sm min-w-0"
-                  data-testid="input-email-waitlist"
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="rounded-full px-4 sm:px-6 text-xs sm:text-sm font-semibold bg-white text-black hover:bg-slate-100 shadow-[0_16px_60px_rgba(15,23,42,0.95)] group flex-shrink-0"
-                  data-testid="button-join-waitlist"
-                >
-                  <span className="hidden sm:inline">Get access for my stream</span>
-                  <span className="sm:hidden">Get access</span>
-                  <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
-                </Button>
-              </form>
-            ) : (
-              <div
-                className="flex items-center justify-center gap-2 text-emerald-300 text-xs sm:text-sm"
-                data-testid="text-success-message"
-              >
-                <CheckCircle className="h-4 w-4" />
-                <span>Check your inbox!</span>
-              </div>
-            )}
+                <span className="hidden sm:inline">Get access for my stream</span>
+                <span className="sm:hidden">Get access</span>
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
+              </Button>
+            </form>
 
             <p className="mt-4 text-[11px] text-muted-foreground/85">
               No credit card • Free trial • Cancel anytime

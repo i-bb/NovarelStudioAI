@@ -5,6 +5,7 @@ import {
   clips,
   socialPosts,
   connectedAccounts,
+  newsletterSignups,
   type User,
   type UpsertUser,
   type StreamSession,
@@ -17,6 +18,7 @@ import {
   type InsertSocialPost,
   type ConnectedAccount,
   type InsertConnectedAccount,
+  type NewsletterSignup,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, count } from "drizzle-orm";
@@ -53,6 +55,9 @@ export interface IStorage {
   getConnectedAccount(userId: string, platform: string): Promise<ConnectedAccount | undefined>;
   upsertConnectedAccount(account: InsertConnectedAccount): Promise<ConnectedAccount>;
   disconnectAccount(userId: string, platform: string): Promise<void>;
+  
+  // Newsletter operations
+  createNewsletterSignup(email: string): Promise<NewsletterSignup>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -203,6 +208,12 @@ export class DatabaseStorage implements IStorage {
     await db.delete(connectedAccounts).where(
       and(eq(connectedAccounts.userId, userId), eq(connectedAccounts.platform, platform))
     );
+  }
+
+  // Newsletter operations
+  async createNewsletterSignup(email: string): Promise<NewsletterSignup> {
+    const [signup] = await db.insert(newsletterSignups).values({ email }).returning();
+    return signup;
   }
 }
 

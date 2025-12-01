@@ -1,9 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Play, Zap, Users, Clock3, TrendingUp, Scissors, MessageCircle, Upload, RefreshCw } from "lucide-react";
+import { Link } from "wouter";
 import streamerImage from "@assets/generated_images/young_black_teen_streamer_full_body.png";
 
 export default function Hero() {
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById('features');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden pt-24 pb-16">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.45),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(22,163,74,0.25),_transparent_55%)]" />
@@ -32,14 +39,21 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
-            <Button className="h-12 sm:h-14 px-5 sm:px-8 text-xs sm:text-sm md:text-base font-semibold rounded-full bg-white text-black hover:bg-slate-100 shadow-[0_18px_60px_rgba(15,23,42,0.8)]">
-              <span className="hidden sm:inline">Start free for your next stream</span>
-              <span className="sm:hidden">Start free</span>
-              <ArrowRight className="ml-2 h-4 w-4 flex-shrink-0" />
-            </Button>
+            <Link href="/signup">
+              <Button 
+                className="h-12 sm:h-14 px-5 sm:px-8 text-xs sm:text-sm md:text-base font-semibold rounded-full bg-white text-black hover:bg-slate-100 shadow-[0_18px_60px_rgba(15,23,42,0.8)]"
+                data-testid="button-hero-start-free"
+              >
+                <span className="hidden sm:inline">Start free for your next stream</span>
+                <span className="sm:hidden">Start free</span>
+                <ArrowRight className="ml-2 h-4 w-4 flex-shrink-0" />
+              </Button>
+            </Link>
             <Button
               variant="outline"
               className="h-12 sm:h-14 px-5 sm:px-8 text-xs sm:text-sm md:text-base rounded-full border-white/15 bg-black/40 hover:bg-white/5 text-foreground flex items-center"
+              onClick={scrollToFeatures}
+              data-testid="button-hero-watch-tour"
             >
               <Play className="mr-2 h-4 w-4 fill-current flex-shrink-0" />
               <span className="hidden sm:inline">Watch 60s tour</span>

@@ -64,9 +64,10 @@ export default function SignupPage() {
   const planParam = params.get("plan") || "starter";
   const tierParam = parseInt(params.get("tier") || "0");
   const billingParam = (params.get("billing") || "monthly") as "monthly" | "annual";
+  const emailParam = params.get("email") || "";
 
   const [channelName, setChannelName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState("");
   const { toast } = useToast();
 

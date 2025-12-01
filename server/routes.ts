@@ -284,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const subscriptionId = session.subscription as string;
-      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId) as any;
       
       const metadata = session.metadata || {};
       const plan = metadata.plan || 'starter';
@@ -299,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         planTier: tier,
         billingPeriod: billing,
         subscriptionStatus: 'active',
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
         clipCreditsRemaining: clipCredits,
         clipCreditsTotal: clipCredits,
       });
@@ -360,6 +360,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error creating portal session:", error);
       res.status(500).json({ message: error.message || "Failed to create billing portal" });
+    }
+  });
+
+  // Newsletter signup
+  app.post('/api/newsletter', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email || typeof email !== 'string' || !email.includes('@')) {
+        return res.status(400).json({ message: "Valid email is required" });
+      }
+
+      await storage.createNewsletterSignup(email);
+      res.json({ message: "Successfully subscribed to updates!" });
+    } catch (error: any) {
+      if (error.code === '23505') {
+        return res.json({ message: "You're already subscribed!" });
+      }
+      console.error("Error creating newsletter signup:", error);
+      res.status(500).json({ message: "Failed to subscribe" });
     }
   });
 

@@ -1,6 +1,40 @@
-import { Zap, Github, Twitter, Linkedin } from "lucide-react";
+import { useState } from "react";
+import { Zap, Github, Twitter, Linkedin, CheckCircle, Loader2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const newsletterMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await apiRequest("POST", "/api/newsletter", { email });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setSuccess(true);
+      setMessage(data.message || "Successfully subscribed!");
+      setEmail("");
+      setTimeout(() => {
+        setSuccess(false);
+        setMessage("");
+      }, 4000);
+    },
+    onError: () => {
+      setMessage("Failed to subscribe. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      newsletterMutation.mutate(email);
+    }
+  };
+
   return (
     <footer className="relative border-t border-white/5 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.18),_transparent_55%),_linear-gradient(to_bottom,_#020617,_#020617)] pt-16 pb-10 mt-8">
       <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
@@ -51,24 +85,42 @@ export default function Footer() {
 
           <div className="md:col-span-4 flex flex-col gap-4 text-sm">
             <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Get updates</h4>
-            <form
-              className="flex flex-col sm:flex-row gap-3"
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <input
-                type="email"
-                placeholder="you@yourchannel.gg"
-                className="flex-1 min-w-0 rounded-full border border-white/15 bg-black/40 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-              <button
-                type="submit"
-                className="rounded-full bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-black shadow-[0_10px_40px_rgba(15,23,42,0.9)] hover:bg-slate-100 flex-shrink-0 whitespace-nowrap"
+            {success ? (
+              <div className="flex items-center gap-2 text-emerald-300 text-sm py-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>{message}</span>
+              </div>
+            ) : (
+              <form
+                className="flex flex-col sm:flex-row gap-3"
+                onSubmit={handleSubmit}
               >
-                Get updates
-              </button>
-            </form>
+                <input
+                  type="email"
+                  placeholder="you@yourchannel.gg"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="flex-1 min-w-0 rounded-full border border-white/15 bg-black/40 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  data-testid="input-footer-email"
+                />
+                <button
+                  type="submit"
+                  disabled={newsletterMutation.isPending}
+                  className="rounded-full bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-black shadow-[0_10px_40px_rgba(15,23,42,0.9)] hover:bg-slate-100 flex-shrink-0 whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-2"
+                  data-testid="button-footer-subscribe"
+                >
+                  {newsletterMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Get updates"
+                  )}
+                </button>
+              </form>
+            )}
+            {message && !success && (
+              <p className="text-xs text-red-400">{message}</p>
+            )}
           </div>
         </div>
 
