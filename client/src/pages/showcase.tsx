@@ -283,11 +283,15 @@ export default function ShowcasePage() {
                         Create Free Account
                       </Button>
                     </Link>
-                    <Link href="/#pricing">
-                      <Button size="lg" variant="outline" className="w-full sm:w-auto" data-testid="button-showcase-pricing">
-                        View Pricing
-                      </Button>
-                    </Link>
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="w-full sm:w-auto" 
+                      data-testid="button-showcase-pricing"
+                      onClick={() => window.location.href = "/#pricing"}
+                    >
+                      View Pricing
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
