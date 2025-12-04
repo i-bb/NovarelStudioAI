@@ -119,7 +119,7 @@ export default function TermsPage() {
               </h2>
               <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
                 <li>Provided "as is" without warranties.</li>
-                <li>Novarel Studio is <strong className="text-foreground">not responsible</strong> for errors, service interruptions, or losses arising from use or reliance on this system.</li>
+                <li>Novarel Studio is <strong className="text-foreground">not responsible</strong> for any errors, interruptions, or issues that may occur while using or relying on this system.</li>
               </ul>
             </section>
           </div>

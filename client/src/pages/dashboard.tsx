@@ -229,7 +229,7 @@ export default function Dashboard() {
       toast({
         title: "Please log in",
         description: "You need to be logged in to access the dashboard.",
-        variant: "destructive",
+        className: "bg-emerald-500/10 border-emerald-500/30 text-emerald-100",
       });
       setTimeout(() => {
         window.location.href = "/login";

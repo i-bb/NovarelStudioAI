@@ -77,7 +77,7 @@ export default function Footer() {
               <FooterLink href="/#features">Features</FooterLink>
               <FooterLink href="/how-it-works">How it works</FooterLink>
               <FooterLink href="/pricing">Pricing</FooterLink>
-              <FooterLink href="/showcase">Creator showcase</FooterLink>
+              <FooterLink href="/showcase">Showcase</FooterLink>
               <FooterLink href="/privacy">Privacy Policy</FooterLink>
               <FooterLink href="/terms">Terms of Service</FooterLink>
             </nav>

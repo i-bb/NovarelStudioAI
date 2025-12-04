@@ -1,4 +1,4 @@
-import { SiTiktok, SiInstagram, SiYoutube } from "react-icons/si";
+import { SiInstagram } from "react-icons/si";
 import { Sparkles, Share2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,14 +26,8 @@ export default function ClipPreviewMockup() {
               />
             </div>
 
-            <div className="absolute -top-2 -right-2 h-9 w-9 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg border-2 border-black animate-bounce" style={{ animationDuration: '2s' }}>
-              <SiTiktok className="h-4 w-4 text-white" />
-            </div>
-            <div className="absolute top-8 -right-4 h-9 w-9 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center shadow-lg border-2 border-black">
-              <SiInstagram className="h-4 w-4 text-white" />
-            </div>
-            <div className="absolute -left-3 top-1/4 h-9 w-9 rounded-full bg-red-600 flex items-center justify-center shadow-lg border-2 border-black">
-              <SiYoutube className="h-4 w-4 text-white" />
+            <div className="absolute -top-2 -right-2 h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center shadow-lg border-2 border-black">
+              <SiInstagram className="h-5 w-5 text-white" />
             </div>
           </div>
         </div>

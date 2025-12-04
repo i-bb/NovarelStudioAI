@@ -12,7 +12,7 @@ export default function HowItWorks() {
               From "Go Live" to multi-platform drops
             </h2>
             <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
-              The flow is brutally simple on purpose. No new scenes, bots or OBS sorcery. You keep streaming; the system quietly does the rest.
+              The flow is simple on purpose. No new scenes, bots or OBS sorcery. You keep streaming; the system quietly does the rest.
             </p>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground/80 max-w-xs">
@@ -24,12 +24,12 @@ export default function HowItWorks() {
           <StepCard
             step="01"
             title="Connect once, then forget it"
-            description="Link Twitch or Kick, set your posting rules, and choose where clips should land. That&apos;s the last time you touch settings."
+            description="Link Twitch or Kick, set your posting rules, and choose where clips should land."
           />
           <StepCard
             step="02"
             title="Novarel sits in on every stream"
-            description="As you go live, we watch audio, chat spikes and in-game events to flag the 1–2% of moments actually worth posting."
+            description="We record live streams using advanced processing and extract the most engaging moments using AI-powered content analysis."
           />
           <StepCard
             step="03"
