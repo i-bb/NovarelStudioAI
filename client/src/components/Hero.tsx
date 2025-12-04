@@ -35,7 +35,7 @@ export default function Hero() {
           </h1>
 
           <p className="text-base sm:text-lg text-muted-foreground/90 max-w-xl leading-relaxed mb-8">
-            NovarelStudio watches your stream end-to-end, finds the moments your chat loses its mind, and ships vertical clips to every platform automatically.
+            NovarelStudio watches your stream end-to-end, finds the moments your chat loses its mind, and ships vertical clips automatically.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
