@@ -124,13 +124,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-[11px] sm:text-xs text-muted-foreground/80 md:flex-row md:items-center md:justify-between">
+        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-[11px] sm:text-xs text-muted-foreground/80 md:flex-row md:items-center md:justify-center">
           <p>© {new Date().getFullYear()} NovarelStudio. All rights reserved.</p>
-          <div className="flex flex-wrap gap-4">
-            <FooterLink href="/privacy">Privacy</FooterLink>
-            <FooterLink href="/terms">Terms</FooterLink>
-            <FooterLink href="#">Status</FooterLink>
-          </div>
         </div>
       </div>
     </footer>

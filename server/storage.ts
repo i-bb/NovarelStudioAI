@@ -30,6 +30,7 @@ export interface IStorage {
   createUser(user: UpsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserSubscription(userId: string, subscriptionData: Partial<User>): Promise<User>;
+  updateUserProfile(userId: string, profileData: { firstName: string | null; lastName: string | null }): Promise<User>;
   
   // Stream session operations
   getStreamSessions(userId: string): Promise<StreamSession[]>;
@@ -97,6 +98,19 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         ...subscriptionData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserProfile(userId: string, profileData: { firstName: string | null; lastName: string | null }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))

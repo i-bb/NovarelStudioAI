@@ -78,10 +78,10 @@ export default function ClipPreviewMockup() {
             </div>
           </div>
 
-          <Button className="w-full rounded-full bg-primary hover:bg-primary/90 text-white font-semibold mt-2" data-testid="button-share-mockup">
-            <Share2 className="h-4 w-4 mr-2" />
-            Publish to all platforms
-          </Button>
+          <div className="w-full rounded-full bg-primary/80 text-white font-semibold mt-2 py-2.5 flex items-center justify-center gap-2 text-sm cursor-default" data-testid="text-share-mockup">
+            <Share2 className="h-4 w-4" />
+            Ready to post on Instagram
+          </div>
         </div>
       </div>
     </Card>

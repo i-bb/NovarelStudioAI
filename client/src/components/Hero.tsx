@@ -150,9 +150,9 @@ export default function Hero() {
                     </p>
                     <p className="text-sm font-semibold text-slate-50">6 clips generated • 3 auto-published</p>
                   </div>
-                  <button className="rounded-full bg-emerald-400/90 px-3 py-1.5 text-[11px] font-semibold text-emerald-950 shadow-md hover:bg-emerald-300">
+                  <span className="rounded-full bg-emerald-400/20 border border-emerald-400/40 px-3 py-1.5 text-[11px] font-semibold text-emerald-300">
                     Approve all
-                  </button>
+                  </span>
                 </div>
 
                 <div className="space-y-2.5">

@@ -3,8 +3,16 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
-import { Zap, LogOut, LayoutDashboard, Film, Link2 } from "lucide-react";
+import { Zap, LogOut, LayoutDashboard, Film, Link2, User, Settings } from "lucide-react";
 
 interface DashboardNavProps {
   activeTab?: "dashboard" | "content" | "accounts";
@@ -66,20 +74,47 @@ export function DashboardNav({ activeTab = "dashboard" }: DashboardNavProps) {
           </nav>
         </div>
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8" data-testid="avatar-user">
-            <AvatarImage src={user?.profileImageUrl || undefined} />
-            <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
-          </Avatar>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            data-testid="button-logout"
-            onClick={() => logoutMutation.mutate()}
-            disabled={logoutMutation.isPending}
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 rounded-full p-1 hover:bg-white/5 transition-colors cursor-pointer" data-testid="button-profile-menu">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.profileImageUrl || undefined} />
+                  <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">{displayName}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <Link href="/dashboard/profile">
+                <DropdownMenuItem className="cursor-pointer" data-testid="menu-item-profile">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Edit Profile</span>
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/dashboard/accounts">
+                <DropdownMenuItem className="cursor-pointer" data-testid="menu-item-accounts">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Account Settings</span>
+                </DropdownMenuItem>
+              </Link>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="cursor-pointer text-red-400 focus:text-red-400"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                data-testid="menu-item-logout"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

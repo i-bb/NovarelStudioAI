@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "wouter";
 
 export function Sidebar() {
   return (
@@ -75,9 +76,11 @@ export function Sidebar() {
          <div className="rounded-lg bg-sidebar-accent/50 p-3">
             <p className="text-xs font-medium text-primary mb-1">NovarelStudio Pro</p>
             <p className="text-[10px] text-muted-foreground mb-2">Unlock 4k clipping & more.</p>
-            <Button size="sm" className="w-full h-7 text-xs font-bold bg-primary text-white hover:bg-primary/90">
-              Upgrade
-            </Button>
+            <Link href="/pricing">
+              <Button size="sm" className="w-full h-7 text-xs font-bold bg-primary text-white hover:bg-primary/90">
+                Upgrade
+              </Button>
+            </Link>
          </div>
       </div>
     </div>

@@ -139,7 +139,7 @@ function PlanStatusCard({ subscription }: { subscription: SubscriptionData | und
               )}
             </Button>
           ) : (
-            <Link href="/#pricing">
+            <Link href="/pricing">
               <Button size="sm" data-testid="button-upgrade">
                 <Zap className="h-4 w-4 mr-2" />
                 Upgrade

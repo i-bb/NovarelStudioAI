@@ -115,7 +115,7 @@ export default function DashboardPreview() {
                               className="bg-emerald-400/10 text-emerald-300 border border-emerald-400/40 text-[10px] font-semibold"
                               data-testid={`badge-status-${i}`}
                             >
-                              {i === 3 ? "Published" : "Processing"}
+                              {i === 3 ? "Published" : "Pending"}
                             </Badge>
                           </div>
                           <Progress value={i === 3 ? 100 : 40 + i * 15} className="h-1.5" />
