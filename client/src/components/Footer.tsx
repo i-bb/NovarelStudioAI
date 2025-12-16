@@ -1,37 +1,53 @@
 import { useState } from "react";
-import { Zap, Github, Twitter, Linkedin, CheckCircle, Loader2 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import {
+  Zap,
+  Github,
+  Twitter,
+  Linkedin,
+  CheckCircle,
+  Loader2,
+  Mail,
+} from "lucide-react";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
   const [success, setSuccess] = useState(false);
   const [message, setMessage] = useState("");
+  const [isPending, setIsPending] = useState(false);
 
-  const newsletterMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const response = await apiRequest("POST", "/api/newsletter", { email });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setSuccess(true);
-      setMessage(data.message || "Successfully subscribed!");
-      setEmail("");
+  // --- Mock Newsletter Submit (Simulates API Call) ---
+  const mockNewsletterSubmit = async (email: string) => {
+    setIsPending(true);
+    return new Promise<{ message: string }>((resolve, reject) => {
       setTimeout(() => {
-        setSuccess(false);
-        setMessage("");
-      }, 4000);
-    },
-    onError: () => {
-      setMessage("Failed to subscribe. Please try again.");
-      setTimeout(() => setMessage(""), 3000);
-    },
-  });
+        // Mock: Random success / failure
+        const isSuccess = Math.random() > 0.2; // 80% success
+        if (isSuccess) resolve({ message: "Successfully subscribed!" });
+        else reject(new Error("Mock failure"));
+      }, 1200);
+    })
+      .then((data) => {
+        setSuccess(true);
+        setMessage(data.message);
+        setEmail("");
+        setTimeout(() => {
+          setSuccess(false);
+          setMessage("");
+        }, 4000);
+      })
+      .catch(() => {
+        setMessage("Failed to subscribe. Please try again.");
+        setTimeout(() => setMessage(""), 3000);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
-      newsletterMutation.mutate(email);
+      mockNewsletterSubmit(email);
     }
   };
 
@@ -54,16 +70,27 @@ export default function Footer() {
                 <p className="font-display text-lg font-semibold tracking-tight text-foreground">
                   Novarel<span className="text-primary">Studio</span>
                 </p>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Stream-to-clip autopilot</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Stream-to-clip autopilot
+                </p>
               </div>
             </div>
+
             <p className="max-w-sm text-sm text-muted-foreground/90">
               Stream-to-clip automation for Twitch and Kick creators.
             </p>
+             <a
+              href="mailto:hello@novarelstudio.com"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+              <Mail className="h-4 w-4" />
+              hello@novarelstudio.com
+              </a>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium text-emerald-300">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Early access open
             </span>
+
             <div className="flex gap-3 mt-1">
               <SocialLink icon={Twitter} href="#" label="Twitter" />
               <SocialLink icon={Github} href="#" label="GitHub" />
@@ -72,7 +99,9 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-3 flex flex-col gap-4 text-sm">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Product</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Product
+            </h4>
             <nav className="flex flex-col gap-2.5 text-muted-foreground/90">
               <FooterLink href="/#features">Features</FooterLink>
               <FooterLink href="/how-it-works">How it works</FooterLink>
@@ -84,7 +113,10 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-4 flex flex-col gap-4 text-sm">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Get updates</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Get updates
+            </h4>
+
             {success ? (
               <div className="flex items-center gap-2 text-emerald-300 text-sm py-2">
                 <CheckCircle className="h-4 w-4" />
@@ -102,15 +134,13 @@ export default function Footer() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="flex-1 min-w-0 rounded-full border border-white/15 bg-black/40 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  data-testid="input-footer-email"
                 />
                 <button
                   type="submit"
-                  disabled={newsletterMutation.isPending}
+                  disabled={isPending}
                   className="rounded-full bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-black shadow-[0_10px_40px_rgba(15,23,42,0.9)] hover:bg-slate-100 flex-shrink-0 whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-2"
-                  data-testid="button-footer-subscribe"
                 >
-                  {newsletterMutation.isPending ? (
+                  {isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     "Get updates"
@@ -118,6 +148,7 @@ export default function Footer() {
                 </button>
               </form>
             )}
+
             {message && !success && (
               <p className="text-xs text-red-400">{message}</p>
             )}
@@ -125,14 +156,24 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-[11px] sm:text-xs text-muted-foreground/80 md:flex-row md:items-center md:justify-center">
-          <p>© {new Date().getFullYear()} NovarelStudio. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} NovarelStudio. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
   );
 }
 
-function FooterLink({ children, href, target }: { children: React.ReactNode; href: string; target?: string }) {
+function FooterLink({
+  children,
+  href,
+  target,
+}: {
+  children: React.ReactNode;
+  href: string;
+  target?: string;
+}) {
   return (
     <a
       href={href}
@@ -145,7 +186,15 @@ function FooterLink({ children, href, target }: { children: React.ReactNode; hre
   );
 }
 
-function SocialLink({ icon: Icon, href, label }: { icon: any; href: string; label: string }) {
+function SocialLink({
+  icon: Icon,
+  href,
+  label,
+}: {
+  icon: any;
+  href: string;
+  label: string;
+}) {
   return (
     <a
       href={href}

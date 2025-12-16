@@ -1,35 +1,72 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Play, Clock, ArrowLeft, Film } from "lucide-react";
-import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import type { StreamExport } from "@shared/schema";
+import api from "@/lib/api/api";
+import { getStatusLabel } from "@/lib/common";
+import kick from "@assets/generated_images/kick.svg";
+import twitch from "@assets/generated_images/twitch.png";
+
 
 export default function DashboardContent() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+
+  const [exports, setExports] = useState<any | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
+  const [exportsLoading, setExportsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<"all" | "kick" | "twitch">("all");
+
+
+  const ITEMS_PER_PAGE = 12;
+  const totalPages = totalCount;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       toast({
-        title: "Please log in",
         description: "You need to be logged in to access the dashboard.",
         variant: "destructive",
       });
+
       setTimeout(() => {
         window.location.href = "/login";
       }, 500);
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const { data: exports, isLoading: exportsLoading } = useQuery<StreamExport[]>({
-    queryKey: ["/api/exports"],
-    enabled: isAuthenticated,
-  });
+  const fetchExportData = async (page = 1) => {
+    try {
+      setExportsLoading(true);
+      const response = await api.getContentStudios(
+        String(page),
+        String(ITEMS_PER_PAGE),
+        activeTab === "all" ? undefined : activeTab
+      );
+
+      setExports(response?.videos || []);
+      setTotalCount(response?.total_pages || 0);
+      setExportsLoading(false);
+    } catch (error: any) {
+      console.error("Content Studio API failed:", error);
+      toast({
+        description:
+          error?.response?.data?.description || "Something went wrong!",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    setCurrentPage(1); // reset page when tab changes
+    fetchExportData(1);
+  }, [isAuthenticated, currentPage, activeTab]);
+
 
   if (authLoading) {
     return (
@@ -39,83 +76,295 @@ export default function DashboardContent() {
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
+  if (!isAuthenticated) return null;
+
+  if (user && user?.active_plan?.status !== "active") {
+    return (
+      <main className="min-h-[70vh] flex items-center justify-center px-4 ">
+        <Card className="p-10 text-center border-none">
+          <h2 className="text-2xl font-bold mb-3">No Content Available</h2>
+          <p className="text-muted-foreground">
+            You do not have an active subscription plan.
+          </p>
+          <p className="text-muted-foreground mb-6">
+            To unlock content features, please purchase a plan.
+          </p>
+
+          <Link href="/subscription">
+            <Button className="bg-primary hover:bg-primary-700 text-white">
+              Purchase Plan
+            </Button>
+          </Link>
+        </Card>
+      </main>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95">
-      <DashboardNav activeTab="content" />
-      
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="icon" className="h-8 w-8" data-testid="button-back">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold">Content Studio</h1>
+    <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <div className="flex items-center gap-4 mb-8">
+        <Link href="/dashboard">
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold">
+          Content Studio
+        </h1>
+      </div>
+
+      <p className="text-muted-foreground mb-8 max-w-2xl">
+        Your stream exports appear here. Click on any video to see the viral
+        clips generated from it, along with transcriptions and virality
+        insights.
+      </p>
+
+      {/* Platform Tabs */}
+      <div className="flex gap-2 mb-6">
+        {[
+          { key: "all", label: "All" },
+          { key: "kick", label: "Kick", logo: kick },
+          { key: "twitch", label: "Twitch", logo: twitch },
+        ].map((tab) => (
+          <Button
+            key={tab.key}
+            size="sm"
+            onClick={() => setActiveTab(tab.key as any)}
+            className={`
+        flex items-center gap-2 border
+        ${activeTab === tab.key
+                ? "bg-primary border-primary"
+                : "bg-black/10 border-white/40 hover:bg-primary hover:border-primary"}
+        text-white
+        transition-colors duration-300
+        transform !translate-y-0 hover:!translate-y-0 active:!translate-y-0
+      `}
+          >
+            {tab.logo && (
+              <img src={tab.logo} alt={tab.label} className="h-4 w-4 object-contain" />
+            )}
+            {tab.label}
+          </Button>
+        ))}
+      </div>
+
+      {exportsLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <Card key={i} className="border-white/10 bg-black/40 animate-pulse">
+              <div className="aspect-video bg-white/5" />
+              <CardContent className="p-3">
+                <div className="h-4 bg-white/5 rounded w-3/4 mb-2" />
+                <div className="h-3 bg-white/5 rounded w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      ) : exports && exports.length > 0 ? (
+        <>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {exports.map((exp: any) => {
+              const duration = Math.round(exp.duration);
+              const minutes = Math.floor(duration / 60);
+              const seconds = String(duration % 60).padStart(2, "0");
+              const {
+                text,
+                icon: Icon,
+                class: statusClass,
+              } = getStatusLabel(exp.status);
+              const isAccessible = exp.status === "completed";
 
-        <p className="text-muted-foreground mb-8 max-w-2xl">
-          Your stream exports appear here. Click on any video to see the viral clips generated from it, 
-          along with transcriptions and virality insights.
-        </p>
-
-        {exportsLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {[...Array(8)].map((_, i) => (
-              <Card key={i} className="border-white/10 bg-black/40 animate-pulse">
-                <div className="aspect-video bg-white/5" />
-                <CardContent className="p-3">
-                  <div className="h-4 bg-white/5 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-white/5 rounded w-1/2" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : exports && exports.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {exports.map((exp) => (
-              <Link key={exp.id} href={`/dashboard/content/${exp.id}`}>
-                <Card 
-                  className="group cursor-pointer overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 transition-all"
-                  data-testid={`card-export-${exp.id}`}
+              return (
+                <div
+                  key={exp.public_id}
+                  className={`transition-all ${isAccessible
+                      ? "cursor-pointer"
+                      : "opacity-60 cursor-not-allowed"
+                    }`}
                 >
-                  <div className="aspect-video relative bg-gradient-to-br from-primary/20 to-emerald-500/20">
-                    {exp.thumbnailUrl ? (
-                      <img src={exp.thumbnailUrl} alt={exp.title || "Stream export"} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Play className="h-12 w-12 text-white/50 group-hover:text-white transition-colors" />
+                  {isAccessible ? (
+                    <Link
+                      href={`/dashboard/content/${exp.public_id}`}
+                      onClick={() => {
+                        localStorage.setItem(
+                          "selected_export",
+                          JSON.stringify(exp)
+                        );
+                      }}
+                    >
+                      <Card className="group overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 flex flex-col h-full">
+                        {/* Thumbnail */}
+                        <div className="aspect-video relative">
+                          {exp.poster_url ? (
+                            <img
+                              src={exp.poster_url}
+                              alt={exp.title || "Video Thumbnail"}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Play className="h-12 w-12 text-white/50" />
+                            </div>
+                          )}
+
+                          {/* Duration */}
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
+                            <Clock className="h-3 w-3" /> {minutes}:{seconds}
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <CardContent className="p-4 space-y-3">
+                          <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
+                            {exp?.provider}
+                          </span>
+                          <p className="font-medium truncate">{exp.title}</p>
+
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm">Status</p>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${statusClass}`}
+                            >
+                              <Icon className="h-3 w-3" /> {text}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm">Processed On</p>
+                            <p className="text-sm text-muted-foreground">
+                              {exp.processed_on
+                                ? new Date(exp.processed_on).toLocaleString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "2-digit",
+                                    year: "numeric",
+                                  }
+                                )
+                                : "Not Available"}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ) : (
+                    <Card className="overflow-hidden border-white/10 bg-black/40">
+                      <div className="aspect-video relative">
+                        {exp.poster_url ? (
+                          <img
+                            src={exp.poster_url}
+                            alt={exp.title || "Video Thumbnail"}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Play className="h-12 w-12 text-white/50" />
+                          </div>
+                        )}
+                        <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
+                          <Clock className="h-3 w-3" /> {minutes}:{seconds}
+                        </div>
+                        {/* 🚫 ACCESS OVERLAY */}
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white"></div>
                       </div>
-                    )}
-                    <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
-                      <Clock className="h-3 w-3" />
-                      {Math.floor(exp.durationSeconds / 60)}:{String(exp.durationSeconds % 60).padStart(2, '0')}
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <p className="font-medium truncate mb-1">{exp.title || "Untitled Export"}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {exp.exportedAt ? new Date(exp.exportedAt).toLocaleDateString() : "Recently"}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+
+                      <CardContent className="p-4 space-y-3">
+                        <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
+                          {exp?.provider}
+                        </span>
+                        <p className="font-medium truncate">{exp.title}</p>
+
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm">Status</p>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${statusClass}`}
+                          >
+                            <Icon className="h-3 w-3" /> {text}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm">Processed On</p>
+                          <p className="text-sm text-muted-foreground">
+                            {exp.processed_on
+                              ? new Date(exp.processed_on).toLocaleString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "2-digit",
+                                  year: "numeric",
+                                }
+                              )
+                              : "Not Available"}
+                          </p>
+                        </div>
+
+                        <p className="text-xs text-muted-foreground text-center">
+                          {exp.status === "failed"
+                            ? "Stream recording was corrupt."
+                            : "No engaging moment found."}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        ) : (
-          <Card className="border-white/10 bg-black/40 p-12 text-center">
-            <Film className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
-            <h3 className="font-display text-2xl font-semibold mb-3">No content yet</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Your stream exports will appear here once you connect your streaming account and start streaming. 
-              We'll automatically detect and export your best moments.
-            </p>
-          </Card>
-        )}
-      </main>
-    </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              >
+                Previous
+              </Button>
+
+              {[...Array(totalPages)].map((_, index) => {
+                const page = index + 1;
+                return (
+                  <Button
+                    key={page}
+                    size="sm"
+                    variant={page === currentPage ? "default" : "ghost"}
+                    className="min-w-[36px]"
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </Button>
+                );
+              })}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={currentPage === totalPages}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </>
+      ) : (
+        <Card className="border-white/10 bg-black/40 p-12 text-center">
+          <Film className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
+          <h3 className="font-display text-2xl font-semibold mb-3">
+            No content yet
+          </h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Your stream exports will appear here once you connect your streaming
+            account and start streaming. We'll automatically detect and export
+            your best moments.
+          </p>
+        </Card>
+      )}
+    </main>
   );
 }
