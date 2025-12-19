@@ -1,6 +1,27 @@
 import { CheckCircle, Clock, Hourglass, Info } from "lucide-react";
 import { SiTwitch, SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
 
+type CreditTier = {
+  credits: string;
+  clipsPerDay: string;
+  monthlyPrice: number;
+  annualPrice: number;
+};
+
+type Plan = {
+  id: string;
+  planId: number;
+  name: string;
+  tagline: string;
+  badge: string | null;
+  bullet: string;
+  features: string[];
+  cta: string;
+  popular: boolean;
+  creditTiers: CreditTier[] | null;
+  fixedMonthlyPrice?: string;
+  fixedAnnualPrice?: string;
+};
 export interface PlatformConfig {
   id: string;
   name: string;
@@ -120,3 +141,114 @@ export const getStatusLabel = (status: string) => {
       };
   }
 };
+
+export const plans: Plan[] = [
+  {
+    id: "starter",
+    planId: 2,
+    name: "Starter",
+    tagline: "Try NovarelStudio on nights and weekends.",
+    badge: null,
+    bullet: "Best if you're testing the waters.",
+    features: [
+      "Up to 10 clips / month",
+      "720p exports",
+      "Basic moment detection",
+      "1 connected platform",
+      "3-day clip history",
+    ],
+    cta: "Start free",
+    popular: false,
+    creditTiers: null,
+    fixedMonthlyPrice: "$0",
+    fixedAnnualPrice: "$0",
+  },
+  {
+    id: "creator",
+    planId: 1,
+    name: "Creator",
+    tagline: "For channels that treat streaming like a job.",
+    badge: "Most picked by full-time creators",
+    bullet: "Best if you stream 3–6 nights a week.",
+    features: [
+      "4K exports",
+      "Advanced chat + audio detection",
+      "Instagram Reels auto-posting",
+      "Unlimited clip archive",
+      "Basic branding presets",
+      "Email support",
+    ],
+    cta: "Use on my next stream",
+    popular: true,
+    creditTiers: [
+      {
+        credits: "60 clips/month",
+        clipsPerDay: "About 2 clips/day",
+        monthlyPrice: 35,
+        annualPrice: 23,
+      },
+      {
+        credits: "120 clips/month",
+        clipsPerDay: "About 4 clips/day",
+        monthlyPrice: 55,
+        annualPrice: 36,
+      },
+      {
+        credits: "200 clips/month",
+        clipsPerDay: "About 7 clips/day",
+        monthlyPrice: 75,
+        annualPrice: 49,
+      },
+      {
+        credits: "300 clips/month",
+        clipsPerDay: "About 10 clips/day",
+        monthlyPrice: 95,
+        annualPrice: 62,
+      },
+    ],
+  },
+  {
+    id: "studio",
+    planId: 3,
+    name: "Studio",
+    tagline: "For partnered channels and small teams.",
+    badge: "For serious growth pushes",
+    bullet: "Best if you run multiple channels or games.",
+    features: [
+      "Everything in Creator",
+      "Multi-channel & multi-game workspaces",
+      "Team access (up to 5 seats)",
+      "API + webhooks",
+      "Custom caption + template setup",
+      "Priority support and check-ins",
+    ],
+    cta: "Talk to the team",
+    popular: false,
+    creditTiers: [
+      {
+        credits: "150 clips/month",
+        clipsPerDay: "About 5 clips/day",
+        monthlyPrice: 100,
+        annualPrice: 65,
+      },
+      {
+        credits: "250 clips/month",
+        clipsPerDay: "About 8 clips/day",
+        monthlyPrice: 150,
+        annualPrice: 98,
+      },
+      {
+        credits: "350 clips/month",
+        clipsPerDay: "About 12 clips/day",
+        monthlyPrice: 200,
+        annualPrice: 130,
+      },
+      {
+        credits: "450 clips/month",
+        clipsPerDay: "About 15 clips/day",
+        monthlyPrice: 275,
+        annualPrice: 179,
+      },
+    ],
+  },
+];

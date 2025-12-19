@@ -10,7 +10,7 @@ import api from "@/lib/api/api";
 import { getStatusLabel } from "@/lib/common";
 import kick from "@assets/generated_images/kick.svg";
 import twitch from "@assets/generated_images/twitch.png";
-
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
 export default function DashboardContent() {
   const { toast } = useToast();
@@ -20,8 +20,7 @@ export default function DashboardContent() {
   const [totalCount, setTotalCount] = useState(0);
   const [exportsLoading, setExportsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<"all" | "kick" | "twitch">("all");
-
+  const [activeTab, setActiveTab] = useState<"kick" | "twitch">("kick");
 
   const ITEMS_PER_PAGE = 12;
   const totalPages = totalCount;
@@ -45,7 +44,7 @@ export default function DashboardContent() {
       const response = await api.getContentStudios(
         String(page),
         String(ITEMS_PER_PAGE),
-        activeTab === "all" ? undefined : activeTab
+        activeTab
       );
 
       setExports(response?.videos || []);
@@ -54,8 +53,7 @@ export default function DashboardContent() {
     } catch (error: any) {
       console.error("Content Studio API failed:", error);
       toast({
-        description:
-          error?.response?.data?.description || "Something went wrong!",
+        description: getErrorMessage(error, "Something went wrong!"),
         variant: "destructive",
       });
     }
@@ -63,10 +61,20 @@ export default function DashboardContent() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    setCurrentPage(1); // reset page when tab changes
-    fetchExportData(1);
-  }, [isAuthenticated, currentPage, activeTab]);
+    setCurrentPage(1);
+  }, [activeTab, isAuthenticated]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetchExportData(currentPage);
+  }, [currentPage, activeTab, isAuthenticated]);
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [currentPage]);
 
   if (authLoading) {
     return (
@@ -122,7 +130,6 @@ export default function DashboardContent() {
       {/* Platform Tabs */}
       <div className="flex gap-2 mb-6">
         {[
-          { key: "all", label: "All" },
           { key: "kick", label: "Kick", logo: kick },
           { key: "twitch", label: "Twitch", logo: twitch },
         ].map((tab) => (
@@ -132,16 +139,22 @@ export default function DashboardContent() {
             onClick={() => setActiveTab(tab.key as any)}
             className={`
         flex items-center gap-2 border
-        ${activeTab === tab.key
-                ? "bg-primary border-primary"
-                : "bg-black/10 border-white/40 hover:bg-primary hover:border-primary"}
+        ${
+          activeTab === tab.key
+            ? "bg-primary border-primary"
+            : "bg-black/10 border-white/40 hover:bg-primary hover:border-primary"
+        }
         text-white
         transition-colors duration-300
         transform !translate-y-0 hover:!translate-y-0 active:!translate-y-0
       `}
           >
             {tab.logo && (
-              <img src={tab.logo} alt={tab.label} className="h-4 w-4 object-contain" />
+              <img
+                src={tab.logo}
+                alt={tab.label}
+                className="h-4 w-4 object-contain"
+              />
             )}
             {tab.label}
           </Button>
@@ -177,10 +190,11 @@ export default function DashboardContent() {
               return (
                 <div
                   key={exp.public_id}
-                  className={`transition-all ${isAccessible
+                  className={`transition-all ${
+                    isAccessible
                       ? "cursor-pointer"
                       : "opacity-60 cursor-not-allowed"
-                    }`}
+                  }`}
                 >
                   {isAccessible ? (
                     <Link
@@ -234,13 +248,13 @@ export default function DashboardContent() {
                             <p className="text-sm text-muted-foreground">
                               {exp.processed_on
                                 ? new Date(exp.processed_on).toLocaleString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "2-digit",
-                                    year: "numeric",
-                                  }
-                                )
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "2-digit",
+                                      year: "numeric",
+                                    }
+                                  )
                                 : "Not Available"}
                             </p>
                           </div>
@@ -288,13 +302,13 @@ export default function DashboardContent() {
                           <p className="text-sm text-muted-foreground">
                             {exp.processed_on
                               ? new Date(exp.processed_on).toLocaleString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "2-digit",
-                                  year: "numeric",
-                                }
-                              )
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "2-digit",
+                                    year: "numeric",
+                                  }
+                                )
                               : "Not Available"}
                           </p>
                         </div>

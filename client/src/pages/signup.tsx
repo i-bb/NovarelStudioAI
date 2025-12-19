@@ -9,6 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useLocation, Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api/api";
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
 type PlanInfo = {
   name: string;
@@ -81,6 +82,12 @@ const planDetails: Record<
   },
 };
 
+const STATIC_PLAN_ID_MAP: Record<string, number> = {
+  starter: 2,
+  creator: 1,
+  studio: 3,
+};
+
 export default function SignupPage() {
   const [, setLocation] = useLocation();
   const search = useSearch();
@@ -92,6 +99,8 @@ export default function SignupPage() {
     | "monthly"
     | "annual";
   const emailParam = params.get("email") || "";
+
+  console.log("planParam", planParam);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState(emailParam);
@@ -144,49 +153,52 @@ export default function SignupPage() {
         password,
       });
 
+      // Save auth
       localStorage.setItem("auth_token", response?.access_token);
       localStorage.setItem("auth_user", JSON.stringify(response.user));
 
-      toast({
-        description: "Your account has been created successfully",
-      });
+      toast({ description: "Your account has been created successfully" });
 
-      // Optional: Save plan selection in localStorage or context for onboarding
-      if (planParam !== "starter") {
-        localStorage.setItem(
-          "pendingPlan",
-          JSON.stringify({
-            plan: planParam,
-            tier: tierParam,
-            billing: billingParam,
-          })
-        );
+      // ───────────────────────────────
+      // STARTER PLAN → NO STRIPE
+      // ───────────────────────────────
+      if (planParam === "starter") {
+        const updatedUser = {
+          ...response.user,
+          active_plan: {
+            id: STATIC_PLAN_ID_MAP.starter,
+            slug: "starter",
+            name: "Starter",
+            status: "Active",
+          },
+        };
+
+        localStorage.setItem("auth_user", JSON.stringify(updatedUser));
+
+        setLocation("/dashboard");
+        return;
       }
 
-      setLocation("/dashboard");
+      const planId = STATIC_PLAN_ID_MAP[planParam];
+
+      if (!planId) {
+        throw new Error("Invalid subscription plan selected");
+      }
+
+      const subRes = await api.purchaseSubscription(planId);
+
+      if (subRes?.checkout_url) {
+        window.location.href = subRes.checkout_url;
+        return;
+      }
+
+      throw new Error("Failed to initiate subscription checkout");
     } catch (error: any) {
-      let message = "Failed to create account. Please try again.";
-
-      if (error.type === "SERVER_ERROR") {
-        const desc = error?.description;
-
-        if (typeof desc === "string") {
-          message = desc;
-        } else if (Array.isArray(desc) && desc[0]?.message) {
-          message = desc[0].message;
-        } else if (typeof desc === "object" && desc?.message) {
-          message = desc.message;
-        } else if (error?.message) {
-          message = error.message;
-        }
-      } else if (error.type === "NO_RESPONSE") {
-        message = "Unable to reach the server. Check your internet connection.";
-      } else if (error.type === "REQUEST_NOT_SENT") {
-        message = "Something went wrong before sending the request.";
-      }
-
       toast({
-        description: message,
+        description: getErrorMessage(
+          error,
+          "Failed to create account. Please try again."
+        ),
         variant: "destructive",
       });
     } finally {
@@ -260,7 +272,7 @@ export default function SignupPage() {
               </div>
               <div className="mt-6 pt-4 border-t border-white/10">
                 <Link
-                  href="/#pricing"
+                  href="/pricing"
                   className="text-sm text-primary hover:text-primary/80"
                 >
                   Choose a different plan

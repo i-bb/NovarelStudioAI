@@ -327,7 +327,7 @@ export default function ConnectedAccountsPage() {
           );
         } else {
           // Instagram, YouTube, TikTok, Facebook
-         response = await api.callbackPlatform(platformId, code, rawState);
+          response = await api.callbackPlatform(platformId, code, rawState);
         }
 
         // --------------------------
@@ -338,7 +338,7 @@ export default function ConnectedAccountsPage() {
         toast({
           // title: `${platformId.toUpperCase()} Connected!`,
           // description: response?.message || "Your account is now linked.",
-          description:"Streamer connected successfully"
+          description: "Streamer connected successfully",
         });
 
         await fetchUserDetails();
@@ -416,7 +416,7 @@ export default function ConnectedAccountsPage() {
         {/* Social */}
         <section>
           <h2 className="font-display text-xl font-semibold mb-4 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-accent" />
+            <span className="h-2 w-2 rounded-full bg-primary" />
             Social Media Platforms
           </h2>
 

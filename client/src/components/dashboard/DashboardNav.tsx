@@ -1,12 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "wouter";
 import {
@@ -24,18 +22,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { GrTransaction } from "react-icons/gr";
 import { MdSubscriptions } from "react-icons/md";
-import api from "@/lib/api/api";
 import { useLocation } from "wouter";
+import { LiveNotification } from "./LiveNotification";
 
 export function DashboardNav() {
   const [location] = useLocation();
 
   const { user } = useAuth();
 
-  const [isKickLive, setIsKickLive] = useState(false);
-  const [isTwitchLive, setIsTwitchLick] = useState(false);
-  const [liveStartKickTime, setLiveStartKickTime] = useState(null);
-  const [liveStartTwitchTime, setLiveStartTwitchTime] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const displayName = user?.name || user?.email?.split("@")[0] || "User";
@@ -59,39 +53,6 @@ export function DashboardNav() {
     localStorage.removeItem("auth_user");
     window.location.href = "/login";
   };
-
-  const fetchTwitchStatus = async () => {
-    try {
-      const response = await api.getStreamerStreamingAccounts("twitch");
-      setIsTwitchLick(response?.live || false);
-      setLiveStartTwitchTime(response?.started_at || null);
-    } catch (error) {
-      console.error("Error polling Twitch account status:", error);
-    }
-  };
-
-  const fetchKickStatus = async () => {
-    try {
-      const response = await api.getStreamerStreamingAccounts("kick");
-      setIsKickLive(response?.live || false);
-      setLiveStartKickTime(response?.started_at || null);
-    } catch (error) {
-      console.error("Error polling Twitch account status:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (!user) return;
-    fetchTwitchStatus(); // call on mount AND on page change
-    fetchKickStatus();
-
-    const interval = setInterval(() => {
-      fetchTwitchStatus();
-      fetchKickStatus();
-    }, 50 * 1000);
-
-    return () => clearInterval(interval);
-  }, [user, location]); // 👈 now runs on route change
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
@@ -162,52 +123,7 @@ export function DashboardNav() {
             )}
           </button>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              {/* liveStartKickTime */}
-              <button
-                className="relative flex items-center gap-2 rounded-full p-1 cursor-pointer group focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                title={
-                  (isKickLive || isTwitchLive) &&
-                  ((liveStartKickTime
-                    ? `Live since ${new Date(
-                        liveStartKickTime
-                      ).toLocaleString()}`
-                    : liveStartTwitchTime
-                    ? `Live since ${new Date(
-                        liveStartTwitchTime
-                      ).toLocaleString()}`
-                    : "") as any)
-                }
-              >
-                {/* 🔥 SAME COLOR RING — rotating + breathing glow */}
-                {(isKickLive || isTwitchLive) && (
-                  <span className="absolute inset-0 rounded-full p-[4px] bg-[conic-gradient(from_0deg,rgba(255,0,0,.9),rgba(255,0,128,.9),rgba(128,0,255,.9),rgba(255,0,0,.9))] animate-insta-rotate animate-live-glow-breath"></span>
-                )}
-
-                {/* Optional ✨ Light Sweep Across Ring */}
-                {(isKickLive || isTwitchLive) && (
-                  <span className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-light-sweep mix-blend-overlay"></span>
-                  </span>
-                )}
-
-                {/* Inner black padding circle */}
-                <span className="relative rounded-full bg-black p-[3px]">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                </span>
-
-                {/* 📌 LIVE label like Instagram */}
-                {(isKickLive || isTwitchLive) && (
-                  <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-sm bg-red-600 px-1 py-[1px] text-[9px] font-bold text-white uppercase tracking-wider">
-                    Live
-                  </span>
-                )}
-              </button>
-            </DropdownMenuTrigger>
+            <LiveNotification initials={initials} />
 
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="font-normal">

@@ -1,168 +1,3 @@
-// import { get } from "http";
-// import apiClient from "./client";
-// import { ENDPOINTS } from "./endpoints";
-
-// // Add this to endpoints.ts or a types file
-// export const SUPPORTED_PLATFORMS = {
-//   twitch: "twitch",
-//   kick: "kick",
-//   youtube: "youtube",
-//   tiktok: "tiktok",
-//   instagram: "instagram",
-// } as const;
-
-// export type Platform = keyof typeof SUPPORTED_PLATFORMS;
-
-// export interface ResetPasswordResponse {
-//   message: string;
-// }
-
-// export interface VerifyOtpResponse {
-//   message: string;
-//   access_token?: string;
-//   user?: User;
-// }
-
-// // Types (add more as needed)
-// export interface ActivePlan {
-//   description: string | null;
-//   end_date: string | null;
-//   id: number;
-//   interval: string | null;
-//   name: string | null;
-//   price: number | null;
-//   start_date: string | null;
-//   status: "active" | "inActive";
-// }
-
-// export interface ConnectedAccounts {
-//   instagram: SocialAccount;
-//   tiktok: SocialAccount;
-//   twitch: SocialAccount;
-//   youtube: SocialAccount;
-// }
-
-// export interface SocialAccount {
-//   connected: boolean;
-//   display_name: string | null;
-//   avatar_url: string | null;
-// }
-
-// export interface User {
-//   email: string;
-//   name: string;
-//   active_plan: ActivePlan;
-//   connected_accounts: ConnectedAccounts;
-// }
-
-// export interface SignupPayload {
-//   name: string;
-//   email: string;
-//   password: string;
-// }
-
-// export interface SignupResponse {
-//   user: User;
-//   access_token: string;
-//   message?: string;
-// }
-
-// export interface LoginResponse {
-//   access_token: string;
-//   user: User;
-// }
-
-// export interface DashboardResponse {
-//   instagram_reel_count: number;
-//   tiktok_reel_count: number;
-//   youtube_short_count: number;
-// }
-
-// export interface accountResponse {
-//   platform: string;
-// }
-
-// export const api = {
-//   // ── Auth ─────────────────────────────────────
-//   login: (email: string, password: string) =>
-//     apiClient.post<LoginResponse>(ENDPOINTS.login, { email, password }),
-
-//   signup: (payload: SignupPayload) =>
-//     apiClient.post<SignupResponse>(ENDPOINTS.signup, payload),
-
-//   logout: () => apiClient.post(ENDPOINTS.logout),
-
-//   userDetails: () => apiClient.get<User>(ENDPOINTS.userDetails),
-
-//   resetPassword: (email: string) =>
-//     apiClient.post<ResetPasswordResponse>(ENDPOINTS.resetPassword, {
-//       email: email,
-//     }),
-
-//   verifyOtp: (email: string, new_password: string, otp: string) =>
-//     apiClient.post<VerifyOtpResponse>(ENDPOINTS.otpVerification, {
-//       email,
-//       new_password,
-//       otp,
-//     }),
-
-//   // ── Others ─────────────────────────────────
-//   getDashboard: () => apiClient.get<DashboardResponse>(ENDPOINTS.dashboard),
-
-//   getContentStudios: (page: string, limit: string) =>
-//     apiClient.get(`${ENDPOINTS.contentStudios}?page=${page}&limit=${limit}`),
-
-//   getReelsData: (public_id: string) =>
-//     apiClient.get(`${ENDPOINTS.reels}?public_id=${public_id}`),
-
-//   getSingleReelData: (reelId: string) =>
-//     apiClient.get(`${ENDPOINTS.singleReel}?public_id=${reelId}`),
-
-//   disconnectPlatform: (platform: string) =>
-//     apiClient.delete(ENDPOINTS.disconnectPlatform(platform)),
-
-//   authorizePlatform: (platform: string) =>
-//     apiClient.get(ENDPOINTS.authorizePlatform(platform)),
-
-//   callbackPlatform: (platform: string, code: string, state: string = "") => {
-//     const body: any = { code, state };
-
-//     return apiClient.post(ENDPOINTS.callbackPlatform(platform), body);
-//   },
-
-//   disconnectStreamingAccount: (platform: string) =>
-//     apiClient.delete(ENDPOINTS.disconnectStreamingAccount(platform)),
-
-//   authorizeStreamingAccount: (platform: string) =>
-//     apiClient.get(ENDPOINTS.authorizeStreamingAccount(platform)),
-
-//   callbackStreamingPlatform: (
-//     platform: string,
-//     code: string,
-//     state: string = ""
-//   ) => {
-//     const body: any = { code, state };
-
-//     return apiClient.post(ENDPOINTS.callbackStreamingAccount(platform), body);
-//   },
-
-//   getStreamerStreamingAccounts: (platform: string) =>
-//     apiClient.get(ENDPOINTS.streamerStreamingAccounts(platform)),
-
-//   getSubscriptionPlans: () => apiClient.get(ENDPOINTS.subscriptionPlan),
-
-//   purchaseSubscription: (planId: number) =>
-//     apiClient.post(ENDPOINTS.subscriptionPurchase, { plan_id: planId }),
-
-//   getTransactionHistory: (page: string, limit: string) =>
-//     apiClient.get(`${ENDPOINTS.transaction}?page=${page}&limit=${limit}`),
-
-//   uploadReels: (platform: string, public_id: string) =>
-//     apiClient.post(`${ENDPOINTS.uploadReels(platform)}?public_id=${public_id}`),
-// };
-
-// export default api;
-
 import apiClient from "./client";
 import { ENDPOINTS } from "./endpoints";
 
@@ -200,7 +35,7 @@ async function safeRequest<T>(promise: Promise<any>): Promise<T> {
 // Generic wrapper for all apiClient methods
 // ─────────────────────────────────────────────
 function request<T>(
-  method: "get" | "post" | "delete",
+  method: "get" | "post" | "delete" | "patch",
   url: string,
   data?: any
 ): Promise<T> {
@@ -304,8 +139,6 @@ export const api = {
   signup: (payload: SignupPayload) =>
     request<SignupResponse>("post", ENDPOINTS.signup, payload),
 
-  logout: () => request("post", ENDPOINTS.logout),
-
   userDetails: () => request<User>("get", ENDPOINTS.userDetails),
 
   resetPassword: (email: string) =>
@@ -322,20 +155,22 @@ export const api = {
   getDashboard: () => request<DashboardResponse>("get", ENDPOINTS.dashboard),
 
   // CONTENT STUDIO
-getContentStudios: (page: string, limit: string, platform?: string) =>
-  request<any>(
-    "get",
-    `${ENDPOINTS.contentStudios}?page=${page}&limit=${limit}${
-      platform ? `&provider=${platform}` : ""
-    }`
-  ),
+  getContentStudios: (page: string, limit: string, platform?: string) =>
+    request<any>(
+      "get",
+      `${ENDPOINTS.contentStudios}/${platform}?page=${page}&limit=${limit}`
+    ),
 
-
-  getReelsData: (public_id: string) =>
-    request<any>("get", `${ENDPOINTS.reels}?public_id=${public_id}`),
+  // getReelsData: (public_id: string) =>
+  //   request<any>("get", `${ENDPOINTS.reels}?public_id=${public_id}`),
+  getReelsData: (platform: string, public_id: string) =>
+    request<any>("get", ENDPOINTS.reels(platform, public_id)),
 
   getSingleReelData: (reelId: string) =>
-    request<any>("get", `${ENDPOINTS.singleReel}?public_id=${reelId}`),
+    request<any>("get", `${ENDPOINTS.singleReel}/${reelId}`),
+
+  updateReelCaption: (reelId: string, caption: string) =>
+    request<any>("patch", ENDPOINTS.reelCaption(reelId), { caption: caption }),
 
   // SOCIAL ACCOUNTS
   disconnectPlatform: (platform: string) =>

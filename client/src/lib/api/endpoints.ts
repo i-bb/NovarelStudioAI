@@ -10,11 +10,13 @@ export const ENDPOINTS = {
   dashboard: "/dashboard",
   contentStudios: "/videos",
   userDetails: "/auth/me",
-  reels: "/reels",
-  singleReel: "/reel",
+  // reels: "/reels",
+  singleReel: "/reels",
   subscriptionPlan: "/subscription/plans",
   subscriptionPurchase: "/subscription/purchase",
   transaction: "/subscription/transaction",
+  reels: (platform: string, reelId: string) =>
+    `videos/${platform}/${reelId}/reels` as const,
 
   // Dynamic platform endpoints
   disconnectPlatform: (platform: string) => `/${platform}/disconnect` as const,
@@ -30,4 +32,5 @@ export const ENDPOINTS = {
     `streams/${platform}/streamer` as const,
 
   uploadReels: (platform: string) => `${platform}/upload` as const,
+  reelCaption: (id: string) => `reels/${id}/caption` as const,
 } as const;

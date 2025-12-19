@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { Clip } from "@shared/schema";
 import { api } from "@/lib/api/api";
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
 function ClipCard({ clip, exportId }: { clip: any; exportId: string }) {
   const durationSeconds = clip.duration ?? clip.durationSeconds;
@@ -149,16 +150,19 @@ export default function VideoDetail() {
   const [clipsData, setClipsData] = useState<Clip[]>([]);
   const [sourceVideoData, setSourceVideoData] = useState<any>();
 
-  const fetchReelsData = async (id: string) => {
+  const fetchReelsData = async (id: string, platform: string) => {
     try {
-      const response = await api.getReelsData(id || "");
+      const response = await api.getReelsData(platform, id || "");
       setClipsData(response?.reels);
       setIsLoading(false);
     } catch (error: any) {
       console.error("Content Studio API failed:", error);
+
       toast({
-        description:
-          error?.response?.data?.description || "Something went wrong!",
+        description: getErrorMessage(
+          error,
+          "Something went wrong!. Please try again."
+        ),
         variant: "destructive",
       });
     }
@@ -166,10 +170,12 @@ export default function VideoDetail() {
 
   useEffect(() => {
     if (exportId) {
-      fetchReelsData(exportId);
       const selectedExport = JSON.parse(
         localStorage.getItem("selected_export") || "{}"
       );
+      console.log("selectedExport", selectedExport?.provider);
+
+      fetchReelsData(exportId, selectedExport?.provider);
       setSourceVideoData(selectedExport);
     }
   }, [exportId]);
