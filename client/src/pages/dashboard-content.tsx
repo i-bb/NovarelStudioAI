@@ -21,6 +21,7 @@ export default function DashboardContent() {
   const [exportsLoading, setExportsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<"kick" | "twitch">("kick");
+  const [autoProcessing, setAutoProcessing] = useState(true);
 
   const ITEMS_PER_PAGE = 12;
   const totalPages = totalCount;
@@ -128,37 +129,68 @@ export default function DashboardContent() {
       </p>
 
       {/* Platform Tabs */}
-      <div className="flex gap-2 mb-6">
-        {[
-          { key: "kick", label: "Kick", logo: kick },
-          { key: "twitch", label: "Twitch", logo: twitch },
-        ].map((tab) => (
-          <Button
-            key={tab.key}
-            size="sm"
-            onClick={() => setActiveTab(tab.key as any)}
-            className={`
-        flex items-center gap-2 border
-        ${
-          activeTab === tab.key
-            ? "bg-primary border-primary"
-            : "bg-black/10 border-white/40 hover:bg-primary hover:border-primary"
-        }
-        text-white
+      <div className="flex items-center flex-wrap gap-4 justify-between mb-6">
+        {/* LEFT: Kick / Twitch */}
+        <div className="flex gap-2">
+          {[
+            { key: "kick", label: "Kick", logo: kick },
+            { key: "twitch", label: "Twitch", logo: twitch },
+          ].map((tab) => (
+            <Button
+              key={tab.key}
+              size="sm"
+              onClick={() => setActiveTab(tab.key as any)}
+              className={`
+          flex items-center gap-2 border
+          ${
+            activeTab === tab.key
+              ? "bg-primary border-primary"
+              : "bg-black/10 border-white/40 hover:bg-primary hover:border-primary"
+          }
+          text-white
         transition-colors duration-300
         transform !translate-y-0 hover:!translate-y-0 active:!translate-y-0
+        `}
+            >
+              {tab.logo && (
+                <img
+                  src={tab.logo}
+                  alt={tab.label}
+                  className="h-4 w-4 object-contain"
+                />
+              )}
+              {tab.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* RIGHT: Toggle */}
+        <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-full px-4 py-2 backdrop-blur min-w-[200px]">
+          <span className="text-sm text-muted-foreground">label</span>
+
+          <button
+            type="button"
+            onClick={() => setAutoProcessing((prev) => !prev)}
+            className={`relative w-11 h-6 rounded-full transition-colors duration-300
+        ${autoProcessing ? "bg-primary" : "bg-white/20"}
       `}
           >
-            {tab.logo && (
-              <img
-                src={tab.logo}
-                alt={tab.label}
-                className="h-4 w-4 object-contain"
-              />
-            )}
-            {tab.label}
-          </Button>
-        ))}
+            <span
+              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white
+          transition-transform duration-300
+          ${autoProcessing ? "translate-x-5" : "translate-x-0"}
+        `}
+            />
+          </button>
+
+          <span
+            className={`text-xs font-medium
+        ${autoProcessing ? "text-primary" : "text-muted-foreground"}
+      `}
+          >
+            {autoProcessing ? "Enabled" : "Disabled"}
+          </span>
+        </div>
       </div>
 
       {exportsLoading ? (

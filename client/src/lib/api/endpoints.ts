@@ -33,4 +33,7 @@ export const ENDPOINTS = {
 
   uploadReels: (platform: string) => `${platform}/upload` as const,
   reelCaption: (id: string) => `reels/${id}/caption` as const,
+  downloadReel: (reelId: string) =>
+  `/reels/${reelId}/download`,
+
 } as const;

@@ -8,6 +8,8 @@ import {
   Check,
   Loader2,
   Edit,
+  AlignLeft,
+  Download,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -130,6 +132,33 @@ export default function SingleVideoDetails() {
     }
   };
 
+  const handleDownload = async () => {
+    try {
+      if (!reelData?.public_id) {
+        toast({
+          title: "Video not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await api.downloadReel(reelData.public_id);
+
+      const downloadUrl = response?.url;
+      if (!downloadUrl) {
+        throw new Error("Invalid download URL");
+      }
+
+      window.location.href = downloadUrl;
+    } catch (error: any) {
+      toast({
+        title: "Download failed",
+        description: error?.message || "Unable to download video",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       toast({
@@ -225,6 +254,18 @@ export default function SingleVideoDetails() {
           <h1 className="text-2xl font-bold text-white mt-[26px]">
             {reelData.title}
           </h1>
+          <button
+            onClick={handleDownload}
+            className="
+    flex items-center gap-2 text-sm px-4 py-2 rounded-lg
+    bg-primary text-primary-foreground
+    hover:bg-primary/90
+    transition font-medium
+  "
+          >
+            <Download className="h-4 w-4" />
+            Download
+          </button>
 
           <Card className="border-white/10 bg-black/60">
             <CardHeader className="pb-2">
@@ -248,7 +289,13 @@ export default function SingleVideoDetails() {
           </Card>
           {reelData.caption && (
             <Card className="border-white/10 bg-black/60 mt-2">
-              <CardContent className="flex items-center justify-between gap-2 p-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <AlignLeft className="h-4 w-4 text-blue-400" />
+                  Caption
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-between  gap-3">
                 <div className="text-[11px] text-white/70 overflow-hidden">
                   <Markdown remarkPlugins={[remarkGfm]}>
                     {formatCaptionForUI(reelData.caption)}

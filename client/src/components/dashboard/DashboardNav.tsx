@@ -134,7 +134,7 @@ export function DashboardNav() {
               </DropdownMenuLabel>
 
               {user?.active_plan ? (
-                <div className="inline-flex items-center rounded-[30px] bg-green-100 px-2 py-1 text-[10px] font-semibold text-green-700 my-3">
+                <div className="inline-flex items-center rounded-[30px] bg-green-100 px-2 py-1 text-[10px] font-semibold text-green-700 my-3 mx-2">
                   Active Plan: {user?.active_plan?.name}
                 </div>
               ) : (

@@ -214,6 +214,10 @@ export const api = {
       "post",
       `${ENDPOINTS.uploadReels(platform)}?public_id=${public_id}`
     ),
+
+
+    downloadReel: (reelId: string) =>
+    request<any>("get", ENDPOINTS.downloadReel(reelId)),
 };
 
 export default api;
