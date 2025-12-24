@@ -35,5 +35,8 @@ export const ENDPOINTS = {
   reelCaption: (id: string) => `reels/${id}/caption` as const,
   downloadReel: (reelId: string) =>
   `/reels/${reelId}/download`,
+  subscriptionPlanWithInterval: (interval: "month" | "year") =>
+  `/subscription/plans?interval=${interval}` as const,
+
 
 } as const;

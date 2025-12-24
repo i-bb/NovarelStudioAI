@@ -218,6 +218,15 @@ export const api = {
 
     downloadReel: (reelId: string) =>
     request<any>("get", ENDPOINTS.downloadReel(reelId)),
+    // SUBSCRIPTIONS
+getSubscriptionPlansByInterval: (
+  interval: "month" | "year",
+) =>
+  request<any>(
+    "get",
+    ENDPOINTS.subscriptionPlanWithInterval(interval),
+  ),
+
 };
 
 export default api;
