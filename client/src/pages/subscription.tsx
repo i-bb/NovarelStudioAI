@@ -428,7 +428,8 @@ import api from "@/lib/api/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { getErrorMessage } from "@/lib/getErrorMessage";
-import { log } from "console";
+
+/* ================= TYPES ================= */
 
 type CreditTier = {
   credits: string;
@@ -444,156 +445,39 @@ type Plan = {
   name: string;
   tagline: string;
   badge: string | null;
-  bullet: string;
   features: string[];
   cta: string;
   popular: boolean;
   creditTiers: CreditTier[] | null;
-  fixedMonthlyPrice?: string;
-  fixedAnnualPrice?: string;
   planId?: number;
+  fixedMonthlyPrice?: number;
+  fixedAnnualPrice?: number;
 };
+
+/* ================= COMPONENT ================= */
 
 export default function Subscription() {
   const [, navigate] = useLocation();
+  const { refreshUser } = useAuth();
+
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
     "monthly"
   );
   const [creatorTier, setCreatorTier] = useState(0);
   const [studioTier, setStudioTier] = useState(0);
-  const [loadingUser, setLoadingUser] = useState(true);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [stripeSessionId, setStripeSessionId] = useState<string | null>(null);
-  const [sessionDetails, setSessionDetails] = useState<any>(null);
+
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [loadingPlanId, setLoadingPlanId] = useState<number | null>(null);
 
-  // Active plan state
-  const [activePlanId, setActivePlanId] = useState("starter");
-  const { refreshUser } = useAuth();
+  const [activePlanId, setActivePlanId] = useState<number | null>(null);
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [stripeSessionId, setStripeSessionId] = useState<string | null>(null);
+  const [sessionDetails, setSessionDetails] = useState<any>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
-  const transformApiResponseToPlans = (apiData: any): Plan[] => {
-    const transformedPlans: Plan[] = [];
-
-    apiData.plans.forEach((apiPlan: any) => {
-      const planName = apiPlan.name.toLowerCase();
-
-      if (planName === "starter") {
-        // Starter plan - fixed pricing (always free)
-        transformedPlans.push({
-          id: "starter",
-          name: apiPlan.name,
-          tagline: apiPlan.description,
-          badge: null,
-          bullet: "",
-          features: apiPlan.features,
-          cta: "Get Started",
-          popular: false,
-          creditTiers: null,
-          fixedMonthlyPrice: apiPlan.prices[0]?.price,
-          fixedAnnualPrice: apiPlan.prices[0]?.price,
-          planId: apiPlan.prices[0]?.plan_id || 1,
-        });
-      } else {
-        // Creator and Studio plans - with credit tiers
-        const creditTiers: CreditTier[] = apiPlan.prices.map((price: any) => {
-          const clipLimit =
-            price.interval === "month"
-              ? price.metadata_json?.clip_limit
-              : price.metadata_json?.clip_limit / 12 || 0;
-          const priceValue = price.price || 0;
-          const daysInPeriod = price.interval === "month" ? 30 : 365;
-          const dailyClips = Math.round(clipLimit / daysInPeriod);
-
-          return {
-            credits: `${clipLimit.toLocaleString()} credits/month`,
-            clipsPerDay: `About ${dailyClips} clips/day`,
-            monthlyPrice:
-              price.interval === "month" ? priceValue : priceValue / 12,
-            annualPrice: priceValue,
-            planId: price.plan_id,
-            clipLimit: clipLimit,
-          };
-        });
-
-        // Sort by clip limit ascending
-        creditTiers.sort((a, b) => a.clipLimit - b.clipLimit);
-
-        transformedPlans.push({
-          id: planName,
-          name: apiPlan.name,
-          tagline: apiPlan.description,
-          badge: planName === "creator" ? "MOST POPULAR" : null,
-          bullet: "",
-          features: apiPlan.features,
-          cta: "Subscribe",
-          popular: planName === "creator",
-          creditTiers: creditTiers,
-        });
-      }
-    });
-
-    // Sort plans: Starter, Creator, Studio
-    const order = ["starter", "creator", "studio"];
-    transformedPlans.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
-
-    return transformedPlans;
-  };
-
-  const getSubscriptionPlans = async () => {
-    try {
-      setLoadingPlans(true);
-      const interval = billingPeriod === "monthly" ? "month" : "year";
-      const response: any = await api.getSubscriptionPlansByInterval(interval);
-
-      const transformedPlans = transformApiResponseToPlans(response);
-      setPlans(transformedPlans);
-    } catch (error) {
-      toast({
-        description: getErrorMessage(error || "Failed to load plans"),
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingPlans(false);
-    }
-  };
-
-  const handleSubscribe = async (planId: number) => {
-    try {
-      setLoadingPlanId(planId);
-      const response = await api.purchaseSubscription(planId || 0);
-      const checkoutUrl = response?.checkout_url;
-
-      if (!checkoutUrl) throw new Error("Stripe checkout URL missing!");
-      window.location.href = checkoutUrl;
-    } catch (error: any) {
-      toast({
-        description: getErrorMessage(error || "Something went wrong!"),
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingPlanId(null);
-    }
-  };
-
-  const handlePlanSelect = (plan: Plan) => {
-    if (plan.id === "starter") {
-      setActivePlanId(plan.id);
-      navigate("/signup?plan=starter");
-    } else if (plan.creditTiers) {
-      const selectedTierIndex = getSelectedTier(plan.id);
-      const selectedTier = plan.creditTiers[selectedTierIndex];
-      handleSubscribe(selectedTier.planId);
-    }
-  };
+  /* ================= HELPERS ================= */
 
   const getSelectedTier = (planId: string) => {
     if (planId === "creator") return creatorTier;
@@ -606,16 +490,24 @@ export default function Subscription() {
     if (planId === "studio") setStudioTier(value);
   };
 
+  const isPlanActive = (plan: Plan) => {
+    if (plan.planId) {
+      return activePlanId === plan.planId;
+    }
+
+    if (plan.creditTiers) {
+      return plan.creditTiers.some((tier) => tier.planId === activePlanId);
+    }
+
+    return false;
+  };
+
   const getPrice = (plan: Plan) => {
     if (plan.creditTiers) {
-      console.log(plan.creditTiers, "plan.creditTiersplan.creditTiers");
-
       const tier = plan.creditTiers[getSelectedTier(plan.id)];
       return `$${tier.monthlyPrice}`;
     }
-    return billingPeriod === "monthly"
-      ? plan.fixedMonthlyPrice
-      : plan.fixedAnnualPrice;
+    return `$${plan.fixedMonthlyPrice}`;
   };
 
   const getAnnualBilling = (plan: Plan) => {
@@ -627,231 +519,245 @@ export default function Subscription() {
   };
 
   const getClipsPerDay = (plan: Plan) => {
-    if (plan.creditTiers)
+    if (plan.creditTiers) {
       return plan.creditTiers[getSelectedTier(plan.id)].clipsPerDay;
+    }
     return null;
   };
 
-  const extractSessionIdFromURL = () => {
-    let sessionId = null;
-    const rawQuery = window.location.search.replace("?", "");
-    const parts = rawQuery.split(/[?&]/);
-    for (const p of parts) {
-      if (p.startsWith("session_id=")) sessionId = p.replace("session_id=", "");
-    }
-    return sessionId;
+  /* ================= API TRANSFORM ================= */
+
+  const transformApiResponseToPlans = (apiData: any): Plan[] => {
+    const result: Plan[] = [];
+
+    apiData.plans.forEach((apiPlan: any) => {
+      const planName = apiPlan.name.toLowerCase();
+
+      if (planName === "starter") {
+        result.push({
+          id: "starter",
+          name: apiPlan.name,
+          tagline: apiPlan.description,
+          badge: null,
+          features: apiPlan.features,
+          cta: "Get Started",
+          popular: false,
+          creditTiers: null,
+          fixedMonthlyPrice: apiPlan.prices[0]?.price,
+          fixedAnnualPrice: apiPlan.prices[0]?.price,
+          planId: apiPlan.prices[0]?.plan_id,
+        });
+      } else {
+        const creditTiers: CreditTier[] = apiPlan.prices
+          .map((price: any) => {
+            const clipLimit = price.metadata_json?.clip_limit || 0;
+            const dailyClips = Math.round(clipLimit / 30);
+
+            return {
+              credits: `${clipLimit.toLocaleString()} credits/month`,
+              clipsPerDay: `About ${dailyClips} clips/day`,
+              monthlyPrice: price.price,
+              annualPrice: price.price * 12,
+              planId: price.plan_id,
+              clipLimit,
+            };
+          })
+          .sort((a: CreditTier, b: CreditTier) => a.clipLimit - b.clipLimit);
+
+        result.push({
+          id: planName,
+          name: apiPlan.name,
+          tagline: apiPlan.description,
+          badge: planName === "creator" ? "MOST POPULAR" : null,
+          features: apiPlan.features,
+          cta: "Subscribe",
+          popular: planName === "creator",
+          creditTiers,
+        });
+      }
+    });
+
+    return result.sort(
+      (a, b) =>
+        ["starter", "creator", "studio"].indexOf(a.id) -
+        ["starter", "creator", "studio"].indexOf(b.id)
+    );
   };
 
-  // Load plans when billing period changes
+  /* ================= API CALLS ================= */
+
+  const getSubscriptionPlans = async () => {
+    try {
+      setLoadingPlans(true);
+      const response: any = await api.getSubscriptionPlansByInterval(
+        billingPeriod === "monthly" ? "month" : "year"
+      );
+      setPlans(transformApiResponseToPlans(response));
+    } catch (error) {
+      toast({
+        description: getErrorMessage(error || "Something went wrong!"),
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
+
+  const handleSubscribe = async (planId: number) => {
+    try {
+      setLoadingPlanId(planId);
+      const response = await api.purchaseSubscription(planId);
+      window.location.href = response.checkout_url;
+    } catch (error) {
+      toast({
+        description: getErrorMessage(error || "Something went wrong!"),
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlanId(null);
+    }
+  };
+
+  const handlePlanSelect = (plan: Plan) => {
+    if (plan.id === "starter") {
+      navigate("/signup?plan=starter");
+      return;
+    }
+
+    if (plan.creditTiers) {
+      const tier = plan.creditTiers[getSelectedTier(plan.id)];
+      handleSubscribe(tier.planId);
+    }
+  };
+
+  /* ================= EFFECTS ================= */
+
   useEffect(() => {
     getSubscriptionPlans();
   }, [billingPeriod]);
 
-  // Load Stripe session
   useEffect(() => {
-    const sessionId = extractSessionIdFromURL();
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
     if (sessionId) setStripeSessionId(sessionId);
   }, []);
 
-  // Fetch user and handle subscription success
   useEffect(() => {
-    const fetchUserData = async () => {
+    const loadUser = async () => {
       try {
         setLoadingUser(true);
-
-        const response = await api.userDetails();
-        const activePlan = response?.active_plan;
-
-        if (activePlan?.id) {
-          // Map backend plan to frontend plan id
-          const planMapping: { [key: number]: string } = {
-            1: "starter",
-            2: "starter",
-          };
-
-          // Check if it's a creator or studio plan by price range
-          const price = activePlan.price ?? 0;
-          if (price > 0 && price < 300) {
-            setActivePlanId("creator");
-          } else if (price >= 300) {
-            setActivePlanId("studio");
-          } else {
-            setActivePlanId(planMapping[activePlan.id] || "starter");
-          }
+        const res = await api.userDetails();
+        if (res?.active_plan?.id) {
+          setActivePlanId(res.active_plan.id);
         }
 
-        // If returning from Stripe AND subscription is active
         if (stripeSessionId) {
           await refreshUser();
-
           setSessionDetails({
-            planName: activePlan?.name,
-            date: activePlan?.start_date,
+            planName: res?.active_plan?.name,
+            date: res?.active_plan?.start_date,
           });
-
           setShowSuccess(true);
           window.history.replaceState({}, "", "/subscription");
         }
-      } catch (error: any) {
-        toast({
-          description:
-            error?.response?.data?.description || "Error loading user data",
-          variant: "destructive",
-        });
       } finally {
         setLoadingUser(false);
       }
     };
 
-    fetchUserData();
+    loadUser();
   }, [stripeSessionId]);
 
-  const isPageLoading = loadingPlans || loadingUser;
+  /* ================= RENDER ================= */
+
+  if (loadingPlans || loadingUser) {
+    return <div className="text-center py-20">Loading...</div>;
+  }
 
   return (
     <>
-      <section id="pricing" className="relative pb-10">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
-          <div className="mb-12 flex flex-col items-center text-center">
-            <img
-              src={logoImage}
-              alt="NovarelStudio"
-              className="w-24 h-24 mb-6 grayscale self-start"
-              style={{ clipPath: "circle(38% at center)" }}
+      <section className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-10">
+          <img src={logoImage} className="w-20 mx-auto mb-4" />
+          <h2 className="text-4xl font-semibold">
+            Pay for the clips that move your channel
+          </h2>
+          <div className="flex justify-center gap-2 mt-4">
+            <BillingToggleButton
+              active={billingPeriod === "monthly"}
+              onClick={() => setBillingPeriod("monthly")}
+              label="Monthly"
             />
-
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold">
-              Pay for the clips that actually move your channel
-            </h2>
-
-            <div className="flex gap-2 mt-4">
-              <BillingToggleButton
-                active={billingPeriod === "monthly"}
-                onClick={() => setBillingPeriod("monthly")}
-                label="Monthly"
-              />
-              <BillingToggleButton
-                active={billingPeriod === "annual"}
-                onClick={() => setBillingPeriod("annual")}
-                label="Annual"
-              />
-            </div>
+            <BillingToggleButton
+              active={billingPeriod === "annual"}
+              onClick={() => setBillingPeriod("annual")}
+              label="Annual"
+            />
           </div>
+        </div>
 
-          {/* PLANS */}
-          {isPageLoading ? (
-            <div className="bg-background flex items-center justify-center">
-              <div className="animate-pulse text-muted-foreground">
-                Loading...
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
-              {plans.map((plan) => (
-                <Card
-                  key={plan.id}
-                  className={`relative flex h-full flex-col rounded-3xl border bg-black/70 backdrop-blur-xl ${
-                    activePlanId === plan.id
-                      ? "border-green-500 ring-2 ring-green-500/40"
-                      : plan.popular
-                      ? "border-white/40"
-                      : "border-white/10"
-                  }`}
+        <div className="grid md:grid-cols-3 gap-6">
+          {plans.map((plan) => (
+            <Card
+              key={plan.id}
+              className={`relative ${
+                isPlanActive(plan)
+                  ? "border-green-500 ring-2 ring-green-500/40"
+                  : "border-white/10"
+              }`}
+            >
+              <CardHeader>
+                {isPlanActive(plan) && (
+                  <Badge className="absolute top-2 right-4 bg-green-500">
+                    Active Plan
+                  </Badge>
+                )}
+                <CardTitle>{plan.name}</CardTitle>
+                <CardDescription>{plan.tagline}</CardDescription>
+                <div className="text-3xl font-bold mt-3">{getPrice(plan)}</div>
+                {getAnnualBilling(plan) && (
+                  <p className="text-xs mt-1">{getAnnualBilling(plan)}</p>
+                )}
+              </CardHeader>
+
+              <CardContent>
+                {plan.creditTiers && (
+                  <Select
+                    value={getSelectedTier(plan.id).toString()}
+                    onValueChange={(v) => setSelectedTier(plan.id, Number(v))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {plan.creditTiers.map((tier, i) => (
+                        <SelectItem key={i} value={i.toString()}>
+                          {tier.credits}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {plan.features.map((f, i) => (
+                  <div key={i} className="flex gap-2 mt-2">
+                    <Check className="w-4 h-4 text-green-400" />
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </CardContent>
+
+              <CardFooter>
+                <Button
+                  className="w-full"
+                  disabled={isPlanActive(plan)}
+                  onClick={() => handlePlanSelect(plan)}
                 >
-                  <CardHeader>
-                    {plan.badge && (
-                      <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
-                        {plan.badge}
-                      </span>
-                    )}
-
-                    {activePlanId === plan.id && (
-                      <Badge className="absolute top-4 right-4 bg-green-500 text-white px-2 py-0.5 text-[10px]">
-                        Active Plan
-                      </Badge>
-                    )}
-
-                    <CardTitle className="text-xl">{plan.name}</CardTitle>
-                    <CardDescription>{plan.tagline}</CardDescription>
-
-                    <div className="mt-4">
-                      <div className="text-3xl font-semibold">
-                        {getPrice(plan)}
-                      </div>
-
-                      {getAnnualBilling(plan) && (
-                        <p className="text-xs mt-1">{getAnnualBilling(plan)}</p>
-                      )}
-                    </div>
-
-                    {plan.creditTiers && (
-                      <div className="mt-4">
-                        {/* <p className="text-xs mb-2">1 credit = 1 clip</p> */}
-                        <Select
-                          value={getSelectedTier(plan.id).toString()}
-                          onValueChange={(v) =>
-                            setSelectedTier(plan.id, parseInt(v))
-                          }
-                        >
-                          <SelectTrigger className="w-full bg-black/50">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {plan.creditTiers.map((tier, index) => (
-                              <SelectItem key={index} value={index.toString()}>
-                                {tier.credits}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </CardHeader>
-
-                  <CardContent>
-                    {plan.creditTiers && (
-                      <div className="flex items-center gap-2">
-                        <Check className="h-3 w-3 text-emerald-300" />
-                        <span>{getClipsPerDay(plan)}</span>
-                      </div>
-                    )}
-
-                    {plan.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <Check className="h-3 w-3 text-emerald-300" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </CardContent>
-
-                  <CardFooter>
-                    <Button
-                      className="w-full rounded-full"
-                      disabled={
-                        activePlanId === plan.id ||
-                        Boolean(
-                          plan.creditTiers &&
-                            loadingPlanId ===
-                              plan.creditTiers[getSelectedTier(plan.id)]?.planId
-                        ) ||
-                        Boolean(plan.planId && loadingPlanId === plan.planId)
-                      }
-                      onClick={() => handlePlanSelect(plan)}
-                    >
-                      {(plan.creditTiers &&
-                        loadingPlanId ===
-                          plan.creditTiers[getSelectedTier(plan.id)]?.planId) ||
-                      (plan.planId && loadingPlanId === plan.planId)
-                        ? "Redirecting..."
-                        : plan.cta}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          )}
+                  {isPlanActive(plan) ? "Current Plan" : plan.cta}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       </section>
 
@@ -859,17 +765,16 @@ export default function Subscription() {
         <PaymentSuccessModal
           open={showSuccess}
           sessionId={stripeSessionId}
-          date={formatDate(sessionDetails.date)}
+          date={sessionDetails.date}
           planName={sessionDetails.planName}
-          onClose={() => {
-            setShowSuccess(false);
-            window.location.href = "/dashboard";
-          }}
+          onClose={() => (window.location.href = "/dashboard")}
         />
       )}
     </>
   );
 }
+
+/* ================= BILLING TOGGLE ================= */
 
 function BillingToggleButton({
   active,
@@ -882,10 +787,10 @@ function BillingToggleButton({
 }) {
   return (
     <button
-      className={`px-3 py-1 rounded-full text-xs ${
-        active ? "bg-white text-black" : "bg-white/10 text-white/70"
-      }`}
       onClick={onClick}
+      className={`px-3 py-1 rounded-full text-xs ${
+        active ? "bg-white text-black" : "bg-white/10 text-white"
+      }`}
     >
       {label}
     </button>
