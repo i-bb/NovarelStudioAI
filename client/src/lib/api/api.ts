@@ -103,6 +103,9 @@ export interface MetaDataJSON {
   manual_posting_enabled: boolean;
   retention_days: number;
   download_reel: boolean;
+  total_clips: number;
+  used_clips: number;
+  posting_limit_complete: boolean;
 }
 
 export interface User {

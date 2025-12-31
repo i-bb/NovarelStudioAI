@@ -11,6 +11,7 @@ import type { StreamExport } from "@shared/schema";
 import api, { User } from "@/lib/api/api";
 import { getStatusLabel } from "@/lib/common";
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import { Progress } from "@/components/ui/progress";
 
 // ── Types ─────────────────────────────────────
 interface SocialMediaStats {
@@ -69,12 +70,20 @@ function PlatformStatCard({
 }
 
 function PlanStatusCard({ subscription }: { subscription: User | null }) {
-  // const usagePercentage =
-  //   (subscription?.clipCreditsTotal || 0) > 0
-  //     ? ((subscription?.clipCreditsTotal ||
-  //         0 - subscription?.clipCreditsRemaining ||
-  //         0) / subscription?.clipCreditsTotal || 0) * 100
-  //     : 0;
+  console.log("subscription", subscription);
+
+  const clipCreditsTotal =
+    subscription?.active_plan?.meta_data_json?.total_clips || 0;
+  const clipCreditsRemaining =
+    subscription?.active_plan?.meta_data_json?.used_clips || 0;
+  const dailyPostingLimitReached =
+    subscription?.active_plan?.meta_data_json?.posting_limit_complete || false;
+  const postingLimit =
+    subscription?.active_plan?.meta_data_json?.daily_posting_limit || 0;
+  const usagePercentage =
+    clipCreditsTotal > 0
+      ? ((clipCreditsTotal - clipCreditsRemaining) / clipCreditsTotal) * 100
+      : 0;
 
   return (
     <Card className="border-white/10 bg-black/40 overflow-hidden mb-8">
@@ -103,16 +112,22 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
             </Button>
           </Link>
         </div>
-        {/* <div className="space-y-2">
+        <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Clip Credits</span>
             <span className="font-medium">
-              {subscription.clipCreditsRemaining} /{" "}
-              {subscription.clipCreditsTotal} remaining
+              {clipCreditsRemaining} / {clipCreditsTotal} remaining
             </span>
           </div>
           <Progress value={usagePercentage} className="h-2" />
-        </div> */}
+        </div>
+        {dailyPostingLimitReached && (
+          <div className="space-y-2">
+            <div className="px-2 py-4 bg-red-500/10 text-red-400 rounded-md mt-4">
+              <p>{`You have utilized your daily positing limit of ${postingLimit} post`}</p>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -271,15 +286,12 @@ export default function Dashboard() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
-  console.log("user", user);
-
   const [socialMediaStats, setSocialMediaStats] =
     useState<SocialMediaStats | null>({
       instagram_reel_count: 0,
       tiktok_reel_count: 0,
       youtube_short_count: 0,
     });
-  // const [exportData, setExportData] = useState<any | null>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = async () => {
@@ -305,25 +317,9 @@ export default function Dashboard() {
     }
   };
 
-  // const fetchExportData = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await api.getContentStudios("1", "6");
-  //     setExportData(response?.videos || []);
-  //   } catch (error: any) {
-  //     console.error("Content Studio API failed:", error);
-  //     toast({
-  //       description:
-  //         error?.response?.data?.description || "Something went wrong!",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // };
-
   useEffect(() => {
     if (!isAuthenticated) return;
     fetchDashboard();
-    // fetchExportData();
   }, [isAuthenticated]);
 
   // Auth guard
