@@ -1,5 +1,32 @@
-import { CheckCircle, Clock, Hourglass, Info } from "lucide-react";
-import { SiTwitch, SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
+import { stat } from "fs";
+import {
+  CheckCircle,
+  Clock,
+  Hourglass,
+  Info,
+  Instagram,
+  Twitch,
+} from "lucide-react";
+import {
+  SiTwitch,
+  SiInstagram,
+  SiTiktok,
+  SiYoutube,
+  SiKick,
+} from "react-icons/si";
+import {
+  Radio,
+  Video,
+  Sparkles,
+  Scissors,
+  Share2,
+  Zap,
+  Play,
+} from "lucide-react";
+import demoVideo from "../../../attached_assets/twitch 1-1 video.mov";
+import KickVideo from "../../../attached_assets/KickVideo.mov";
+import TwitchVideo from "../../../attached_assets/TwitchVideo.mov";
+import InstagramVideo from "../../../attached_assets/InstagramVideo.mov";
 
 type CreditTier = {
   credits: string;
@@ -110,6 +137,7 @@ export const getStatusLabel = (status: string) => {
         text: "Completed",
         icon: CheckCircle,
         class: "bg-emerald-600/20 text-emerald-400",
+        message: "",
       };
 
     case "failed":
@@ -117,6 +145,7 @@ export const getStatusLabel = (status: string) => {
         text: "Failed",
         icon: Info,
         class: "bg-red-600/20 text-red-400",
+        message: "Stream recording was corrupt.",
       };
 
     case "pending":
@@ -124,6 +153,7 @@ export const getStatusLabel = (status: string) => {
         text: "Pending",
         icon: Hourglass, // ⏳
         class: "bg-yellow-600/20 text-yellow-400",
+        message: "",
       };
 
     case "processing":
@@ -131,6 +161,7 @@ export const getStatusLabel = (status: string) => {
         text: "Processing",
         icon: Clock,
         class: "bg-blue-600/20 text-blue-400",
+        message: "",
       };
 
     default:
@@ -138,6 +169,7 @@ export const getStatusLabel = (status: string) => {
         text: "Skipped",
         icon: Info,
         class: "bg-neutral-500/20 text-neutral-400",
+        message: "No engaging moment found.",
       };
   }
 };
@@ -250,5 +282,56 @@ export const plans: Plan[] = [
         annualPrice: 179,
       },
     ],
+  },
+];
+
+export const connectAccountGuide = [
+  {
+    id: "twitch",
+    icon: Twitch,
+    title: "Twitch",
+    description: "How to connect your Twitch account.",
+    tag: "twitch",
+    video: TwitchVideo,
+  },
+  {
+    id: "kick",
+    icon: SiKick,
+    title: "Kick",
+    description: "How to connect your Kick account.",
+    tag: "kiick",
+    video: KickVideo,
+  },
+  {
+    id: "instagram",
+    icon: Instagram,
+    title: "Instagram",
+    description: "How to connect your Instagram account.",
+    tag: "instagram",
+    video: InstagramVideo,
+  },
+];
+
+export const features = [
+  {
+    id: "hands-off",
+    icon: Radio,
+    title: "Hands-off capture",
+    description: "Auto-detect when you go live and record in the cloud.",
+    tag: "Live ingest",
+  },
+  {
+    id: "smart-clipping",
+    icon: Scissors,
+    title: "Smart clipping",
+    description: "AI finds the best moments with proper build-up.",
+    tag: "Scene-aware",
+  },
+  {
+    id: "vertical-ready",
+    icon: Video,
+    title: "Vertical-ready",
+    description: "Auto-crop to 9:16 with facecam focus.",
+    tag: "Mobile first",
   },
 ];

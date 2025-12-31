@@ -1,106 +1,144 @@
-import { Radio, Video, Sparkles, Scissors, Share2, Zap, Play } from "lucide-react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { connectAccountGuide, features } from "@/lib/common";
 
 export default function FeaturesSection() {
-  const features = [
-    {
-      icon: Radio,
-      title: "Hands-off capture",
-      description: "Auto-detect when you go live and record in the cloud.",
-      tag: "Live ingest",
-    },
-    {
-      icon: Scissors,
-      title: "Smart clipping",
-      description: "AI finds the best moments with proper build-up.",
-      tag: "Scene-aware",
-    },
-    {
-      icon: Video,
-      title: "Vertical-ready",
-      description: "Auto-crop to 9:16 with facecam focus.",
-      tag: "Mobile first",
-    },
-    {
-      icon: Share2,
-      title: "Auto-post",
-      description: "One click to TikTok, Reels, and Shorts.",
-      tag: "Cross-platform",
-      accent: true,
-    },
-    {
-      icon: Sparkles,
-      title: "Styled captions",
-      description: "On-brand text overlays, auto-generated.",
-      tag: "Trendy",
-    },
-    {
-      icon: Zap,
-      title: "Clip intelligence",
-      description: "See which clips drive followers and watch-time.",
-      tag: "Analytics",
-    },
-  ];
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [loopIndex, setLoopIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
+
+  /* ---------------- AUTO LOOP FLAG ---------------- */
+
+  const isAutoLooping = selectedCard === null;
+
+  /* ---------------- ACTIVE VIDEO (ONLY FROM connectAccountGuide) ---------------- */
+
+  const activeVideo = useMemo(() => {
+    if (isAutoLooping) {
+      return connectAccountGuide[loopIndex]?.video ?? null;
+    }
+
+    return (
+      connectAccountGuide.find((c) => c.id === selectedCard)?.video ?? null
+    );
+  }, [isAutoLooping, loopIndex, selectedCard]);
+
+  /* ---------------- INTERSECTION OBSERVER ---------------- */
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.5 }
+    );
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  /* ---------------- RESET ON VIDEO CHANGE ---------------- */
+
+  // useEffect(() => {
+  //   if (!videoRef.current || !activeVideo) return;
+
+  //   videoRef.current.pause();
+  //   videoRef.current.currentTime = 0;
+  //   setIsVideoReady(false);
+  // }, [activeVideo]);
+  useEffect(() => {
+    if (!videoRef.current || !activeVideo) return;
+
+    videoRef.current.currentTime = 0;
+    setIsVideoReady(false);
+  }, [activeVideo]);
+
+  /* ---------------- PLAY / PAUSE ---------------- */
+
+  useEffect(() => {
+    if (!videoRef.current || !activeVideo || !isVideoReady) return;
+
+    if (isVisible) {
+      videoRef.current.play().catch(() => {});
+    } else {
+      videoRef.current.pause();
+    }
+  }, [isVisible, isVideoReady, activeVideo]);
+
+  /* ---------------- AUTO LOOP HANDLER ---------------- */
+
+  const handleVideoEnded = () => {
+    if (!isAutoLooping) return;
+
+    setLoopIndex((prev) => (prev + 1) % connectAccountGuide.length);
+  };
+
+  /* ---------------- UI ---------------- */
 
   return (
     <section id="features" className="relative">
-      <div className="absolute inset-0 bg-noise opacity-40" />
       <div className="relative max-w-7xl mx-auto">
-        <div className="mb-10 md:mb-14">
-          <h2 className="font-display font-semibold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-foreground mb-3">
-            A studio team,
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-primary to-fuchsia-500">
-              bottled into one product.
-            </span>
-          </h2>
-          <p className="max-w-lg text-sm sm:text-base text-muted-foreground/90">
-            You stream. We handle capture, clipping, and cross-posting.
-          </p>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Left: Video Demo */}
-          <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[480px] rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-950 to-black overflow-hidden group">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(139,92,246,0.15),_transparent_70%)]" />
-            
-            {/* Video placeholder */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-white/5 border border-white/20 mb-4 group-hover:bg-white/10 group-hover:scale-105 transition-all cursor-pointer">
-                  <Play className="w-8 h-8 text-white ml-1" />
-                </div>
-                <p className="text-sm text-muted-foreground">Connect your accounts</p>
-              </div>
-            </div>
+          {/* VIDEO */}
+          <div className="relative lg:min-h-[480px] rounded-3xl border border-white/10 bg-black overflow-hidden">
+            <div ref={containerRef} className="absolute inset-0">
+              {activeVideo ? (
+                <video
+                  key={isAutoLooping ? loopIndex : selectedCard}
+                  ref={videoRef}
+                  src={activeVideo}
+                  muted
+                  playsInline
+                  onLoadedMetadata={() => {
+                    setIsVideoReady(true);
 
-            {/* Corner accent */}
-            <div className="absolute top-4 left-4 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 border border-white/10 text-xs text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                Setup Guide
-              </span>
-            </div>
-
-            {/* Decorative elements */}
-            <div className="absolute bottom-4 left-4 right-4 flex gap-2">
-              <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
-                <div className="h-full w-1/3 bg-gradient-to-r from-primary to-emerald-400 rounded-full" />
-              </div>
+                    if (videoRef.current && isVisible) {
+                      videoRef.current.play().catch(() => {});
+                    }
+                  }}
+                  onEnded={handleVideoEnded}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-black" />
+              )}
             </div>
           </div>
 
-          {/* Right: Feature Cards Grid */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
-            {features.map((feature) => (
-              <FeatureCard
-                key={feature.title}
-                icon={feature.icon}
-                title={feature.title}
-                description={feature.description}
-                tag={feature.tag}
-                accent={feature.accent}
-              />
-            ))}
+          {/* FEATURE CARDS */}
+          <div className="flex gap-2">
+            {/* CONNECT ACCOUNT GUIDE (CLICKABLE) */}
+            <div className="grid grid-rows-3 gap-4 w-1/2">
+              {connectAccountGuide.map((f) => (
+                <FeatureCard
+                  key={f.id}
+                  icon={f.icon}
+                  title={f.title}
+                  description={f.description}
+                  tag={f.tag}
+                  accent={selectedCard === f.id}
+                  onClick={() => setSelectedCard(f.id)}
+                  clickable
+                />
+              ))}
+            </div>
+
+            {/* FEATURES (NON-CLICKABLE) */}
+            <div className="grid grid-rows-3 gap-4 w-1/2">
+              {features.map((f) => (
+                <FeatureCard
+                  key={f.id}
+                  icon={f.icon}
+                  title={f.title}
+                  description={f.description}
+                  tag={f.tag}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -114,18 +152,24 @@ function FeatureCard({
   description,
   tag,
   accent,
+  onClick,
+  clickable = false,
 }: {
   icon: any;
   title: string;
   description: string;
   tag: string;
   accent?: boolean;
+  onClick?: () => void;
+  clickable?: boolean;
 }) {
   return (
     <article
+      onClick={clickable ? onClick : undefined}
       className={cn(
-        "relative overflow-hidden rounded-2xl border p-4 flex flex-col justify-between group transition-all duration-300",
-        "backdrop-blur-xl hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(15,23,42,0.8)]",
+        "relative overflow-hidden rounded-2xl border p-4 flex flex-col justify-between h-full group transition-all duration-300",
+        clickable && "cursor-pointer hover:-translate-y-0.5",
+        "backdrop-blur-xl hover:shadow-[0_12px_40px_rgba(15,23,42,0.8)]",
         accent
           ? "bg-gradient-to-br from-emerald-400/10 via-slate-900 to-black border-emerald-400/30"
           : "bg-slate-900/70 border-white/8"
@@ -136,16 +180,27 @@ function FeatureCard({
           <Icon className="w-4 h-4" />
         </div>
         <div>
-          <h3 className="font-subhead text-sm sm:text-base font-normal text-foreground mb-1">{title}</h3>
-          <p className="text-[11px] sm:text-xs text-muted-foreground/80 leading-relaxed line-clamp-2">{description}</p>
+          <h3 className="font-subhead text-sm sm:text-base font-normal text-foreground mb-1">
+            {title}
+          </h3>
+          <p className="text-[11px] sm:text-xs text-muted-foreground/80 leading-relaxed line-clamp-2">
+            {description}
+          </p>
         </div>
       </div>
+
       <div className="mt-3 flex items-center text-[10px] text-muted-foreground/70">
         <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-0.5 border border-white/5">
-          <span className={cn("h-1 w-1 rounded-full", accent ? "bg-emerald-400" : "bg-white/40")} />
+          <span
+            className={cn(
+              "h-1 w-1 rounded-full",
+              accent ? "bg-emerald-400" : "bg-white/40"
+            )}
+          />
           {tag}
         </span>
       </div>
+
       <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_60%)]" />
     </article>
   );
