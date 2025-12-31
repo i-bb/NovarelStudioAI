@@ -35,7 +35,7 @@ async function safeRequest<T>(promise: Promise<any>): Promise<T> {
 // Generic wrapper for all apiClient methods
 // ─────────────────────────────────────────────
 function request<T>(
-  method: "get" | "post" | "delete" | "patch",
+  method: "get" | "post" | "delete" | "patch" | "put",
   url: string,
   data?: any
 ): Promise<T> {
@@ -78,6 +78,7 @@ export interface ActivePlan {
   price: number | null;
   start_date: string | null;
   status: "active" | "inActive";
+  meta_data_json: MetaDataJSON;
 }
 
 export interface ConnectedAccounts {
@@ -91,6 +92,20 @@ export interface SocialAccount {
   connected: boolean;
   display_name: string | null;
   avatar_url: string | null;
+}
+
+export interface MetaDataJSON {
+  auto_posting_enabled: boolean;
+  clip_limit: number;
+  connected_platforms: number;
+  custom_caption_editing: boolean;
+  daily_posting_limit: number;
+  manual_posting_enabled: boolean;
+  retention_days: number;
+  download_reel: boolean;
+  total_clips: number;
+  used_clips: number;
+  posting_limit_complete: boolean;
 }
 
 export interface User {
@@ -170,7 +185,7 @@ export const api = {
     request<any>("get", `${ENDPOINTS.singleReel}/${reelId}`),
 
   updateReelCaption: (reelId: string, caption: string) =>
-    request<any>("patch", ENDPOINTS.reelCaption(reelId), { caption: caption }),
+    request<any>("put", ENDPOINTS.reelCaption(reelId), { caption: caption }),
 
   // SOCIAL ACCOUNTS
   disconnectPlatform: (platform: string) =>
@@ -198,6 +213,9 @@ export const api = {
   getStreamerStreamingAccounts: (platform: string) =>
     request<any>("get", ENDPOINTS.streamerStreamingAccounts(platform)),
 
+  autoPostReels: (id: string) =>
+    request<any>("put", ENDPOINTS.autoPostReels(id)),
+
   // SUBSCRIPTIONS
   getSubscriptionPlans: () => request("get", ENDPOINTS.subscriptionPlan),
 
@@ -210,14 +228,16 @@ export const api = {
 
   // REELS
   uploadReels: (platform: string, public_id: string) =>
-    request(
+    request<any>(
       "post",
       `${ENDPOINTS.uploadReels(platform)}?public_id=${public_id}`
     ),
 
-
-    downloadReel: (reelId: string) =>
+  downloadReel: (reelId: string) =>
     request<any>("get", ENDPOINTS.downloadReel(reelId)),
+  // SUBSCRIPTIONS
+  getSubscriptionPlansByInterval: (interval: "month" | "year") =>
+    request<any>("get", ENDPOINTS.subscriptionPlanWithInterval(interval)),
 };
 
 export default api;

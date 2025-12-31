@@ -30,10 +30,10 @@ export const ENDPOINTS = {
     `streams/${platform}/callback` as const,
   streamerStreamingAccounts: (platform: string) =>
     `streams/${platform}/streamer` as const,
-
+  autoPostReels: (id: string) => `reels/${id}/auto-post` as const,
   uploadReels: (platform: string) => `${platform}/upload` as const,
   reelCaption: (id: string) => `reels/${id}/caption` as const,
-  downloadReel: (reelId: string) =>
-  `/reels/${reelId}/download`,
-
+  downloadReel: (reelId: string) => `/reels/${reelId}/download`,
+  subscriptionPlanWithInterval: (interval: "month" | "year") =>
+    `/subscription/plans?interval=${interval}` as const,
 } as const;
