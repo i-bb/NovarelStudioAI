@@ -299,9 +299,14 @@ export default function SingleVideoDetails() {
 
               <button
                 type="button"
+                disabled={!manualPostingAllowed}
                 onClick={handleAutoPostToggle}
                 className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                  autoProcessing ? "bg-primary" : "bg-white/20"
+                  !manualPostingAllowed
+                    ? "bg-primary/40"
+                    : autoProcessing
+                    ? "bg-primary"
+                    : "bg-white/20"
                 }`}
               >
                 <span
