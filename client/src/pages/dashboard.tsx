@@ -280,7 +280,7 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
 
 // ── Main Dashboard Component ─────────────────────
 export default function Dashboard() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { refreshUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const [socialMediaStats, setSocialMediaStats] =
@@ -290,6 +290,8 @@ export default function Dashboard() {
       youtube_short_count: 0,
     });
   const [loading, setLoading] = useState(true);
+  const [userDataLoading, setUserDataLoading] = useState(true);
+  const [userData, setUserData] = useState<User | null>(null);
 
   const fetchDashboard = async () => {
     try {
@@ -303,10 +305,7 @@ export default function Dashboard() {
     } catch (error: any) {
       console.error("Dashboard API failed:", error);
       toast({
-        description: getErrorMessage(
-          error,
-          "Failed to create account. Please try again."
-        ),
+        description: getErrorMessage(error, "Failed to fetch data."),
         variant: "destructive",
       });
     } finally {
@@ -314,9 +313,26 @@ export default function Dashboard() {
     }
   };
 
+  const fetchUserDetails = async () => {
+    try {
+      const response = await api.userDetails();
+      setUserDataLoading(false);
+      setUserData(response);
+      refreshUser();
+    } catch (error: any) {
+      toast({
+        description: getErrorMessage(error, "Failed to fetch user data."),
+        variant: "destructive",
+      });
+    } finally {
+      setUserDataLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAuthenticated) return;
     fetchDashboard();
+    fetchUserDetails();
   }, [isAuthenticated]);
 
   // Auth guard
@@ -327,7 +343,7 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  if (authLoading || loading || !socialMediaStats) {
+  if (authLoading || loading || userDataLoading || !socialMediaStats) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background to-black/95 flex items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -335,13 +351,13 @@ export default function Dashboard() {
     );
   }
 
-  const displayName = user?.name || "Creator";
+  const displayName = userData?.name || "Creator";
 
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
       <h1 className="font-display text-3xl mb-8">Hello, {displayName}!</h1>
 
-      <PlanStatusCard subscription={user || null} />
+      <PlanStatusCard subscription={userData || null} />
 
       <section className="my-12">
         <div className="grid gap-6 sm:grid-cols-3">
