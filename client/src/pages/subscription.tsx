@@ -428,10 +428,11 @@ import api from "@/lib/api/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import { TransformApiResponseToPlans } from "@/lib/MapApiPlans";
 
 /* ================= TYPES ================= */
 
-type CreditTier = {
+export type CreditTier = {
   credits: string;
   clipsPerDay: string;
   monthlyPrice: number;
@@ -440,7 +441,7 @@ type CreditTier = {
   clipLimit: number;
 };
 
-type Plan = {
+export type Plan = {
   id: string;
   name: string;
   tagline: string;
@@ -457,7 +458,6 @@ type Plan = {
 /* ================= COMPONENT ================= */
 
 export default function Subscription() {
-  const [, navigate] = useLocation();
   const { refreshUser } = useAuth();
 
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
@@ -491,12 +491,17 @@ export default function Subscription() {
   };
 
   const isPlanActive = (plan: Plan) => {
-    if (plan.planId) {
+    // ───────── Starter / fixed-price plan ─────────
+    if (!plan.creditTiers && plan.planId) {
       return activePlanId === plan.planId;
     }
 
-    if (plan.creditTiers) {
-      return plan.creditTiers.some((tier) => tier.planId === activePlanId);
+    // ───────── Tier-based plans (creator / studio) ─────────
+    if (plan.creditTiers && plan.creditTiers.length > 0) {
+      const selectedTierIndex = getSelectedTier(plan.id);
+      const selectedTier = plan.creditTiers[selectedTierIndex];
+
+      return selectedTier?.planId === activePlanId;
     }
 
     return false;
@@ -525,74 +530,13 @@ export default function Subscription() {
     return null;
   };
 
-  /* ================= API TRANSFORM ================= */
-
-  const transformApiResponseToPlans = (apiData: any): Plan[] => {
-    const result: Plan[] = [];
-
-    apiData.plans.forEach((apiPlan: any) => {
-      const planName = apiPlan.name.toLowerCase();
-
-      if (planName === "starter") {
-        result.push({
-          id: "starter",
-          name: apiPlan.name,
-          tagline: apiPlan.description,
-          badge: null,
-          features: apiPlan.features,
-          cta: "Get Started",
-          popular: false,
-          creditTiers: null,
-          fixedMonthlyPrice: apiPlan.prices[0]?.price,
-          fixedAnnualPrice: apiPlan.prices[0]?.price,
-          planId: apiPlan.prices[0]?.plan_id,
-        });
-      } else {
-        const creditTiers: CreditTier[] = apiPlan.prices
-          .map((price: any) => {
-            const clipLimit = price.metadata_json?.clip_limit || 0;
-            const dailyClips = Math.round(clipLimit / 30);
-
-            return {
-              credits: `${clipLimit.toLocaleString()} credits/month`,
-              clipsPerDay: `About ${dailyClips} clips/day`,
-              monthlyPrice: price.price,
-              annualPrice: price.price * 12,
-              planId: price.plan_id,
-              clipLimit,
-            };
-          })
-          .sort((a: CreditTier, b: CreditTier) => a.clipLimit - b.clipLimit);
-
-        result.push({
-          id: planName,
-          name: apiPlan.name,
-          tagline: apiPlan.description,
-          badge: planName === "creator" ? "MOST POPULAR" : null,
-          features: apiPlan.features,
-          cta: "Subscribe",
-          popular: planName === "creator",
-          creditTiers,
-        });
-      }
-    });
-
-    return result.sort(
-      (a, b) =>
-        ["starter", "creator", "studio"].indexOf(a.id) -
-        ["starter", "creator", "studio"].indexOf(b.id)
-    );
-  };
-
-  /* ================= API CALLS ================= */
-
   const getSubscriptionPlans = async () => {
     try {
       setLoadingPlans(true);
       const response: any = await api.getSubscriptionPlansByInterval(
         billingPeriod === "monthly" ? "month" : "year"
       );
-      setPlans(transformApiResponseToPlans(response));
+      setPlans(TransformApiResponseToPlans(response));
     } catch (error) {
       toast({
         description: getErrorMessage(error || "Something went wrong!"),
@@ -619,9 +563,8 @@ export default function Subscription() {
   };
 
   const handlePlanSelect = (plan: Plan) => {
-    if (plan.id === "starter") {
-      navigate("/signup?plan=starter");
-      return;
+    if (plan.id === "starter" && plan.planId) {
+      handleSubscribe(plan.planId);
     }
 
     if (plan.creditTiers) {
@@ -636,10 +579,22 @@ export default function Subscription() {
     getSubscriptionPlans();
   }, [billingPeriod]);
 
+  const extractSessionIdFromURL = () => {
+    let sessionId = null;
+    const rawQuery = window.location.search.replace("?", "");
+    const parts = rawQuery.split(/[?&]/);
+    for (const p of parts) {
+      if (p.startsWith("session_id=")) sessionId = p.replace("session_id=", "");
+    }
+    return sessionId;
+  };
+
+  // Load Stripe session and plans
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get("session_id");
+    const sessionId = extractSessionIdFromURL();
     if (sessionId) setStripeSessionId(sessionId);
+
+    getSubscriptionPlans();
   }, []);
 
   useEffect(() => {
@@ -674,11 +629,18 @@ export default function Subscription() {
     return <div className="text-center py-20">Loading...</div>;
   }
 
+  console.log("showSuccessModal", showSuccess, sessionDetails);
+
   return (
     <>
       <section className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
-          <img src={logoImage} className="w-20 mx-auto mb-4" />
+          <img
+            src={logoImage}
+            alt="NovarelStudio"
+            className="w-24 h-24 mb-6 grayscale self-start"
+            style={{ clipPath: "circle(38% at center)" }}
+          />
           <h2 className="text-4xl font-semibold">
             Pay for the clips that move your channel
           </h2>
@@ -707,6 +669,11 @@ export default function Subscription() {
               }`}
             >
               <CardHeader>
+                {plan.badge && (
+                  <span className="inline-block text-[10px] mt-2 bg-white/10 px-2 py-1 rounded-full border border-white/20">
+                    {plan.badge}
+                  </span>
+                )}
                 {isPlanActive(plan) && (
                   <Badge className="absolute top-2 right-4 bg-green-500">
                     Active Plan

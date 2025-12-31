@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { Link2, Check, Loader2, ArrowLeft, Unlink } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api/api";
-import { PlatformConfig, platforms } from "@/lib/common";
+import { platforms } from "@/lib/common";
+import { getErrorMessage } from "@/lib/getErrorMessage";
+import PlatformCard from "@/components/PlatformCard";
 
 export interface PlatformAccount {
   avatar_url: string | null;
@@ -19,131 +19,10 @@ export type ConnectedAccounts = {
   [platform: string]: PlatformAccount;
 };
 
-function PlatformCard({
-  platform,
-  connectedAccount,
-  onConnect,
-  onDisconnect,
-  isConnecting,
-  isDisconnecting,
-  isInitialLoading,
-  setSelectedPlatform,
-  setConfirmModalOpen,
-}: {
-  platform: PlatformConfig;
-  connectedAccount?: PlatformAccount;
-  onConnect: () => void;
-  onDisconnect: () => void;
-  isConnecting: boolean;
-  isDisconnecting: boolean;
-  isInitialLoading: boolean;
-  setSelectedPlatform: any;
-  setConfirmModalOpen: any;
-}) {
-  const Icon = platform.icon;
-  const isConnected = connectedAccount?.connected;
-
-  const actionableDescription = platform.description
-    ? platform.description
-    : `Connect your ${platform.name} account to enable analytics, syncing, and platform-specific features.`;
-
-  return (
-    <Card className="bg-black/40 border-white/10 overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl overflow-hidden flex items-center justify-center bg-white/5">
-              {isConnected && connectedAccount?.avatar_url ? (
-                <img
-                  src={connectedAccount.avatar_url}
-                  alt="profile"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div
-                  className={`h-full w-full rounded-xl ${platform.bgColor} flex items-center justify-center`}
-                >
-                  <Icon className={`h-6 w-6 ${platform.color}`} />
-                </div>
-              )}
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-display text-base font-medium text-foreground">
-                  {platform.name}
-                </h3>
-
-                {!platform.available && (
-                  <Badge variant="outline" className="text-xs border-white/20">
-                    Coming Soon
-                  </Badge>
-                )}
-              </div>
-
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {actionableDescription}
-              </p>
-
-              {isConnected && connectedAccount?.display_name && (
-                <p className="text-primary">@{connectedAccount.display_name}</p>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT BUTTONS */}
-          <div className="flex items-center gap-2">
-            {isInitialLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            ) : isConnected ? (
-              <>
-                <Badge className="bg-green-500/20 text-sm text-green-400 border-green-500/30 gap-1 px-4 py-2">
-                  <Check className="h-4 w-4" />
-                  Connected
-                </Badge>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-red-400"
-                  onClick={() => {
-                    setSelectedPlatform(platform.id);
-                    setConfirmModalOpen(true);
-                  }}
-                  disabled={isDisconnecting}
-                >
-                  {isDisconnecting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Unlink className="h-4 w-4" />
-                  )}
-                </Button>
-              </>
-            ) : (
-              <Button
-                onClick={onConnect}
-                disabled={!platform.available || isConnecting}
-                className="gap-2"
-              >
-                {isConnecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Link2 className="h-4 w-4" />
-                )}
-                Connect
-              </Button>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 // ------------------ MAIN PAGE ------------------
 export default function ConnectedAccountsPage() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
 
@@ -209,9 +88,7 @@ export default function ConnectedAccountsPage() {
     } catch (error: any) {
       toast({
         // title: "Connection Failed",
-        description:
-          error.response?.response?.data?.description ||
-          "Something went wrong!",
+        description: getErrorMessage(error, "Something went wrong!"),
         variant: "destructive",
       });
     } finally {
@@ -242,10 +119,7 @@ export default function ConnectedAccountsPage() {
       await fetchUserDetails();
     } catch (error: any) {
       toast({
-        description:
-          error?.response?.data?.description ||
-          error ||
-          "Something went wrong!",
+        description: getErrorMessage(error, "Something went wrong!"),
         variant: "destructive",
       });
     } finally {
@@ -259,8 +133,6 @@ export default function ConnectedAccountsPage() {
     const code = params.get("code");
     const state = params.get("state");
     const error = params.get("error");
-
-    console.log("error", error);
 
     if (error) {
       toast({
@@ -337,15 +209,15 @@ export default function ConnectedAccountsPage() {
 
         toast({
           // title: `${platformId.toUpperCase()} Connected!`,
-          // description: response?.message || "Your account is now linked.",
-          description: "Streamer connected successfully",
+          description: response?.message || "Your account is now linked.",
+          // description: "Streamer connected successfully",
         });
 
         await fetchUserDetails();
       } catch (err: any) {
         toast({
           // title: "Connection failed",
-          description: err?.message || "Authentication failed.",
+          description: getErrorMessage(err, "Authentication failed."),
           variant: "destructive",
         });
       } finally {
@@ -353,6 +225,15 @@ export default function ConnectedAccountsPage() {
       }
     })();
   }, []);
+
+  const connectedStreamingCount = platforms
+    .filter((p) => p.category === "streaming")
+    .reduce((count, platform) => {
+      if (connectedAccounts?.[platform.id]?.connected) {
+        return count + 1;
+      }
+      return count;
+    }, 0);
 
   // ------------------ LOADING STATES ------------------
   if (authLoading || isLoadingAccounts) {
@@ -408,6 +289,9 @@ export default function ConnectedAccountsPage() {
                   isInitialLoading={isLoadingAccounts}
                   setSelectedPlatform={setSelectedPlatform}
                   setConfirmModalOpen={setConfirmModalOpen}
+                  user={user}
+                  isStreamingPlatform
+                  connectedStreamingCount={connectedStreamingCount}
                 />
               ))}
           </div>
@@ -435,6 +319,7 @@ export default function ConnectedAccountsPage() {
                   isInitialLoading={isLoadingAccounts}
                   setSelectedPlatform={setSelectedPlatform}
                   setConfirmModalOpen={setConfirmModalOpen}
+                  user={user}
                 />
               ))}
           </div>

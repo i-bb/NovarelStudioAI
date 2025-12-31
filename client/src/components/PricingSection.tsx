@@ -339,7 +339,7 @@ export default function PricingSection() {
           id: planName,
           name: apiPlan.name,
           tagline: apiPlan.description,
-          badge: planName === "creator" ? "MOST POPULAR" : null,
+          badge: null,
           bullet: "",
           features: apiPlan.features,
           cta: "Subscribe",
@@ -410,8 +410,8 @@ export default function PricingSection() {
         : `$${tier.annualPrice}`;
     }
     return billingPeriod === "monthly"
-      ? plan.fixedMonthlyPrice
-      : plan.fixedAnnualPrice;
+      ? `$${plan.fixedMonthlyPrice}`
+      : `$${plan.fixedAnnualPrice}`;
   };
 
   const getAnnualBilling = (plan: Plan) => {

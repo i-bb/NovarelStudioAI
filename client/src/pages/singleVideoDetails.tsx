@@ -29,13 +29,19 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
 export default function SingleVideoDetails() {
   const params = useParams();
   const exportId = params?.id;
   const reelId = params?.reelId;
 
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const captionEditingAllowed =
+    user?.active_plan?.meta_data_json?.custom_caption_editing;
+  const manualPostingAllowed =
+    user?.active_plan?.meta_data_json?.manual_posting_enabled;
+  const downloadReelAllowed = user?.active_plan?.meta_data_json?.download_reel;
 
   const [reelData, setReelData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,18 +52,20 @@ export default function SingleVideoDetails() {
   const [captionSaving, setCaptionSaving] = useState(false);
   const [rawCaption, setRawCaption] = useState("");
   const [editedCaption, setEditedCaption] = useState("");
+  const [autoProcessing, setAutoProcessing] = useState(true);
 
   const fetchReelsData = async () => {
     setIsLoading(true);
     try {
       const response = await api.getSingleReelData(reelId || "");
       setReelData(response);
+      setAutoProcessing(response.auto_posting || false);
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Content Studio API failed:", error);
       toast({
-        title: "Loading offline data",
-        description: "Couldn't connect to server",
+        // title: "Loading offline data",
+        description: getErrorMessage(error, "Couldn't connect to server"),
         variant: "destructive",
       });
     }
@@ -83,7 +91,7 @@ export default function SingleVideoDetails() {
       const response = await api.uploadReels(platform, reelData.public_id);
 
       toast({
-        description: `Reel published on ${platform}!`,
+        description: response?.message || `Reel published on ${platform}!`,
       });
 
       fetchReelsData();
@@ -92,7 +100,7 @@ export default function SingleVideoDetails() {
 
       toast({
         title: "Publish Failed",
-        description: error?.response?.data?.description || "Please try again.",
+        description: getErrorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -120,11 +128,9 @@ export default function SingleVideoDetails() {
       }));
 
       setIsCaptionModalOpen(false);
-    } catch (error) {
-      console.log("error", error);
-
+    } catch (error: any) {
       toast({
-        title: "Update failed",
+        title: getErrorMessage(error, "Save caption failed"),
         variant: "destructive",
       });
     } finally {
@@ -154,6 +160,26 @@ export default function SingleVideoDetails() {
       toast({
         title: "Download failed",
         description: error?.message || "Unable to download video",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAutoPostToggle = async () => {
+    if (!reelData?.public_id) return;
+
+    try {
+      setAutoProcessing((prev) => !prev);
+      const response = await api.autoPostReels(reelData.public_id);
+      toast({
+        description: response?.message || "Auto post setting updated",
+      });
+    } catch (error: any) {
+      // Rollback on failure
+      setAutoProcessing((prev) => !prev);
+
+      toast({
+        description: getErrorMessage(error, "Unable to update auto post"),
         variant: "destructive",
       });
     }
@@ -254,18 +280,42 @@ export default function SingleVideoDetails() {
           <h1 className="text-2xl font-bold text-white mt-[26px]">
             {reelData.title}
           </h1>
-          <button
-            onClick={handleDownload}
-            className="
-    flex items-center gap-2 text-sm px-4 py-2 rounded-lg
-    bg-primary text-primary-foreground
-    hover:bg-primary/90
-    transition font-medium
-  "
-          >
-            <Download className="h-4 w-4" />
-            Download
-          </button>
+          <div className="flex gap-6">
+            <Button
+              onClick={handleDownload}
+              disabled={!downloadReelAllowed}
+              className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition font-medium"
+            >
+              <Download className="h-4 w-4" />
+              Download
+            </Button>
+            {/* RIGHT: Toggle */}
+            <div className="flex items-center gap-3 bg-black/40 border border-primary/90 rounded-full px-4 py-2 backdrop-blur min-w-[200px]">
+              <span className="text-sm text-muted-foreground">label</span>
+
+              <button
+                type="button"
+                onClick={handleAutoPostToggle}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+                  autoProcessing ? "bg-primary" : "bg-white/20"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-300 ${
+                    autoProcessing ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+
+              <span
+                className={`text-xs font-medium ${
+                  autoProcessing ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {autoProcessing ? "Enabled" : "Disabled"}
+              </span>
+            </div>
+          </div>
 
           <Card className="border-white/10 bg-black/60">
             <CardHeader className="pb-2">
@@ -304,12 +354,15 @@ export default function SingleVideoDetails() {
 
                 <button
                   type="button"
-                  className="text-white/70 hover:text-white transition"
+                  className={`${
+                    captionEditingAllowed
+                      ? "text-white/70 hover:text-white transition"
+                      : "text-white/20 cursor-not-allowed"
+                  } `}
+                  disabled={!captionEditingAllowed}
                   onClick={(e) => {
                     e.stopPropagation();
-
                     const raw = reelData.caption || "";
-
                     setRawCaption(raw);
                     setEditedCaption(formatCaptionForUI(raw));
                     setIsCaptionModalOpen(true);
@@ -399,6 +452,7 @@ export default function SingleVideoDetails() {
                       {integrated && !posted && (
                         <Button
                           className="text-sm px-6 py-2 rounded-md font-medium bg-primary text-[white]"
+                          disabled={!manualPostingAllowed}
                           onClick={() => handlePublish(id)}
                         >
                           {publishingPlatform === id ? (
