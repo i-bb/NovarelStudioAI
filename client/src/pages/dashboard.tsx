@@ -23,7 +23,7 @@ interface SocialMediaStats {
 interface DashboardData {
   subscription: {
     plan: string;
-    clipCreditsRemaining: number;
+    clipCreditsUsed: number;
     clipCreditsTotal: number;
     subscriptionStatus: string;
   };
@@ -70,20 +70,17 @@ function PlatformStatCard({
 }
 
 function PlanStatusCard({ subscription }: { subscription: User | null }) {
-  console.log("subscription", subscription);
-
   const clipCreditsTotal =
     subscription?.active_plan?.meta_data_json?.total_clips || 0;
-  const clipCreditsRemaining =
+  const clipCreditsUsed =
     subscription?.active_plan?.meta_data_json?.used_clips || 0;
   const dailyPostingLimitReached =
     subscription?.active_plan?.meta_data_json?.posting_limit_complete || false;
   const postingLimit =
     subscription?.active_plan?.meta_data_json?.daily_posting_limit || 0;
+
   const usagePercentage =
-    clipCreditsTotal > 0
-      ? ((clipCreditsTotal - clipCreditsRemaining) / clipCreditsTotal) * 100
-      : 0;
+    clipCreditsTotal > 0 ? (clipCreditsUsed / clipCreditsTotal) * 100 : 0;
 
   return (
     <Card className="border-white/10 bg-black/40 overflow-hidden mb-8">
@@ -116,7 +113,7 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Clip Credits</span>
             <span className="font-medium">
-              {clipCreditsRemaining} / {clipCreditsTotal} remaining
+              {clipCreditsUsed} / {clipCreditsTotal} Used
             </span>
           </div>
           <Progress value={usagePercentage} className="h-2" />
