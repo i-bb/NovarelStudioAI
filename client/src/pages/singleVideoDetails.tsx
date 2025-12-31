@@ -42,6 +42,10 @@ export default function SingleVideoDetails() {
   const manualPostingAllowed =
     user?.active_plan?.meta_data_json?.manual_posting_enabled;
   const downloadReelAllowed = user?.active_plan?.meta_data_json?.download_reel;
+  const dailyPostingLimitReached =
+    user?.active_plan?.meta_data_json?.posting_limit_complete || false;
+
+  console.log("dailyPostingLimitReached", dailyPostingLimitReached);
 
   const [reelData, setReelData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -452,7 +456,9 @@ export default function SingleVideoDetails() {
                       {integrated && !posted && (
                         <Button
                           className="text-sm px-6 py-2 rounded-md font-medium bg-primary text-[white]"
-                          disabled={!manualPostingAllowed}
+                          disabled={
+                            !manualPostingAllowed || dailyPostingLimitReached
+                          }
                           onClick={() => handlePublish(id)}
                         >
                           {publishingPlatform === id ? (
