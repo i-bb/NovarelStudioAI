@@ -579,6 +579,22 @@ export default function Subscription() {
     getSubscriptionPlans();
   }, [billingPeriod]);
 
+  useEffect(() => {
+    if (!plans.length || !activePlanId) return;
+
+    plans.forEach((plan) => {
+      if (!plan.creditTiers) return;
+
+      const matchedTierIndex = plan.creditTiers.findIndex(
+        (tier) => tier.planId === activePlanId
+      );
+
+      if (matchedTierIndex !== -1) {
+        setSelectedTier(plan.id, matchedTierIndex);
+      }
+    });
+  }, [plans, activePlanId]);
+
   const extractSessionIdFromURL = () => {
     let sessionId = null;
     const rawQuery = window.location.search.replace("?", "");
@@ -622,6 +638,15 @@ export default function Subscription() {
 
     loadUser();
   }, [stripeSessionId]);
+
+  const isTierActive = (tierPlanId: number) => {
+    return tierPlanId === activePlanId;
+  };
+
+  const getSelectedTierLabel = (plan: Plan) => {
+    if (!plan.creditTiers) return "";
+    return plan.creditTiers[getSelectedTier(plan.id)]?.credits;
+  };
 
   /* ================= RENDER ================= */
 
@@ -692,14 +717,32 @@ export default function Subscription() {
                     onValueChange={(v) => setSelectedTier(plan.id, Number(v))}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue asChild>
+                        <span>{getSelectedTierLabel(plan)}</span>
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      {plan.creditTiers.map((tier, i) => (
-                        <SelectItem key={i} value={i.toString()}>
-                          {tier.credits}
-                        </SelectItem>
-                      ))}
+                      {plan.creditTiers.map((tier, i) => {
+                        const isActiveTier = isTierActive(tier.planId);
+
+                        return (
+                          <SelectItem
+                            key={i}
+                            value={i.toString()}
+                            textValue={tier.credits}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span>{tier.credits}</span>
+
+                              {isActiveTier && (
+                                <span className="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                                  Current
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 )}

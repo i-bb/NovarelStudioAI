@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { connectAccountGuide, features } from "@/lib/common";
+import { Play } from "lucide-react";
 
 export default function FeaturesSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -10,6 +11,8 @@ export default function FeaturesSection() {
   const [loopIndex, setLoopIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [userPaused, setUserPaused] = useState(false);
 
   /* ---------------- AUTO LOOP FLAG ---------------- */
 
@@ -55,6 +58,7 @@ export default function FeaturesSection() {
 
     videoRef.current.currentTime = 0;
     setIsVideoReady(false);
+    setUserPaused(false); // ✅ reset manual pause
   }, [activeVideo]);
 
   /* ---------------- PLAY / PAUSE ---------------- */
@@ -62,12 +66,24 @@ export default function FeaturesSection() {
   useEffect(() => {
     if (!videoRef.current || !activeVideo || !isVideoReady) return;
 
-    if (isVisible) {
+    if (isVisible && !userPaused) {
       videoRef.current.play().catch(() => {});
     } else {
       videoRef.current.pause();
     }
-  }, [isVisible, isVideoReady, activeVideo]);
+  }, [isVisible, isVideoReady, activeVideo, userPaused]);
+
+  const togglePlayPause = () => {
+    if (!videoRef.current) return;
+
+    if (videoRef.current.paused) {
+      setUserPaused(false); // user wants to play
+      videoRef.current.play().catch(() => {});
+    } else {
+      setUserPaused(true); // user explicitly paused
+      videoRef.current.pause();
+    }
+  };
 
   /* ---------------- AUTO LOOP HANDLER ---------------- */
 
@@ -92,24 +108,39 @@ export default function FeaturesSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* VIDEO */}
           <div className="relative min-h-[480px] rounded-3xl border border-white/10 bg-black overflow-hidden">
-            <div ref={containerRef} className="absolute inset-0">
+            <div
+              ref={containerRef}
+              className="absolute inset-0"
+              onClick={togglePlayPause}
+            >
               {activeVideo ? (
-                <video
-                  key={isAutoLooping ? loopIndex : selectedCard}
-                  ref={videoRef}
-                  src={activeVideo}
-                  muted
-                  playsInline
-                  onLoadedMetadata={() => {
-                    setIsVideoReady(true);
+                <>
+                  <video
+                    key={isAutoLooping ? loopIndex : selectedCard}
+                    ref={videoRef}
+                    src={activeVideo}
+                    muted
+                    playsInline
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onLoadedMetadata={() => {
+                      setIsVideoReady(true);
 
-                    if (videoRef.current && isVisible) {
-                      videoRef.current.play().catch(() => {});
-                    }
-                  }}
-                  onEnded={handleVideoEnded}
-                  className="w-full h-full object-cover"
-                />
+                      if (videoRef.current && isVisible && isPlaying) {
+                        videoRef.current.play().catch(() => {});
+                      }
+                    }}
+                    onEnded={handleVideoEnded}
+                    className="w-full h-full object-cover cursor-pointer"
+                  />
+                  {userPaused && (
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
+                      <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-white/5 border border-white/20 mb-4 group-hover:bg-white/10 group-hover:scale-105 transition-all cursor-pointer">
+                        <Play className="w-8 h-8 text-white ml-1" />
+                      </div>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="absolute inset-0 bg-black" />
               )}

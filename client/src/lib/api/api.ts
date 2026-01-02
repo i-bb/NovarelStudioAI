@@ -32,37 +32,6 @@ async function safeRequest<T>(promise: Promise<any>): Promise<T> {
   }
 }
 
-// async function safeRequest<T>(promise: Promise<any>): Promise<T> {
-//   try {
-//     const res = await promise;
-//     console.log("res.data.data", res.data);
-
-//     return res.data.data as T;
-//   } catch (error: any) {
-//     // 🔴 Only handle Axios errors here
-//     if (axios.isAxiosError(error)) {
-//       let message = "Something went wrong. Please try again.";
-
-//       if (error.response) {
-//         message =
-//           (error.response.data as any)?.message ??
-//           "Server rejected the request.";
-//       } else if (error.request) {
-//         message = "Unable to reach the server. Please check your connection.";
-//       }
-
-//       throw {
-//         type: "API_ERROR",
-//         message,
-//         raw: error,
-//       };
-//     }
-
-//     // 🔥 VERY IMPORTANT: rethrow runtime errors
-//     throw error;
-//   }
-// }
-
 // ─────────────────────────────────────────────
 // Generic wrapper for all apiClient methods
 // ─────────────────────────────────────────────
@@ -185,6 +154,8 @@ export const api = {
 
   signup: (payload: SignupPayload) =>
     request<SignupResponse>("post", ENDPOINTS.signup, payload),
+
+  profile: (name: string) => request<any>("put", ENDPOINTS.profile, { name }),
 
   userDetails: () => request<User>("get", ENDPOINTS.userDetails),
 

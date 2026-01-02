@@ -248,7 +248,7 @@ const ForgotPassword = () => {
               </Button>
             </form>
             <div className="mt-6 text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
+              Remembered your password?{" "}
               <Link
                 href="/login"
                 className="text-primary hover:text-primary/80 font-semibold"
