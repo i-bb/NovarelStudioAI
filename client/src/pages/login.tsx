@@ -9,7 +9,6 @@ import { useLocation, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api/api";
 
-
 export default function LoginPage() {
   const [location, setLocation] = useLocation();
   const [email, setEmail] = useState("");
@@ -17,7 +16,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-
 
   // Redirect if already logged in
   useEffect(() => {
@@ -154,10 +152,11 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
                     tabIndex={-1}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${showPassword
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                      showPassword
                         ? "text-black"
                         : "text-muted-foreground hover:text-black"
-                      }`}
+                    }`}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -165,7 +164,6 @@ export default function LoginPage() {
                       <Eye className="h-4 w-4" />
                     )}
                   </button>
-
                 </div>
               </div>
 
@@ -193,7 +191,7 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-            <div className="relative my-6">
+            {/* <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-white/10"></div>
               </div>
@@ -212,7 +210,7 @@ export default function LoginPage() {
             >
               <FcGoogle className="h-5 w-5" />
               Continue with Google
-            </Button>
+            </Button> */}
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link

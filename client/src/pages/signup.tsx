@@ -528,7 +528,7 @@ export default function SignupPage() {
                 </Button>
               </form>
 
-              <div className="relative my-6">
+              {/* <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-white/10" />
                 </div>
@@ -547,7 +547,7 @@ export default function SignupPage() {
               >
                 <FcGoogle className="h-5 w-5" />
                 Continue with Google
-              </Button>
+              </Button> */}
 
               <p className="mt-4 text-xs text-muted-foreground text-center">
                 By signing up, you agree to our Terms of Service and Privacy
