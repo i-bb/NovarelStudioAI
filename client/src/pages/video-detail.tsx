@@ -173,8 +173,6 @@ export default function VideoDetail() {
       const selectedExport = JSON.parse(
         localStorage.getItem("selected_export") || "{}"
       );
-      console.log("selectedExport", selectedExport?.provider);
-
       fetchReelsData(exportId, selectedExport?.provider);
       setSourceVideoData(selectedExport);
     }

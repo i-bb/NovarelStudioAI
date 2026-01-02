@@ -6,10 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
-import { Clock, Film, Zap, Loader2, Play } from "lucide-react";
-import type { StreamExport } from "@shared/schema";
+import { Zap, Loader2 } from "lucide-react";
 import api, { User } from "@/lib/api/api";
-import { getStatusLabel } from "@/lib/common";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Progress } from "@/components/ui/progress";
 

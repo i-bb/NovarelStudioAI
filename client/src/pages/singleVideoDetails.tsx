@@ -30,6 +30,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function SingleVideoDetails() {
   const params = useParams();
@@ -44,8 +50,6 @@ export default function SingleVideoDetails() {
   const downloadReelAllowed = user?.active_plan?.meta_data_json?.download_reel;
   const dailyPostingLimitReached =
     user?.active_plan?.meta_data_json?.posting_limit_complete || false;
-
-  console.log("dailyPostingLimitReached", dailyPostingLimitReached);
 
   const [reelData, setReelData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -285,45 +289,91 @@ export default function SingleVideoDetails() {
             {reelData.title}
           </h1>
           <div className="flex gap-6">
-            <Button
+            {/* <Button
               onClick={handleDownload}
               disabled={!downloadReelAllowed}
               className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition font-medium"
             >
               <Download className="h-4 w-4" />
               Download
-            </Button>
+            </Button> */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* wrapper div is required because disabled buttons don’t trigger hover */}
+                  <div className="inline-block">
+                    <Button
+                      onClick={handleDownload}
+                      disabled={!downloadReelAllowed}
+                      className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition font-medium"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+
+                {!downloadReelAllowed && (
+                  <TooltipContent side="top">
+                    <p className="text-xs">
+                      Upgrade your plan to enable downloads
+                    </p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
             {/* RIGHT: Toggle */}
-            <div className="flex items-center gap-3 bg-black/40 border border-primary/90 rounded-full px-4 py-2 backdrop-blur min-w-[200px]">
-              <span className="text-sm text-muted-foreground">label</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* Wrapper needed because disabled buttons don't fire hover */}
+                  <div className="inline-block">
+                    <div className="flex items-center gap-3 bg-black/40 border border-primary/90 rounded-full px-4 py-2 backdrop-blur min-w-[200px] cursor-pointer">
+                      <span className="text-sm text-muted-foreground">
+                        label
+                      </span>
 
-              <button
-                type="button"
-                disabled={!manualPostingAllowed}
-                onClick={handleAutoPostToggle}
-                className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                  !manualPostingAllowed
-                    ? "bg-primary/40"
-                    : autoProcessing
-                    ? "bg-primary"
-                    : "bg-white/20"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-300 ${
-                    autoProcessing ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </button>
+                      <button
+                        type="button"
+                        disabled={!manualPostingAllowed}
+                        onClick={handleAutoPostToggle}
+                        className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+                          !manualPostingAllowed
+                            ? "bg-primary/40"
+                            : autoProcessing
+                            ? "bg-primary"
+                            : "bg-white/20"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-300 ${
+                            autoProcessing ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
 
-              <span
-                className={`text-xs font-medium ${
-                  autoProcessing ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                {autoProcessing ? "Enabled" : "Disabled"}
-              </span>
-            </div>
+                      <span
+                        className={`text-xs font-medium ${
+                          autoProcessing
+                            ? "text-primary"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {autoProcessing ? "Enabled" : "Disabled"}
+                      </span>
+                    </div>
+                  </div>
+                </TooltipTrigger>
+
+                {!manualPostingAllowed && (
+                  <TooltipContent side="top">
+                    <p className="text-xs">
+                      Upgrade your plan to enable auto posting
+                    </p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           <Card className="border-white/10 bg-black/60">
@@ -457,24 +507,44 @@ export default function SingleVideoDetails() {
                         </span>
                       )}
 
-                      {/* Integrated but NOT posted → Show Publish button */}
                       {integrated && !posted && (
-                        <Button
-                          className="text-sm px-6 py-2 rounded-md font-medium bg-primary text-[white]"
-                          disabled={
-                            !manualPostingAllowed || dailyPostingLimitReached
-                          }
-                          onClick={() => handlePublish(id)}
-                        >
-                          {publishingPlatform === id ? (
-                            <div className="flex gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              <span>Loading...</span>
-                            </div>
-                          ) : (
-                            "Publish"
-                          )}
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              {/* Wrapper needed because disabled buttons don’t trigger hover */}
+                              <div className="inline-block">
+                                <Button
+                                  className="text-sm px-6 py-2 rounded-md font-medium bg-primary text-[white]"
+                                  disabled={
+                                    !manualPostingAllowed ||
+                                    dailyPostingLimitReached
+                                  }
+                                  onClick={() => handlePublish(id)}
+                                >
+                                  {publishingPlatform === id ? (
+                                    <div className="flex gap-2">
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                      <span>Loading...</span>
+                                    </div>
+                                  ) : (
+                                    "Publish"
+                                  )}
+                                </Button>
+                              </div>
+                            </TooltipTrigger>
+
+                            {(!manualPostingAllowed ||
+                              dailyPostingLimitReached) && (
+                              <TooltipContent side="top">
+                                <p className="text-xs">
+                                  {!manualPostingAllowed
+                                    ? "Upgrade your plan to enable manual posting"
+                                    : "Daily posting limit reached"}
+                                </p>
+                              </TooltipContent>
+                            )}
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
 
                       {/* Integrated AND posted → Show Done badge */}

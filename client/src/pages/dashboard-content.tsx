@@ -22,8 +22,6 @@ export default function DashboardContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<"kick" | "twitch">("kick");
 
-  console.log("exports", exports);
-
   const ITEMS_PER_PAGE = 12;
   const totalPages = totalCount;
 

@@ -629,8 +629,6 @@ export default function Subscription() {
     return <div className="text-center py-20">Loading...</div>;
   }
 
-  console.log("showSuccessModal", showSuccess, sessionDetails);
-
   return (
     <>
       <section className="max-w-7xl mx-auto px-4">

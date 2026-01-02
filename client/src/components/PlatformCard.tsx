@@ -6,6 +6,12 @@ import { Badge } from "./ui/badge";
 import { Check, Link2, Loader2, Unlink } from "lucide-react";
 import { Button } from "./ui/button";
 import { User } from "@/lib/api/api";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 const PlatformCard = ({
   platform,
@@ -39,7 +45,6 @@ const PlatformCard = ({
 
   const maxStreamingConnections =
     Number(user?.active_plan?.meta_data_json?.connected_platforms) || 0;
-  console.log("maxStreamingConnections", maxStreamingConnections);
 
   const safeStreamingCount = connectedStreamingCount ?? 0;
 
@@ -48,7 +53,6 @@ const PlatformCard = ({
     !isConnected &&
     maxStreamingConnections > 0 &&
     safeStreamingCount >= maxStreamingConnections;
-  console.log("isStreamingLimitReached", isStreamingLimitReached);
 
   const actionableDescription = platform.description
     ? platform.description
@@ -133,20 +137,39 @@ const PlatformCard = ({
                 </Button>
               </>
             ) : (
-              <Button
-                onClick={onConnect}
-                disabled={
-                  !platform.available || isConnecting || isStreamingLimitReached
-                }
-                className="gap-2"
-              >
-                {isConnecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Link2 className="h-4 w-4" />
-                )}
-                Connect
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="inline-block">
+                      <Button
+                        onClick={onConnect}
+                        disabled={
+                          !platform.available ||
+                          isConnecting ||
+                          isStreamingLimitReached
+                        }
+                        className="gap-2"
+                      >
+                        {isConnecting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Link2 className="h-4 w-4" />
+                        )}
+                        Connect
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+
+                  {isStreamingLimitReached && (
+                    <TooltipContent side="top">
+                      <p className="text-xs">
+                        You have reached the maximum number of streaming
+                        platforms for your plan
+                      </p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         </div>
