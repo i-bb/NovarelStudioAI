@@ -79,12 +79,19 @@ export default function FeaturesSection() {
 
   /* ---------------- UI ---------------- */
 
+  const activeCardId = useMemo(() => {
+    if (selectedCard) return selectedCard;
+
+    // Auto-looping → match card by loopIndex
+    return connectAccountGuide[loopIndex]?.id ?? null;
+  }, [selectedCard, loopIndex]);
+
   return (
     <section id="features" className="relative">
       <div className="relative max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* VIDEO */}
-          <div className="relative lg:min-h-[480px] rounded-3xl border border-white/10 bg-black overflow-hidden">
+          <div className="relative min-h-[480px] rounded-3xl border border-white/10 bg-black overflow-hidden">
             <div ref={containerRef} className="absolute inset-0">
               {activeVideo ? (
                 <video
@@ -120,7 +127,7 @@ export default function FeaturesSection() {
                   title={f.title}
                   description={f.description}
                   tag={f.tag}
-                  accent={selectedCard === f.id}
+                  accent={activeCardId === f.id}
                   onClick={() => setSelectedCard(f.id)}
                   clickable
                 />
