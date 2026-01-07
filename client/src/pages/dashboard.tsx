@@ -10,6 +10,7 @@ import { Zap, Loader2 } from "lucide-react";
 import api, { User } from "@/lib/api/api";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Progress } from "@/components/ui/progress";
+import { getExpiryLabel } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────
 interface SocialMediaStats {
@@ -85,6 +86,7 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3"> */}
             <div className="p-2 rounded-lg bg-emerald-400/10">
               <Zap className="h-5 w-5 text-emerald-400" />
             </div>
@@ -93,19 +95,35 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
                 {subscription?.active_plan?.name}
               </h3>
               <Badge
-                variant="secondary"
+                variant={
+                  subscription?.active_plan?.status === "active"
+                    ? "secondary"
+                    : "destructive"
+                }
                 className="text-[10px] cursor-default hover:text-white"
               >
                 {subscription?.active_plan?.status}
               </Badge>
             </div>
+            {/* </div> */}
           </div>
-          <Link href="/subscription">
-            <Button size="sm">
-              <Zap className="h-4 w-4 mr-2" />
-              Upgrade
-            </Button>
-          </Link>
+          <div className="flex flex-col gap-3">
+            {subscription?.active_plan?.end_date && (
+              <p
+                className={`text-xs mt-1 text-red-400 ${getExpiryLabel(
+                  subscription?.active_plan?.end_date
+                )}`}
+              >
+                {getExpiryLabel(subscription?.active_plan?.end_date)}
+              </p>
+            )}
+            <Link href="/subscription">
+              <Button size="sm">
+                <Zap className="h-4 w-4 mr-2" />
+                Upgrade
+              </Button>
+            </Link>
+          </div>
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">

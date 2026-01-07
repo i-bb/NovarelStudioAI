@@ -42,6 +42,7 @@ type Plan = {
   creditTiers: CreditTier[] | null;
   fixedMonthlyPrice?: string;
   fixedAnnualPrice?: string;
+  clipLimit?: number;
 };
 
 export default function PricingSection() {
@@ -75,6 +76,7 @@ export default function PricingSection() {
           creditTiers: null,
           fixedMonthlyPrice: apiPlan.prices[0]?.price,
           fixedAnnualPrice: apiPlan.prices[0]?.price,
+          clipLimit: apiPlan.prices[0]?.metadata_json?.clip_limit || 0,
         });
       } else {
         const creditTiers: CreditTier[] = apiPlan.prices.map((price: any) => {
@@ -248,6 +250,14 @@ export default function PricingSection() {
                       <p className="text-xs mt-1">{getAnnualBilling(plan)}</p>
                     )}
                   </div>
+
+                  {plan.id === "starter" && plan.clipLimit && (
+                    <div className="border border-input rounded-md px-[12px] py-[8px]">
+                      <p className="text-[14px] text-white leading-[20px]">
+                        Upto {plan.clipLimit.toLocaleString()} clips/month
+                      </p>
+                    </div>
+                  )}
 
                   {plan.creditTiers && (
                     <Select

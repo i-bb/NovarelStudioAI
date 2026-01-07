@@ -19,6 +19,7 @@ export const TransformApiResponseToPlans = (apiData: any): Plan[] => {
         fixedMonthlyPrice: apiPlan.prices[0]?.price,
         fixedAnnualPrice: apiPlan.prices[0]?.price,
         planId: apiPlan.prices[0]?.plan_id,
+        clipLimit: apiPlan.prices[0]?.metadata_json?.clip_limit || 0,
       });
     } else {
       const creditTiers: CreditTier[] = apiPlan.prices

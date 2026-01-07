@@ -78,8 +78,9 @@ export interface ActivePlan {
   name: string | null;
   price: number | null;
   start_date: string | null;
-  status: "active" | "inActive";
+  status: "active" | "inactive" | null;
   meta_data_json: MetaDataJSON;
+  has_purchased_any_plan: boolean;
 }
 
 export interface ConnectedAccounts {
@@ -224,6 +225,8 @@ export const api = {
 
   purchaseSubscription: (planId: number) =>
     request<any>("post", ENDPOINTS.subscriptionPurchase, { plan_id: planId }),
+
+  cancelSubscription: () => request<any>("put", ENDPOINTS.subscriptionCancel),
 
   // TRANSACTIONS
   getTransactionHistory: (page: string, limit: string) =>

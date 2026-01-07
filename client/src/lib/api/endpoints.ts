@@ -15,6 +15,7 @@ export const ENDPOINTS = {
   singleReel: "/reels",
   subscriptionPlan: "/subscription/plans",
   subscriptionPurchase: "/subscription/purchase",
+  subscriptionCancel: "/subscription/cancel",
   transaction: "/subscription/transaction",
   reels: (platform: string, reelId: string) =>
     `videos/${platform}/${reelId}/reels` as const,
