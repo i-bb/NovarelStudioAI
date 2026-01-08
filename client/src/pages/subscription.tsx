@@ -626,7 +626,7 @@ export default function Subscription() {
   const getAnnualBilling = (plan: Plan) => {
     if (plan.creditTiers && billingPeriod === "annual") {
       const tier = plan.creditTiers[getSelectedTier(plan.id)];
-      return `$${tier.annualPrice}/month billed annually`;
+      return `$${tier.price}/month billed annually`;
     }
     return null;
   };
