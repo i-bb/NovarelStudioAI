@@ -76,6 +76,39 @@ export default function DashboardContent() {
     });
   }, [currentPage]);
 
+  useEffect(() => {
+    const isReturning = sessionStorage.getItem("content_returning");
+
+    if (!isReturning) {
+      // Fresh entry → always default
+      setActiveTab("kick");
+      setCurrentPage(1);
+
+      localStorage.removeItem("content_active_tab");
+      localStorage.removeItem("content_active_page");
+      return;
+    }
+
+    // ✅ returning from video
+    const savedTab = localStorage.getItem("content_active_tab") as
+      | "kick"
+      | "twitch"
+      | null;
+
+    const savedPage = localStorage.getItem("content_active_page");
+
+    if (savedTab) {
+      setActiveTab(savedTab);
+    }
+
+    if (savedPage && !isNaN(Number(savedPage))) {
+      setCurrentPage(Number(savedPage));
+    }
+
+    // 🔥 IMPORTANT: consume the flag
+    sessionStorage.removeItem("content_returning");
+  }, []);
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -111,7 +144,14 @@ export default function DashboardContent() {
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
       <div className="flex items-center gap-4 mb-8">
-        <Link href="/dashboard">
+        <Link
+          href="/dashboard"
+          onClick={() => {
+            localStorage.removeItem("content_active_tab");
+            localStorage.removeItem("content_active_page");
+            sessionStorage.removeItem("content_returning");
+          }}
+        >
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -138,7 +178,13 @@ export default function DashboardContent() {
             <Button
               key={tab.key}
               size="sm"
-              onClick={() => setActiveTab(tab.key as any)}
+              // onClick={() => setActiveTab(tab.key as any)}
+              onClick={() => {
+                setActiveTab(tab.key as any);
+                setCurrentPage(1);
+                localStorage.setItem("content_active_tab", tab.key);
+                localStorage.setItem("content_active_page", "1");
+              }}
               className={` flex items-center gap-2 border ${
                 activeTab === tab.key
                   ? "bg-primary border-primary"
@@ -202,6 +248,12 @@ export default function DashboardContent() {
                           "selected_export",
                           JSON.stringify(exp)
                         );
+                        localStorage.setItem("content_active_tab", activeTab);
+                        localStorage.setItem(
+                          "content_active_page",
+                          String(currentPage)
+                        );
+                        sessionStorage.setItem("content_returning", "true");
                       }}
                     >
                       <Card className="group overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 flex flex-col h-full">
@@ -329,7 +381,14 @@ export default function DashboardContent() {
                 variant="ghost"
                 size="sm"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                // onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                onClick={() => {
+                  setCurrentPage((p) => {
+                    const next = Math.max(p - 1, 1);
+                    localStorage.setItem("content_active_page", String(next));
+                    return next;
+                  });
+                }}
               >
                 Previous
               </Button>
@@ -342,7 +401,11 @@ export default function DashboardContent() {
                     size="sm"
                     variant={page === currentPage ? "default" : "ghost"}
                     className="min-w-[36px]"
-                    onClick={() => setCurrentPage(page)}
+                    // onClick={() => setCurrentPage(page)}
+                    onClick={() => {
+                      setCurrentPage(page);
+                      localStorage.setItem("content_active_page", String(page));
+                    }}
                   >
                     {page}
                   </Button>
@@ -353,8 +416,15 @@ export default function DashboardContent() {
                 variant="ghost"
                 size="sm"
                 disabled={currentPage === totalPages}
+                // onClick={() =>
+                //   setCurrentPage((p) => Math.min(p + 1, totalPages))
+                // }
                 onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                  setCurrentPage((p) => {
+                    const next = Math.min(p + 1, totalPages);
+                    localStorage.setItem("content_active_page", String(next));
+                    return next;
+                  })
                 }
               >
                 Next

@@ -289,14 +289,6 @@ export default function SingleVideoDetails() {
             {reelData.title}
           </h1>
           <div className="flex gap-6">
-            {/* <Button
-              onClick={handleDownload}
-              disabled={!downloadReelAllowed}
-              className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition font-medium"
-            >
-              <Download className="h-4 w-4" />
-              Download
-            </Button> */}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -323,34 +315,36 @@ export default function SingleVideoDetails() {
               </Tooltip>
             </TooltipProvider>
             {/* RIGHT: Toggle */}
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  {/* Wrapper needed because disabled buttons don't fire hover */}
                   <div className="inline-block">
-                    <div className="flex items-center gap-3 bg-black/40 border border-primary/90 rounded-full px-4 py-2 backdrop-blur min-w-[200px] cursor-pointer">
+                    <div className="flex items-center gap-3 bg-black/40 border border-primary/90 rounded-lg px-4 py-2 backdrop-blur min-w-[200px] cursor-pointer">
                       <span className="text-sm text-muted-foreground">
-                        label
+                        Auto Post
                       </span>
 
-                      <button
-                        type="button"
-                        disabled={!manualPostingAllowed}
-                        onClick={handleAutoPostToggle}
-                        className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
-                          !manualPostingAllowed
-                            ? "bg-primary/40"
-                            : autoProcessing
-                            ? "bg-primary"
-                            : "bg-white/20"
-                        }`}
-                      >
-                        <span
-                          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-300 ${
-                            autoProcessing ? "translate-x-5" : "translate-x-0"
+                      <div className="flex flex-col items-center gap-1">
+                        <button
+                          type="button"
+                          disabled={!manualPostingAllowed}
+                          onClick={handleAutoPostToggle}
+                          className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+                            !manualPostingAllowed
+                              ? "bg-primary/40"
+                              : autoProcessing
+                              ? "bg-primary"
+                              : "bg-white/20"
                           }`}
-                        />
-                      </button>
+                        >
+                          <span
+                            className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-300 ${
+                              autoProcessing ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
+                      </div>
 
                       <span
                         className={`text-xs font-medium ${
@@ -359,7 +353,7 @@ export default function SingleVideoDetails() {
                             : "text-muted-foreground"
                         }`}
                       >
-                        {autoProcessing ? "Enabled" : "Disabled"}
+                        {autoProcessing ? "On" : "Off"}
                       </span>
                     </div>
                   </div>

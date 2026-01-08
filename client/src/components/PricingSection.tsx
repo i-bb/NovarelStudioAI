@@ -21,29 +21,7 @@ import logoImage from "@assets/ChatGPT Image Nov 26, 2025, 05_11_54 PM_176419511
 import api from "@/lib/api/api";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/getErrorMessage";
-
-type CreditTier = {
-  credits: string;
-  clipsPerDay: string;
-  monthlyPrice: number;
-  annualPrice: number;
-  clipLimit: number;
-};
-
-type Plan = {
-  id: string;
-  name: string;
-  tagline: string;
-  badge: string | null;
-  bullet: string;
-  features: string[];
-  cta: string;
-  popular: boolean;
-  creditTiers: CreditTier[] | null;
-  fixedMonthlyPrice?: string;
-  fixedAnnualPrice?: string;
-  clipLimit?: number;
-};
+import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
 
 export default function PricingSection() {
   const [, navigate] = useLocation();
@@ -56,78 +34,15 @@ export default function PricingSection() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /* ---------------- API → UI TRANSFORM (same logic as Subscription page) ---------------- */
-  const transformApiResponseToPlans = (apiData: any): Plan[] => {
-    const transformed: Plan[] = [];
-
-    apiData.plans.forEach((apiPlan: any) => {
-      const planName = apiPlan.name.toLowerCase();
-
-      if (planName === "starter") {
-        transformed.push({
-          id: "starter",
-          name: apiPlan.name,
-          tagline: apiPlan.description,
-          badge: null,
-          bullet: "",
-          features: apiPlan.features,
-          cta: "Get Started",
-          popular: false,
-          creditTiers: null,
-          fixedMonthlyPrice: apiPlan.prices[0]?.price,
-          fixedAnnualPrice: apiPlan.prices[0]?.price,
-          clipLimit: apiPlan.prices[0]?.metadata_json?.clip_limit || 0,
-        });
-      } else {
-        const creditTiers: CreditTier[] = apiPlan.prices.map((price: any) => {
-          const clipLimit =
-            price.interval === "month"
-              ? price.metadata_json?.clip_limit
-              : price.metadata_json?.clip_limit / 12 || 0;
-          const days = price.interval === "month" ? 30 : 365;
-          const clipsPerDay = Math.round(clipLimit / days);
-
-          return {
-            credits: `${clipLimit.toLocaleString()} credits/month`,
-            clipsPerDay: `About ${clipsPerDay} clips/day`,
-            monthlyPrice:
-              price.interval === "month" ? price.price : price.price / 12,
-            annualPrice: price.price,
-            clipLimit,
-          };
-        });
-
-        creditTiers.sort((a, b) => a.clipLimit - b.clipLimit);
-
-        transformed.push({
-          id: planName,
-          name: apiPlan.name,
-          tagline: apiPlan.description,
-          badge: null,
-          bullet: "",
-          features: apiPlan.features,
-          cta: "Subscribe",
-          popular: planName === "creator",
-          creditTiers,
-        });
-      }
-    });
-
-    return transformed.sort(
-      (a, b) =>
-        ["starter", "creator", "studio"].indexOf(a.id) -
-        ["starter", "creator", "studio"].indexOf(b.id)
-    );
-  };
-
   /* ---------------- LOAD PLANS ---------------- */
   useEffect(() => {
     const loadPlans = async () => {
       try {
         setLoading(true);
-        const interval = billingPeriod === "monthly" ? "month" : "year";
-        const response = await api.getSubscriptionPlansByInterval(interval);
-        setPlans(transformApiResponseToPlans(response));
+        const response = await api.getSubscriptionPlansByInterval(
+          billingPeriod === "monthly" ? "month" : "year"
+        );
+        setPlans(TransformApiResponseToPlans(response));
       } catch (err) {
         toast({
           description: getErrorMessage(err || "Failed to load plans"),
@@ -169,43 +84,44 @@ export default function PricingSection() {
   const getPrice = (plan: Plan) => {
     if (plan.creditTiers) {
       const tier = plan.creditTiers[getSelectedTier(plan.id)];
-      return billingPeriod === "monthly"
-        ? `$${tier.monthlyPrice}`
-        : `$${tier.annualPrice}`;
+      if (billingPeriod === "annual") {
+        return `$${tier.monthlyPrice}/month`;
+      } else {
+        return `$${tier.price}/month`;
+      }
     }
-    return billingPeriod === "monthly"
-      ? `$${plan.fixedMonthlyPrice}`
-      : `$${plan.fixedAnnualPrice}`;
+    return `$${plan.fixedMonthlyPrice}`;
   };
 
   const getAnnualBilling = (plan: Plan) => {
-    if (plan.creditTiers) {
+    if (plan.creditTiers && billingPeriod === "annual") {
       const tier = plan.creditTiers[getSelectedTier(plan.id)];
-      return `$${tier.annualPrice * 12} billed annually`;
+      return `$${tier.price} billed annually`;
     }
     return null;
   };
 
-  const getClipsPerDay = (plan: Plan) =>
-    plan.creditTiers
-      ? plan.creditTiers[getSelectedTier(plan.id)].clipsPerDay
-      : null;
+  if (loading) {
+    return <div className="text-center py-20">Loading...</div>;
+  }
 
   /* ---------------- UI (UNCHANGED) ---------------- */
   return (
     <section id="pricing" className="relative pb-10">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
+      <div className="relative z-10 max-w-7xl mx-auto">
         <div className="mb-12 flex flex-col items-center text-center">
-          <img
-            src={logoImage}
-            alt="NovarelStudio"
-            className="w-24 h-24 mb-6 grayscale self-start"
-            style={{ clipPath: "circle(38% at center)" }}
-          />
+          <div className="flex-col lg:flex-row flex mt-8 items-center justify-items-center gap-4">
+            <img
+              src={logoImage}
+              alt="NovarelStudio"
+              className="w-24 h-24 grayscale self-center lg:self-start"
+              style={{ clipPath: "circle(38% at center)" }}
+            />
 
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold">
-            Pay for the clips that actually move your channel
-          </h2>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold">
+              Pay for the clips that actually move your channel
+            </h2>
+          </div>
 
           <div className="flex gap-2 mt-4">
             <BillingToggleButton
@@ -221,16 +137,12 @@ export default function PricingSection() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="text-center text-muted-foreground">Loading...</div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
-            {plans.map((plan) => (
+        <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
+          {plans.map((plan) => {
+            return (
               <Card
                 key={plan.id}
-                className={`relative flex h-full flex-col rounded-3xl border bg-black/70 backdrop-blur-xl ${
-                  plan.popular ? "border-white/40" : "border-white/10"
-                }`}
+                className="relative flex h-full flex-col rounded-3xl border bg-black/70 backdrop-blur-xl border-white/10"
               >
                 <CardHeader>
                   {plan.badge && (
@@ -239,7 +151,7 @@ export default function PricingSection() {
                     </span>
                   )}
 
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <CardDescription>{plan.tagline}</CardDescription>
 
                   <div className="mt-4">
@@ -280,14 +192,7 @@ export default function PricingSection() {
                   )}
                 </CardHeader>
 
-                <CardContent>
-                  {plan.creditTiers && (
-                    <div className="flex items-center gap-2">
-                      <Check className="h-3 w-3 text-emerald-300" />
-                      <span>{getClipsPerDay(plan)}</span>
-                    </div>
-                  )}
-
+                <CardContent className="flex-1">
                   {plan.features.map((f, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <Check className="h-3 w-3 text-emerald-300" />
@@ -298,16 +203,16 @@ export default function PricingSection() {
 
                 <CardFooter>
                   <Button
-                    className="w-full rounded-full"
+                    className="w-full border-none"
                     onClick={() => handlePlanSelect(plan.id)}
                   >
                     {plan.cta}
                   </Button>
                 </CardFooter>
               </Card>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
     </section>
   );

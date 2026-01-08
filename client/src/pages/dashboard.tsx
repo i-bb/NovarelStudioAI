@@ -86,7 +86,6 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            {/* <div className="flex items-center gap-3"> */}
             <div className="p-2 rounded-lg bg-emerald-400/10">
               <Zap className="h-5 w-5 text-emerald-400" />
             </div>
@@ -105,18 +104,23 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
                 {subscription?.active_plan?.status}
               </Badge>
             </div>
-            {/* </div> */}
           </div>
-          <div className="flex flex-col gap-3">
+
+          <div className="flex flex-col items-end justify-center gap-2 text-right">
             {subscription?.active_plan?.end_date && (
               <p
-                className={`text-xs mt-1 text-red-400 ${getExpiryLabel(
-                  subscription?.active_plan?.end_date
-                )}`}
+                className={`text-xs mt-1 ${
+                  getExpiryLabel(
+                    subscription?.active_plan?.end_date
+                  ).startsWith("Expired")
+                    ? "text-red-400"
+                    : "text-amber-400"
+                }`}
               >
                 {getExpiryLabel(subscription?.active_plan?.end_date)}
               </p>
             )}
+
             <Link href="/subscription">
               <Button size="sm">
                 <Zap className="h-4 w-4 mr-2" />
@@ -137,7 +141,7 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
         {dailyPostingLimitReached && (
           <div className="space-y-2">
             <div className="px-2 py-4 bg-red-500/10 text-red-400 rounded-md mt-4">
-              <p>{`You have utilized your daily positing limit of ${postingLimit} post`}</p>
+              <p>{`You have utilized your daily positing limit of ${postingLimit} posts`}</p>
             </div>
           </div>
         )}
