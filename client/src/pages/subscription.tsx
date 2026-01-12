@@ -110,8 +110,6 @@ export default function Subscription() {
     return plan.creditTiers?.some((t) => t.planId === activePlanId);
   });
 
-  console.log("activeBackendPlan", activeBackendPlan);
-
   const getActiveTierIndex = (plan: Plan) => {
     if (!plan.creditTiers || !activePlanId) return null;
     return plan.creditTiers.findIndex((t) => t.planId === activePlanId);

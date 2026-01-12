@@ -29,7 +29,6 @@ export function DashboardNav() {
   const [location] = useLocation();
 
   const { user } = useAuth();
-  console.log("user", user);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

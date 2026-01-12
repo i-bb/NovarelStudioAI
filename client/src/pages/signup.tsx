@@ -10,8 +10,7 @@ import { useLocation, Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api/api";
 import { getErrorMessage } from "@/lib/getErrorMessage";
-import { Plan } from "./subscription";
-import { TransformApiResponseToPlans } from "@/lib/MapApiPlans";
+import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
 
 type PlanInfo = {
   name: string;
@@ -33,8 +32,6 @@ export default function SignupPage() {
     | "monthly"
     | "annual";
   const emailParam = params.get("email") || "";
-
-  console.log("planParam", planParam);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState(emailParam);
@@ -130,8 +127,6 @@ export default function SignupPage() {
       badge: planDef.badge ?? undefined,
     };
   }, [plans, planParam, tierParam, billingPeriod]);
-
-  console.log("selectedPlanInfo", selectedPlanInfo);
 
   // const handleSignup = async (e: React.FormEvent) => {
   //   e.preventDefault();
