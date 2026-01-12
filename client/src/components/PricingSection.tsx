@@ -158,6 +158,10 @@ export default function PricingSection() {
                     <div className="text-3xl font-semibold">
                       {getPrice(plan)}
                     </div>
+
+                    {plan.id !== "starter" && (
+                      <p className="text-[14px]">1 credit = 1 clip</p>
+                    )}
                     {billingPeriod === "annual" && plan.creditTiers && (
                       <p className="text-xs mt-1">{getAnnualBilling(plan)}</p>
                     )}

@@ -25,7 +25,7 @@ export const getExpiryLabel = (isoDate: string) => {
   }
 
   if (expiry > today) {
-    return `Expiries on ${formatDate(isoDate)}`;
+    return `Expires on ${formatDate(isoDate)}`;
   }
 
   return `Expired on ${formatDate(isoDate)}`;

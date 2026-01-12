@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
 import type { Clip } from "@shared/schema";
 import { api } from "@/lib/api/api";
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import { useAuth } from "@/hooks/AuthContext";
 
 function ClipCard({ clip, exportId }: { clip: any; exportId: string }) {
   const durationSeconds = clip.duration ?? clip.durationSeconds;
@@ -236,7 +236,8 @@ export default function VideoDetail() {
       <Card className="border-white/10 bg-black/40 mb-8">
         <CardContent className="p-4 flex items-center gap-4">
           <div className="h-20 w-32 rounded-lg bg-gradient-to-br from-primary/20 to-emerald-500/20 flex items-center justify-center">
-            <Play className="h-8 w-8 text-white/50" />
+            {/* <Play className="h-8 w-8 text-white/50" /> */}
+            <img src={sourceVideoData?.poster_url} alt="Thumbnail" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground mb-1">Source Video</p>

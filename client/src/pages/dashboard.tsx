@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +10,7 @@ import api, { User } from "@/lib/api/api";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Progress } from "@/components/ui/progress";
 import { getExpiryLabel } from "@/lib/utils";
+import { useAuth } from "@/hooks/AuthContext";
 
 // ── Types ─────────────────────────────────────
 interface SocialMediaStats {
@@ -77,6 +77,7 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
     subscription?.active_plan?.meta_data_json?.posting_limit_complete || false;
   const postingLimit =
     subscription?.active_plan?.meta_data_json?.daily_posting_limit || 0;
+  const isTopPlan = subscription?.active_plan?.is_top_plan || false;
 
   const usagePercentage =
     clipCreditsTotal > 0 ? (clipCreditsUsed / clipCreditsTotal) * 100 : 0;
@@ -121,12 +122,23 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
               </p>
             )}
 
-            <Link href="/subscription">
-              <Button size="sm">
+            {isTopPlan ? (
+              <Button
+                size="sm"
+                disabled
+                className="cursor-not-allowed opacity-60"
+              >
                 <Zap className="h-4 w-4 mr-2" />
                 Upgrade
               </Button>
-            </Link>
+            ) : (
+              <Link href="/subscription">
+                <Button size="sm">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Upgrade
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
         <div className="space-y-2">

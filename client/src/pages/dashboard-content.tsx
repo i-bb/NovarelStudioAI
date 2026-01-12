@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Play, Clock, ArrowLeft, Film } from "lucide-react";
-import type { StreamExport } from "@shared/schema";
 import api from "@/lib/api/api";
 import { getStatusLabel } from "@/lib/common";
 import kick from "@assets/generated_images/kick.svg";
@@ -20,7 +19,7 @@ export default function DashboardContent() {
   const [totalCount, setTotalCount] = useState(0);
   const [exportsLoading, setExportsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<"kick" | "twitch">("kick");
+  const [activeTab, setActiveTab] = useState<"kick" | "twitch">("twitch");
 
   const ITEMS_PER_PAGE = 12;
   const totalPages = totalCount;
@@ -81,7 +80,7 @@ export default function DashboardContent() {
 
     if (!isReturning) {
       // Fresh entry → always default
-      setActiveTab("kick");
+      setActiveTab("twitch");
       setCurrentPage(1);
 
       localStorage.removeItem("content_active_tab");
@@ -109,6 +108,13 @@ export default function DashboardContent() {
     sessionStorage.removeItem("content_returning");
   }, []);
 
+  const isPlanExpired = (() => {
+    const endDate = user?.active_plan?.end_date;
+    if (!endDate) return false;
+
+    return new Date(endDate).getTime() < Date.now();
+  })();
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -118,18 +124,34 @@ export default function DashboardContent() {
   }
 
   if (!isAuthenticated) return null;
+  const isClipLimitReached =
+    user?.active_plan?.meta_data_json?.clips_limit_reached;
 
-  if (user && user?.active_plan?.status !== "active") {
+  if (isPlanExpired) {
     return (
       <main className="min-h-[70vh] flex items-center justify-center px-4 ">
         <Card className="p-10 text-center border-none">
           <h2 className="text-2xl font-bold mb-3">No Content Available</h2>
-          <p className="text-muted-foreground">
-            You do not have an active subscription plan.
-          </p>
-          <p className="text-muted-foreground mb-6">
-            To unlock content features, please purchase a plan.
-          </p>
+          {isClipLimitReached ? (
+            <>
+              <p className="text-muted-foreground">
+                You do not have an active subscription plan.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                To unlock content features, please purchase a plan.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-muted-foreground">
+                You still have unused credits on your account.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                Renew or upgrade your plan to use your remaining credits and
+                access content features.
+              </p>
+            </>
+          )}
 
           <Link href="/subscription">
             <Button className="bg-primary hover:bg-primary-700 text-white">
@@ -172,8 +194,8 @@ export default function DashboardContent() {
         {/* LEFT: Kick / Twitch */}
         <div className="flex gap-2">
           {[
-            { key: "kick", label: "Kick", logo: kick },
             { key: "twitch", label: "Twitch", logo: twitch },
+            { key: "kick", label: "Kick", logo: kick },
           ].map((tab) => (
             <Button
               key={tab.key}
@@ -258,7 +280,7 @@ export default function DashboardContent() {
                     >
                       <Card className="group overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 flex flex-col h-full">
                         {/* Thumbnail */}
-                        <div className="aspect-video relative">
+                        <div className="relative h-[220px] w-full overflow-hidden bg-black">
                           {exp.poster_url ? (
                             <img
                               src={exp.poster_url}
@@ -307,6 +329,10 @@ export default function DashboardContent() {
                                   )
                                 : "Not Available"}
                             </p>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm">Posted</p>
+                            <p className="text-sm">{`${exp.posted_reels}/${exp.total_reels}`}</p>
                           </div>
                         </CardContent>
                       </Card>

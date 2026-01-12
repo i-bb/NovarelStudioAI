@@ -16,7 +16,6 @@ import { Progress } from "@/components/ui/progress";
 import { useParams } from "wouter";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api/api";
-import { useAuth } from "@/hooks/useAuth";
 import { platforms } from "@/lib/common";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -36,6 +35,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAuth } from "@/hooks/AuthContext";
 
 export default function SingleVideoDetails() {
   const params = useParams();
@@ -475,7 +475,7 @@ export default function SingleVideoDetails() {
                     <div
                       key={name}
                       className={`flex items-center justify-between p-3 rounded-lg bg-white/5 ${
-                        posted ? "" : "opacity-60"
+                        integrated && !posted ? "" : "opacity-60"
                       }`}
                     >
                       <div className="flex items-center gap-3">

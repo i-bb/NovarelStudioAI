@@ -96,7 +96,7 @@ export function TopNav() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="ghost"
-            className="h-8 rounded-full border border-transparent px-3 text-xs font-medium text-muted-foreground hover:border-white/15 hover:bg-white/5 hover:text-foreground"
+            className="hidden sm:block h-8 rounded-full border border-transparent px-3 text-xs font-medium text-muted-foreground hover:border-white/15 hover:bg-white/5 hover:text-foreground"
             asChild
           >
             <Link href="/login">Log in</Link>
@@ -107,8 +107,8 @@ export function TopNav() {
             asChild
           >
             <Link href="/signup">
-              Get started
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              Get Started
+              {/* <ArrowRight className="ml-1.5 h-3.5 w-3.5" /> */}
             </Link>
           </Button>
 
@@ -148,6 +148,12 @@ export function TopNav() {
               {item}
             </a>
           ))}
+          <a
+            href="/login"
+            className="rounded-md px-2 py-2 text-sm font-medium text-muted-foreground transition hover:bg-white/5 hover:text-foreground"
+          >
+            Log in
+          </a>
         </nav>
       </div>
     </header>

@@ -131,7 +131,7 @@ export default function FeaturesSection() {
                       }
                     }}
                     onEnded={handleVideoEnded}
-                    className="w-full h-full object-cover cursor-pointer"
+                    className="object-contain sm:object-cover w-full h-full cursor-pointer"
                   />
                   {userPaused && (
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">

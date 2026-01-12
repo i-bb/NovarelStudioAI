@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -17,6 +16,7 @@ import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { Loader2, Save, User } from "lucide-react";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import api from "@/lib/api/api";
+import { useAuth } from "@/hooks/AuthContext";
 
 export default function ProfilePage() {
   const { toast } = useToast();

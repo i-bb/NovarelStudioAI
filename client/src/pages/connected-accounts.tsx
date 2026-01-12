@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -8,6 +7,7 @@ import { api } from "@/lib/api/api";
 import { platforms } from "@/lib/common";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import PlatformCard from "@/components/PlatformCard";
+import { useAuth } from "@/hooks/AuthContext";
 
 export interface PlatformAccount {
   avatar_url: string | null;

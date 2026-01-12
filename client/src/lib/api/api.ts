@@ -81,6 +81,7 @@ export interface ActivePlan {
   status: "active" | "inactive" | null;
   meta_data_json: MetaDataJSON;
   has_purchased_any_plan: boolean;
+  is_top_plan: boolean;
 }
 
 export interface ConnectedAccounts {
@@ -108,6 +109,7 @@ export interface MetaDataJSON {
   total_clips: number;
   used_clips: number;
   posting_limit_complete: boolean;
+  clips_limit_reached: boolean;
 }
 
 export interface User {
