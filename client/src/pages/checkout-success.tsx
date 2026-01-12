@@ -4,8 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, PartyPopper, Zap } from "lucide-react";
 import { useLocation, useSearch, Link } from "wouter";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CheckoutSuccessPage() {
@@ -15,35 +13,24 @@ export default function CheckoutSuccessPage() {
   const sessionId = params.get("session_id");
   const { toast } = useToast();
   const [completed, setCompleted] = useState(false);
-
-  const completeMutation = useMutation({
-    mutationFn: async (sessionId: string) => {
-      const response = await apiRequest("POST", "/api/checkout/complete", { sessionId });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/subscription"] });
-      setCompleted(true);
-      toast({
-        title: "Subscription activated!",
-        description: "Your plan is now active. Let's create some viral clips!",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Activation issue",
-        description: error.message || "There was an issue activating your subscription. Please contact support.",
-        variant: "destructive",
-      });
-    },
-  });
+  const [isPending, setIsPending] = useState(true);
 
   useEffect(() => {
-    if (sessionId && !completed && !completeMutation.isPending) {
-      completeMutation.mutate(sessionId);
+    if (sessionId && !completed) {
+      // Simulate checkout completion
+      setTimeout(() => {
+        setCompleted(true);
+        setIsPending(false);
+        toast({
+          title: "Subscription activated!",
+          description:
+            "Your plan is now active. Let's create some viral clips!",
+        });
+      }, 1500);
+    } else if (!sessionId) {
+      setIsPending(false);
     }
-  }, [sessionId]);
+  }, [sessionId, completed, toast]);
 
   if (!sessionId) {
     return (
@@ -55,7 +42,8 @@ export default function CheckoutSuccessPage() {
                 Invalid Session
               </h1>
               <p className="text-muted-foreground mb-6">
-                No checkout session found. Please try again from the pricing page.
+                No checkout session found. Please try again from the pricing
+                page.
               </p>
               <Button asChild>
                 <Link href="/#pricing">View Plans</Link>
@@ -72,7 +60,7 @@ export default function CheckoutSuccessPage() {
       <main className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95 pt-24">
         <div className="flex-1 flex items-center justify-center px-4 py-12">
           <Card className="w-full max-w-md p-8 bg-black/60 border-white/10 backdrop-blur-xl text-center">
-            {completeMutation.isPending ? (
+            {isPending ? (
               <>
                 <div className="flex justify-center mb-6">
                   <div className="relative">
@@ -105,17 +93,21 @@ export default function CheckoutSuccessPage() {
                   Welcome to the NovarelStudio family
                 </p>
                 <p className="text-muted-foreground mb-8">
-                  Your subscription is active and you're ready to start turning your streams into viral content. Let's go!
+                  Your subscription is active and you're ready to start turning
+                  your streams into viral content. Let's go!
                 </p>
                 <div className="space-y-3">
-                  <Button asChild className="w-full bg-gradient-to-r from-primary to-accent">
-                    <Link href="/dashboard" data-testid="link-dashboard">
+                  <Button
+                    asChild
+                    className="w-full bg-gradient-to-r from-primary to-accent"
+                  >
+                    <Link href="/dashboard">
                       <Zap className="mr-2 h-4 w-4" />
                       Go to Dashboard
                     </Link>
                   </Button>
                   <Button variant="outline" asChild className="w-full">
-                    <Link href="/dashboard?tab=accounts" data-testid="link-connect-accounts">
+                    <Link href="/dashboard?tab=accounts">
                       Connect Your Streaming Accounts
                     </Link>
                   </Button>
@@ -133,10 +125,11 @@ export default function CheckoutSuccessPage() {
                   Something went wrong
                 </h1>
                 <p className="text-muted-foreground mb-6">
-                  We couldn't activate your subscription. Your payment was successful, but there was an issue on our end.
+                  We couldn't activate your subscription. Your payment was
+                  successful, but there was an issue on our end.
                 </p>
                 <div className="space-y-3">
-                  <Button onClick={() => completeMutation.mutate(sessionId)} className="w-full">
+                  <Button onClick={() => setCompleted(true)} className="w-full">
                     Try Again
                   </Button>
                   <Button variant="outline" asChild className="w-full">

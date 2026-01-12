@@ -11,9 +11,9 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        lg: ".5625rem", /* 9px */
-        md: ".375rem", /* 6px */
-        sm: ".1875rem", /* 3px */
+        lg: ".5625rem" /* 9px */,
+        md: ".375rem" /* 6px */,
+        sm: ".1875rem" /* 3px */,
       },
       colors: {
         // Flat / base colors (regular buttons)
@@ -78,7 +78,7 @@ export default {
         "sidebar-accent": {
           DEFAULT: "hsl(var(--sidebar-accent) / <alpha-value>)",
           foreground: "hsl(var(--sidebar-accent-foreground) / <alpha-value>)",
-          border: "var(--sidebar-accent-border)"
+          border: "var(--sidebar-accent-border)",
         },
         status: {
           online: "rgb(34 197 94)",
@@ -104,10 +104,40 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        instaRotate: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        liveGlowBreath: {
+          "0%": {
+            boxShadow: "0 0 6px 1px rgba(255,0,140,0.35)",
+            transform: "scale(1)",
+          },
+          "50%": {
+            boxShadow: "0 0 20px 6px rgba(255,0,170,0.75)",
+            transform: "scale(1.02)",
+          },
+          "100%": {
+            boxShadow: "0 0 6px 1px rgba(255,0,140,0.35)",
+            transform: "scale(1)",
+          },
+        },
+        lightSweep: {
+          "0%": { transform: "translateX(-150%) rotate(45deg)" },
+          "100%": { transform: "translateX(150%) rotate(45deg)" },
+        },
+        fadeDown: {
+          "0%": { opacity: "0", transform: "translateY(-10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "insta-rotate": "instaRotate 3s linear infinite",
+        "live-glow-breath": "liveGlowBreath 2.2s ease-in-out infinite",
+        "light-sweep": "lightSweep 2.5s ease-in-out infinite",
+        "fade-down": "fadeDown 0.25s ease-out",
       },
     },
   },

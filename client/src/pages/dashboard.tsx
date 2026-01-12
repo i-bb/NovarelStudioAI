@@ -1,364 +1,422 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Link } from "wouter";
 import { SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
-import { Play, Clock, Loader2, Sparkles, Film, Zap, Crown, CreditCard } from "lucide-react";
-import { DashboardNav } from "@/components/dashboard/DashboardNav";
-import type { StreamExport } from "@shared/schema";
+import { Zap, Loader2 } from "lucide-react";
+import api, { User } from "@/lib/api/api";
+import { getErrorMessage } from "@/lib/getErrorMessage";
+import { Progress } from "@/components/ui/progress";
+import { getExpiryLabel } from "@/lib/utils";
 
-type SubscriptionData = {
-  plan: string;
-  planTier: number | null;
-  billingPeriod: string | null;
-  subscriptionStatus: string | null;
-  currentPeriodEnd: string | null;
-  clipCreditsRemaining: number | null;
-  clipCreditsTotal: number | null;
-  stripeSubscriptionId: string | null;
-};
+// ── Types ─────────────────────────────────────
+interface SocialMediaStats {
+  instagram_reel_count: number;
+  tiktok_reel_count: number;
+  youtube_short_count: number;
+}
 
-function PlatformStatCard({ 
-  platform, 
-  icon: Icon, 
-  count, 
+interface DashboardData {
+  subscription: {
+    plan: string;
+    clipCreditsUsed: number;
+    clipCreditsTotal: number;
+    subscriptionStatus: string;
+  };
+}
+
+// ── Components (unchanged, just using new props) ─────
+function PlatformStatCard({
+  platform,
+  icon: Icon,
+  count,
   comingSoon = false,
-  color
-}: { 
-  platform: string; 
-  icon: any; 
-  count: number;
-  comingSoon?: boolean;
-  color: string;
-}) {
+  color,
+}: any) {
   return (
-    <Card 
-      className={`relative overflow-hidden border-2 transition-all ${
-        comingSoon ? "border-white/10 bg-black/40" : `border-${color}/30 bg-${color}/5`
+    <Card
+      className={`cursor-default relative overflow-hidden border-2 transition-all ${
+        comingSoon
+          ? "border-white/10 bg-black/40"
+          : `border-[${color}]/30 bg-[${color}]/5`
       }`}
-      data-testid={`card-platform-${platform.toLowerCase()}`}
     >
       {comingSoon && (
-        <Badge className="absolute top-3 right-3 bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">
+        <Badge className="cursor-default absolute top-3 right-3 bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">
           Coming Soon
         </Badge>
       )}
       <CardContent className="p-6 flex flex-col items-center text-center">
-        <div className={`mb-4 p-3 rounded-xl ${comingSoon ? "bg-white/5" : `bg-${color}/10`}`}>
-          <Icon className={`h-6 w-6 ${comingSoon ? "text-muted-foreground" : `text-${color}`}`} style={{ color: comingSoon ? undefined : color }} />
+        <div className="mb-4 p-3 rounded-xl bg-white/5">
+          <Icon className="h-6 w-6" style={{ color }} />
         </div>
-        <h3 className={`font-display text-lg font-semibold mb-2 ${comingSoon ? "text-muted-foreground" : ""}`} style={{ color: comingSoon ? undefined : color }}>
+        <h3
+          className="font-display text-lg font-semibold mb-2"
+          style={{ color }}
+        >
           {platform}
         </h3>
-        <p className="text-4xl font-bold text-foreground mb-1">{count}</p>
-        <p className="text-sm text-muted-foreground">Video{count !== 1 ? "s" : ""} Posted</p>
+        <p className="text-4xl font-bold">{count}</p>
+        <p className="text-sm text-muted-foreground">
+          Video{count !== 1 ? "s" : ""} Posted
+        </p>
       </CardContent>
     </Card>
   );
 }
 
-function PlanStatusCard({ subscription }: { subscription: SubscriptionData | undefined }) {
-  const { toast } = useToast();
-  
-  const portalMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/billing/portal");
-      return response.json();
-    },
-    onSuccess: (data) => {
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to open billing portal",
-        variant: "destructive",
-      });
-    },
-  });
+function PlanStatusCard({ subscription }: { subscription: User | null }) {
+  const clipCreditsTotal =
+    subscription?.active_plan?.meta_data_json?.total_clips || 0;
+  const clipCreditsUsed =
+    subscription?.active_plan?.meta_data_json?.used_clips || 0;
+  const dailyPostingLimitReached =
+    subscription?.active_plan?.meta_data_json?.posting_limit_complete || false;
+  const postingLimit =
+    subscription?.active_plan?.meta_data_json?.daily_posting_limit || 0;
 
-  const planName = subscription?.plan || "starter";
-  const isPaid = planName !== "starter" && subscription?.subscriptionStatus === "active";
-  const creditsRemaining = subscription?.clipCreditsRemaining ?? 10;
-  const creditsTotal = subscription?.clipCreditsTotal ?? 10;
-  const usagePercentage = creditsTotal > 0 ? ((creditsTotal - creditsRemaining) / creditsTotal) * 100 : 0;
+  const usagePercentage =
+    clipCreditsTotal > 0 ? (clipCreditsUsed / clipCreditsTotal) * 100 : 0;
 
   return (
-    <Card className="border-white/10 bg-black/40 overflow-hidden" data-testid="card-plan-status">
+    <Card className="border-white/10 bg-black/40 overflow-hidden mb-8">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            {planName === "studio" ? (
-              <div className="p-2 rounded-lg bg-yellow-500/10">
-                <Crown className="h-5 w-5 text-yellow-400" />
-              </div>
-            ) : planName === "creator" ? (
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-            ) : (
-              <div className="p-2 rounded-lg bg-emerald-400/10">
-                <Zap className="h-5 w-5 text-emerald-400" />
-              </div>
-            )}
+            <div className="p-2 rounded-lg bg-emerald-400/10">
+              <Zap className="h-5 w-5 text-emerald-400" />
+            </div>
             <div>
-              <h3 className="font-display text-lg font-semibold capitalize">{planName} Plan</h3>
-              {subscription?.subscriptionStatus && (
-                <Badge 
-                  variant={subscription.subscriptionStatus === "active" ? "default" : "secondary"} 
-                  className="text-[10px]"
-                >
-                  {subscription.subscriptionStatus}
-                </Badge>
-              )}
+              <h3 className="font-display text-lg font-semibold capitalize cursor-default">
+                {subscription?.active_plan?.name}
+              </h3>
+              <Badge
+                variant={
+                  subscription?.active_plan?.status === "active"
+                    ? "secondary"
+                    : "destructive"
+                }
+                className="text-[10px] cursor-default hover:text-white"
+              >
+                {subscription?.active_plan?.status}
+              </Badge>
             </div>
           </div>
-          {isPaid ? (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => portalMutation.mutate()}
-              disabled={portalMutation.isPending}
-              data-testid="button-manage-billing"
-            >
-              {portalMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Manage Billing
-                </>
-              )}
-            </Button>
-          ) : (
-            <Link href="/pricing">
-              <Button size="sm" data-testid="button-upgrade">
+
+          <div className="flex flex-col items-end justify-center gap-2 text-right">
+            {subscription?.active_plan?.end_date && (
+              <p
+                className={`text-xs mt-1 ${
+                  getExpiryLabel(
+                    subscription?.active_plan?.end_date
+                  ).startsWith("Expired")
+                    ? "text-red-400"
+                    : "text-amber-400"
+                }`}
+              >
+                {getExpiryLabel(subscription?.active_plan?.end_date)}
+              </p>
+            )}
+
+            <Link href="/subscription">
+              <Button size="sm">
                 <Zap className="h-4 w-4 mr-2" />
                 Upgrade
               </Button>
             </Link>
-          )}
+          </div>
         </div>
-
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Clip Credits</span>
-            <span className="font-medium">{creditsRemaining} / {creditsTotal} remaining</span>
+            <span className="font-medium">
+              {clipCreditsUsed} / {clipCreditsTotal} Used
+            </span>
           </div>
           <Progress value={usagePercentage} className="h-2" />
-          {creditsRemaining <= 5 && (
-            <p className="text-xs text-amber-400">
-              Running low on credits! Consider upgrading for more clips.
-            </p>
-          )}
         </div>
-
-        {subscription?.currentPeriodEnd && (
-          <p className="text-xs text-muted-foreground mt-4">
-            {subscription.subscriptionStatus === "active" ? "Renews" : "Expires"} on{" "}
-            {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-          </p>
+        {dailyPostingLimitReached && (
+          <div className="space-y-2">
+            <div className="px-2 py-4 bg-red-500/10 text-red-400 rounded-md mt-4">
+              <p>{`You have utilized your daily positing limit of ${postingLimit} posts`}</p>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
   );
 }
 
-function ContentStudioPreview({ exports }: { exports: StreamExport[] }) {
-  if (exports.length === 0) {
-    return (
-      <Card className="border-white/10 bg-black/40 p-8 text-center">
-        <Film className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-        <h3 className="font-display text-lg font-semibold mb-2">No content yet</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Your stream exports will appear here once you start streaming.
-        </p>
-      </Card>
-    );
-  }
+// function ContentStudioPreview({ exports }: { exports: any }) {
+//   if (!exports || exports.length === 0) {
+//     return (
+//       <Card className="border-white/10 bg-black/40 p-8 text-center">
+//         <Film className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+//         <h3 className="font-display text-lg font-semibold mb-2">
+//           No content yet
+//         </h3>
+//         <p className="text-sm text-muted-foreground">
+//           Your stream exports will appear here once you start streaming.
+//         </p>
+//       </Card>
+//     );
+//   }
 
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {exports.slice(0, 6).map((exp) => (
-        <Link key={exp.id} href={`/dashboard/content/${exp.id}`}>
-          <Card 
-            className="group cursor-pointer overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 transition-all"
-            data-testid={`card-export-${exp.id}`}
-          >
-            <div className="aspect-video relative bg-gradient-to-br from-primary/20 to-emerald-500/20">
-              {exp.thumbnailUrl ? (
-                <img src={exp.thumbnailUrl} alt={exp.title || "Stream export"} className="w-full h-full object-cover" />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Play className="h-10 w-10 text-white/50 group-hover:text-white transition-colors" />
-                </div>
-              )}
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
-                <Clock className="h-3 w-3" />
-                {Math.floor(exp.durationSeconds / 60)}:{String(exp.durationSeconds % 60).padStart(2, '0')}
-              </div>
-            </div>
-            <CardContent className="p-3">
-              <p className="font-medium text-sm truncate">{exp.title || "Untitled Export"}</p>
-              <p className="text-xs text-muted-foreground">
-                {exp.exportedAt ? new Date(exp.exportedAt).toLocaleDateString() : "Recently"}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
-    </div>
-  );
-}
+//   return (
+//     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+//       {exports.slice(0, 6).map((exp: any) => {
+//         const duration = Math.round(exp.duration);
+//         const minutes = Math.floor(duration / 60);
+//         const seconds = String(duration % 60).padStart(2, "0");
+//         const {
+//           text,
+//           icon: Icon,
+//           class: statusClass,
+//         } = getStatusLabel(exp.status);
+//         const isAccessible = exp.status === "completed";
 
+//         return (
+//           <div
+//             key={exp.public_id}
+//             className={`transition-all ${
+//               isAccessible ? "cursor-pointer" : "opacity-60 cursor-not-allowed"
+//             }`}
+//           >
+//             {isAccessible ? (
+//               <Link
+//                 href={`/dashboard/content/${exp.public_id}`}
+//                 onClick={() => {
+//                   localStorage.setItem("selected_export", JSON.stringify(exp));
+//                 }}
+//               >
+//                 <Card className="group overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 flex flex-col h-full">
+//                   <div className="aspect-video relative">
+//                     {exp.poster_url ? (
+//                       <img
+//                         src={exp.poster_url}
+//                         alt={exp.title || "Video Thumbnail"}
+//                         className="w-full h-full object-cover"
+//                       />
+//                     ) : (
+//                       <div className="absolute inset-0 flex items-center justify-center">
+//                         <Play className="h-12 w-12 text-white/50" />
+//                       </div>
+//                     )}
+
+//                     <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
+//                       <Clock className="h-3 w-3" /> {minutes}:{seconds}
+//                     </div>
+//                   </div>
+
+//                   <CardContent className="p-4 space-y-3">
+//                     <p className="font-medium truncate">{exp.title}</p>
+
+//                     <div className="flex justify-between items-center">
+//                       <p className="text-sm">Status</p>
+//                       <span
+//                         className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${statusClass}`}
+//                       >
+//                         <Icon className="h-3 w-3" /> {text}
+//                       </span>
+//                     </div>
+
+//                     <div className="flex justify-between items-center">
+//                       <p className="text-sm">Processed On</p>
+//                       <p className="text-sm text-muted-foreground">
+//                         {exp.processed_on
+//                           ? new Date(exp.processed_on).toLocaleString("en-US", {
+//                               month: "short",
+//                               day: "2-digit",
+//                               year: "numeric",
+//                             })
+//                           : "Not Available"}
+//                       </p>
+//                     </div>
+//                   </CardContent>
+//                 </Card>
+//               </Link>
+//             ) : (
+//               <Card className="overflow-hidden border-white/10 bg-black/40">
+//                 <div className="aspect-video relative">
+//                   {exp.poster_url ? (
+//                     <img
+//                       src={exp.poster_url}
+//                       alt={exp.title || "Video Thumbnail"}
+//                       className="w-full h-full object-cover"
+//                     />
+//                   ) : (
+//                     <div className="absolute inset-0 flex items-center justify-center">
+//                       <Play className="h-12 w-12 text-white/50" />
+//                     </div>
+//                   )}
+//                   <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
+//                     <Clock className="h-3 w-3" /> {minutes}:{seconds}
+//                   </div>
+//                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white"></div>
+//                 </div>
+
+//                 <CardContent className="p-4 space-y-3">
+//                   <p className="font-medium truncate">{exp.title}</p>
+
+//                   <div className="flex justify-between items-center">
+//                     <p className="text-sm">Status</p>
+//                     <span
+//                       className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${statusClass}`}
+//                     >
+//                       <Icon className="h-3 w-3" /> {text}
+//                     </span>
+//                   </div>
+
+//                   <div className="flex justify-between items-center">
+//                     <p className="text-sm">Processed On</p>
+//                     <p className="text-sm text-muted-foreground">
+//                       {exp.processed_on
+//                         ? new Date(exp.processed_on).toLocaleString("en-US", {
+//                             month: "short",
+//                             day: "2-digit",
+//                             year: "numeric",
+//                           })
+//                         : "Not Available"}
+//                     </p>
+//                   </div>
+
+//                   <p className="text-xs text-muted-foreground text-center">
+//                     {exp.status === "failed"
+//                       ? "Stream recording was corrupt."
+//                       : "No engaging moment found."}
+//                   </p>
+//                 </CardContent>
+//               </Card>
+//             )}
+//           </div>
+//         );
+//       })}
+//     </div>
+//   );
+// }
+
+// ── Main Dashboard Component ─────────────────────
 export default function Dashboard() {
+  const { refreshUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // Redirect to login if not authenticated
+  const [socialMediaStats, setSocialMediaStats] =
+    useState<SocialMediaStats | null>({
+      instagram_reel_count: 0,
+      tiktok_reel_count: 0,
+      youtube_short_count: 0,
+    });
+  const [loading, setLoading] = useState(true);
+  const [userDataLoading, setUserDataLoading] = useState(true);
+  const [userData, setUserData] = useState<User | null>(null);
+
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      const response = await api.getDashboard();
+      setSocialMediaStats({
+        instagram_reel_count: response?.instagram_reel_count,
+        tiktok_reel_count: response?.tiktok_reel_count,
+        youtube_short_count: response?.youtube_short_count,
+      });
+    } catch (error: any) {
+      console.error("Dashboard API failed:", error);
+      toast({
+        description: getErrorMessage(error, "Failed to fetch data."),
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserDetails = async () => {
+    try {
+      const response = await api.userDetails();
+      setUserDataLoading(false);
+      setUserData(response);
+      refreshUser();
+    } catch (error: any) {
+      toast({
+        description: getErrorMessage(error, "Failed to fetch user data."),
+        variant: "destructive",
+      });
+    } finally {
+      setUserDataLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetchDashboard();
+    fetchUserDetails();
+  }, [isAuthenticated]);
+
+  // Auth guard
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Please log in",
-        description: "You need to be logged in to access the dashboard.",
-        className: "bg-emerald-500/10 border-emerald-500/30 text-emerald-100",
-      });
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 500);
+      toast({ description: "Redirecting..." });
+      setTimeout(() => (window.location.href = "/login"), 800);
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const { data: stats } = useQuery<{ instagram: number; tiktok: number; youtube: number }>({
-    queryKey: ["/api/dashboard/stats"],
-    enabled: isAuthenticated,
-  });
-
-  const { data: exports } = useQuery<StreamExport[]>({
-    queryKey: ["/api/exports"],
-    enabled: isAuthenticated,
-  });
-
-  const { data: subscription } = useQuery<SubscriptionData>({
-    queryKey: ["/api/subscription"],
-    enabled: isAuthenticated,
-  });
-
-  const seedMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/seed-demo");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/exports"] });
-      toast({
-        title: "Demo data created!",
-        description: "Sample streams and clips have been added to your dashboard.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to create demo data.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  if (authLoading) {
+  if (authLoading || loading || userDataLoading || !socialMediaStats) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-b from-background to-black/95 flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const displayName = user?.firstName 
-    ? `${user.firstName}${user.lastName ? ` ${user.lastName[0]}` : ""}`
-    : user?.email?.split("@")[0] || "Creator";
+  const displayName = userData?.name || "Creator";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95">
-      <DashboardNav activeTab="dashboard" />
-      
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold" data-testid="text-greeting">
-            Hello, {displayName}
-          </h1>
-          {(!exports || exports.length === 0) && (
-            <Button 
-              onClick={() => seedMutation.mutate()} 
-              disabled={seedMutation.isPending}
-              className="gap-2"
-              data-testid="button-seed-demo"
-            >
-              {seedMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              Load Demo Data
-            </Button>
-          )}
+    <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <h1 className="font-display text-3xl mb-8">Hello, {displayName}!</h1>
+
+      <PlanStatusCard subscription={userData || null} />
+
+      <section className="my-12">
+        <div className="grid gap-6 sm:grid-cols-3">
+          <PlatformStatCard
+            platform="Instagram"
+            icon={SiInstagram}
+            count={socialMediaStats?.instagram_reel_count}
+            color="#E1306C"
+          />
+          <PlatformStatCard
+            platform="TikTok"
+            icon={SiTiktok}
+            count={socialMediaStats?.tiktok_reel_count}
+            comingSoon
+            color="#00f2ea"
+          />
+          <PlatformStatCard
+            platform="YouTube"
+            icon={SiYoutube}
+            count={socialMediaStats?.youtube_short_count}
+            comingSoon
+            color="#FF0000"
+          />
         </div>
+      </section>
 
-        {/* Plan Status */}
-        <section className="mb-8">
-          <PlanStatusCard subscription={subscription} />
-        </section>
-
-        {/* Platform Stats */}
-        <section className="mb-12">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <PlatformStatCard 
-              platform="Instagram" 
-              icon={SiInstagram} 
-              count={stats?.instagram || 0}
-              color="#E1306C"
-            />
-            <PlatformStatCard 
-              platform="TikTok" 
-              icon={SiTiktok} 
-              count={stats?.tiktok || 0}
-              comingSoon
-              color="#00f2ea"
-            />
-            <PlatformStatCard 
-              platform="YouTube" 
-              icon={SiYoutube} 
-              count={stats?.youtube || 0}
-              comingSoon
-              color="#FF0000"
-            />
-          </div>
-        </section>
-
-        {/* Content Studio Preview */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-xl font-semibold">Content Studio</h2>
+      {/* <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-display text-xl font-semibold">Content Studio</h2>
+          {exportData && exportData?.length > 0 && (
             <Link href="/dashboard/content">
-              <Button variant="outline" size="sm" data-testid="button-view-all-content">
+              <Button variant="outline" size="sm">
                 View All
               </Button>
             </Link>
-          </div>
-          <ContentStudioPreview exports={exports || []} />
-        </section>
-      </main>
-    </div>
+          )}
+        </div>
+        <ContentStudioPreview exports={exportData || []} />
+      </section> */}
+    </main>
   );
 }

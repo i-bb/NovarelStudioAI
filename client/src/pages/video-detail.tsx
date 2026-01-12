@@ -1,113 +1,142 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Link, useParams } from "wouter";
-import { Play, Clock, ArrowLeft, TrendingUp, FileText, Sparkles } from "lucide-react";
-import { DashboardNav } from "@/components/dashboard/DashboardNav";
-import type { StreamExport, Clip } from "@shared/schema";
+import {
+  Play,
+  Clock,
+  ArrowLeft,
+  TrendingUp,
+  Sparkles,
+  Instagram,
+  Youtube,
+  Music2,
+  Edit,
+} from "lucide-react";
+import type { Clip } from "@shared/schema";
+import { api } from "@/lib/api/api";
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
-function ClipCard({ clip }: { clip: Clip }) {
-  const viralityColor = clip.viralityScore && clip.viralityScore >= 70 
-    ? "text-emerald-400" 
-    : clip.viralityScore && clip.viralityScore >= 40 
-    ? "text-amber-400" 
-    : "text-muted-foreground";
+function ClipCard({ clip, exportId }: { clip: any; exportId: string }) {
+  const durationSeconds = clip.duration ?? clip.durationSeconds;
+  const duration =
+    typeof durationSeconds === "number"
+      ? `${Math.floor(durationSeconds / 60)}:${String(
+          Math.floor(durationSeconds % 60)
+        ).padStart(2, "0")}`
+      : null;
+
+  const viralScore = clip.viral_score ?? clip.viralityScore;
+
+  const platforms = [];
+
+  if (clip.instagram_posted) {
+    platforms.push({
+      name: "Instagram",
+      icon: Instagram,
+      bg: "bg-gradient-to-br from-purple-500 to-pink-500",
+    });
+  }
+
+  if (clip.youtube_posted) {
+    platforms.push({
+      name: "YouTube",
+      icon: Youtube,
+      bg: "bg-red-600",
+    });
+  }
+
+  if (clip.tiktok_posted) {
+    platforms.push({
+      name: "TikTok",
+      icon: Music2,
+      bg: "bg-black",
+    });
+  }
 
   return (
-    <Card className="border-white/10 bg-black/40" data-testid={`card-clip-${clip.id}`}>
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Video Player */}
-        <div className="relative">
-          <div className="aspect-[9/16] bg-gradient-to-br from-primary/20 to-emerald-500/20 rounded-lg overflow-hidden">
-            {clip.clipUrl ? (
-              <video 
-                src={clip.clipUrl} 
-                controls 
-                className="w-full h-full object-cover"
-                poster={clip.thumbnailUrl || undefined}
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <Play className="h-16 w-16 text-white/50 mx-auto mb-4" />
-                  <p className="text-muted-foreground">Clip preview</p>
-                </div>
-              </div>
-            )}
-          </div>
-          {clip.durationSeconds && (
-            <div className="absolute bottom-4 right-4 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
+    <Link href={`/dashboard/content/${exportId}/reel/${clip.public_id}`}>
+      <div className="rounded-xl overflow-hidden border border-white/10 bg-black/40 cursor-pointer group hover:bg-black/60 transition">
+        <div className="relative aspect-[9/16]">
+          <img
+            src={clip.poster_url}
+            alt={clip.title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+
+          {/* Duration */}
+          {duration && (
+            <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-1 font-medium">
               <Clock className="h-3 w-3" />
-              {Math.floor(clip.durationSeconds / 60)}:{String(clip.durationSeconds % 60).padStart(2, '0')}
+              {duration}
             </div>
           )}
-        </div>
 
-        {/* Clip Details */}
-        <div className="space-y-6 p-4 lg:p-0 lg:pr-4">
-          {/* Virality Score */}
-          <Card className="border-white/10 bg-black/60">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                Virality Score
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-end gap-3 mb-3">
-                <span className={`text-5xl font-bold ${viralityColor}`} data-testid="text-virality-score">
-                  {clip.viralityScore || 0}
-                </span>
-                <span className="text-muted-foreground mb-1">/ 100</span>
-              </div>
-              <Progress value={clip.viralityScore || 0} className="h-2" />
-              {clip.viralityScore && clip.viralityScore >= 70 && (
-                <Badge className="mt-3 bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                  High Viral Potential
-                </Badge>
-              )}
-            </CardContent>
-          </Card>
+          {/* Viral Score */}
+          {viralScore !== undefined && (
+            <div className="absolute top-2 right-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-xs px-2 py-1 rounded flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              {viralScore.toFixed(1)}
+            </div>
+          )}
 
-          {/* Virality Reason */}
-          <Card className="border-white/10 bg-black/60">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Sparkles className="h-4 w-4 text-amber-400" />
-                Why This Can Go Viral
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground leading-relaxed" data-testid="text-virality-reason">
-                {clip.viralityReason || "Analysis pending..."}
+          {/* Hover overlay */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300">
+            <div className="absolute inset-0 flex top-[40%] justify-center pointer-events-none">
+              <Play className="h-16 w-16 text-white drop-shadow-xl" />
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/85 to-transparent px-4 pt-10 pb-6 flex flex-col text-left gap-2">
+              <p className="font-semibold text-white text-sm leading-tight">
+                {clip.title}
               </p>
-            </CardContent>
-          </Card>
+              {/* Posted on */}
+              {(clip.instagram_posted ||
+                clip.youtube_posted ||
+                clip.tiktok_posted) && (
+                <>
+                  <p className="text-xs text-white/80 font-medium">
+                    Posted on:
+                  </p>
 
-          {/* Transcription */}
-          <Card className="border-white/10 bg-black/60">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <FileText className="h-4 w-4 text-blue-400" />
-                Transcription
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="max-h-48 overflow-y-auto">
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap" data-testid="text-transcription">
-                  {clip.transcription || "Transcription pending..."}
+                  {/* Platform icons with correct backgrounds */}
+                  <div className="flex space-x-2">
+                    {platforms.map((p, idx) => {
+                      const Icon = p.icon;
+                      return (
+                        <div
+                          key={idx}
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center ${p.bg}`}
+                        >
+                          <Icon className="w-4 h-4 text-white" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+              {/* Viral reason */}
+              {clip.viral_reason && (
+                <p className="text-[11px] text-white/90 leading-relaxed line-clamp-2">
+                  {clip.viral_reason}
                 </p>
-              </div>
-            </CardContent>
-          </Card>
+              )}
+
+              {/* Transcript */}
+              {clip.transcript && (
+                <div className="bg-black/70 border border-white/10 rounded-md px-3 py-2">
+                  <p className="text-[11px] text-white/90 italic line-clamp-2">
+                    {clip.transcript}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </Card>
+    </Link>
   );
 }
 
@@ -117,6 +146,38 @@ export default function VideoDetail() {
   const params = useParams();
   const exportId = params.id;
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [clipsData, setClipsData] = useState<Clip[]>([]);
+  const [sourceVideoData, setSourceVideoData] = useState<any>();
+
+  const fetchReelsData = async (id: string, platform: string) => {
+    try {
+      const response = await api.getReelsData(platform, id || "");
+      setClipsData(response?.reels);
+      setIsLoading(false);
+    } catch (error: any) {
+      console.error("Content Studio API failed:", error);
+
+      toast({
+        description: getErrorMessage(
+          error,
+          "Something went wrong!. Please try again."
+        ),
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (exportId) {
+      const selectedExport = JSON.parse(
+        localStorage.getItem("selected_export") || "{}"
+      );
+      fetchReelsData(exportId, selectedExport?.provider);
+      setSourceVideoData(selectedExport);
+    }
+  }, [exportId]);
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       toast({
@@ -124,16 +185,23 @@ export default function VideoDetail() {
         description: "You need to be logged in to access the dashboard.",
         variant: "destructive",
       });
+
       setTimeout(() => {
         window.location.href = "/login";
       }, 500);
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  const { data, isLoading } = useQuery<{ export: StreamExport; clips: Clip[] }>({
-    queryKey: ["/api/exports", exportId],
-    enabled: isAuthenticated && !!exportId,
-  });
+  const duration = Math.round(sourceVideoData?.duration); // Convert float → integer seconds
+  const minutes = Math.floor(duration / 60);
+  const seconds = String(duration % 60).padStart(2, "0");
+
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
   if (authLoading || isLoading) {
     return (
@@ -142,80 +210,69 @@ export default function VideoDetail() {
       </div>
     );
   }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const exportData = data?.export;
-  const clips = data?.clips || [];
+  if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95">
-      <DashboardNav activeTab="content" />
-      
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-        <div className="flex items-center gap-4 mb-6">
-          <Link href="/dashboard/content">
-            <Button variant="ghost" size="icon" className="h-8 w-8" data-testid="button-back">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="font-display text-2xl sm:text-3xl font-semibold" data-testid="text-export-title">
-              {exportData?.title || "Stream Export"}
-            </h1>
-            {exportData?.exportedAt && (
-              <p className="text-sm text-muted-foreground">
-                Exported on {new Date(exportData.exportedAt).toLocaleDateString()}
-              </p>
-            )}
-          </div>
+    <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <div className="flex items-center gap-4 mb-6">
+        <Link
+          href="/dashboard/content"
+          onClick={() => localStorage.removeItem("selected_export")}
+        >
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <div>
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold">
+            {sourceVideoData?.title || ""}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Exported on {formatDate(sourceVideoData?.processed_on)}
+          </p>
         </div>
+      </div>
 
-        {/* Source Video Info */}
-        <Card className="border-white/10 bg-black/40 mb-8">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-20 w-32 rounded-lg bg-gradient-to-br from-primary/20 to-emerald-500/20 flex items-center justify-center flex-shrink-0">
-              <Play className="h-8 w-8 text-white/50" />
+      <Card className="border-white/10 bg-black/40 mb-8">
+        <CardContent className="p-4 flex items-center gap-4">
+          <div className="h-20 w-32 rounded-lg bg-gradient-to-br from-primary/20 to-emerald-500/20 flex items-center justify-center">
+            <Play className="h-8 w-8 text-white/50" />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Source Video</p>
+            <p className="font-medium">{sourceVideoData?.title || ""}</p>
+            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              {minutes}:{seconds}
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Source Video</p>
-              <p className="font-medium">{exportData?.title || "Untitled"}</p>
-              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                {exportData?.durationSeconds 
-                  ? `${Math.floor(exportData.durationSeconds / 60)} minutes`
-                  : "Duration unknown"
-                }
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Clips Section */}
-        <section>
-          <h2 className="font-display text-xl font-semibold mb-6">
-            Generated Clips ({clips.length})
-          </h2>
+      <section>
+        <h2 className="font-display text-xl font-semibold mb-6">
+          Generated Clips ({clipsData.length})
+        </h2>
 
-          {clips.length > 0 ? (
-            <div className="space-y-8">
-              {clips.map((clip) => (
-                <ClipCard key={clip.id} clip={clip} />
-              ))}
-            </div>
-          ) : (
-            <Card className="border-white/10 bg-black/40 p-12 text-center">
-              <Sparkles className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
-              <h3 className="font-display text-2xl font-semibold mb-3">No clips yet</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                We're analyzing this video for viral moments. Clips will appear here once processing is complete.
-              </p>
-            </Card>
-          )}
-        </section>
-      </main>
-    </div>
+        {clipsData.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {clipsData.map((c) => (
+              <ClipCard key={c.id} clip={c} exportId={exportId || ""} />
+            ))}
+          </div>
+        ) : (
+          <Card className="border-white/10 bg-black/40 p-12 text-center">
+            <Sparkles className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
+            <h3 className="font-display text-2xl font-semibold mb-3">
+              No clips yet
+            </h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              We're analyzing this video for viral moments. Clips will appear
+              here once processing is complete.
+            </p>
+          </Card>
+        )}
+      </section>
+    </main>
   );
 }
