@@ -10,6 +10,7 @@ import { getStatusLabel } from "@/lib/common";
 import kick from "@assets/generated_images/kick.svg";
 import twitch from "@assets/generated_images/twitch.png";
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import { getSocket } from "@/lib/socket";
 
 export default function DashboardContent() {
   const { toast } = useToast();
@@ -57,6 +58,89 @@ export default function DashboardContent() {
       });
     }
   };
+
+  const updateVideoStatusBySocket = (videoId: string, status: string) => {
+    setExports((prev: any[]) => {
+      if (!prev || !Array.isArray(prev)) return prev;
+
+      // ❌ Remove video for skipped / failed
+      if (status === "skipped" || status === "failed") {
+        const next = prev.filter((video) => video.public_id !== videoId);
+
+        // optional debug
+        if (next.length !== prev.length) {
+          console.log(`[socket] video removed (${status}):`, videoId);
+        }
+
+        return next;
+      }
+
+      // ✅ Otherwise update status
+      let updated = false;
+
+      const next = prev.map((video) => {
+        if (video.public_id === videoId) {
+          updated = true;
+
+          if (video.status === status) return video;
+
+          return {
+            ...video,
+            status,
+          };
+        }
+        return video;
+      });
+
+      if (!updated) {
+        console.warn("[socket] status update for unknown video:", videoId);
+      }
+
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    const handleConnect = () => {
+      console.log("[socket] connected:", socket.id);
+    };
+
+    const handleDisconnect = (reason: string) => {
+      console.warn("[socket] disconnected:", reason);
+    };
+
+    const handleConnectError = (err: Error) => {
+      console.error("[socket] connection error:", err.message);
+    };
+
+    const handleVideoStatus = (payload: any) => {
+      console.log("[socket] video_status:", payload);
+      const { video_id, status } = payload;
+      if (!video_id || !status) return;
+
+      updateVideoStatusBySocket(video_id, status);
+    };
+
+    // const handleNewVideoDetails = (payload: any) => {
+    //   console.log("[socket] video_details:", payload);
+    // };
+
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+    socket.on("video_status", handleVideoStatus);
+    // socket.on("video_details", handleNewVideoDetails);
+
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
+      socket.off("video_status", handleVideoStatus);
+      // socket.on("video_details", handleNewVideoDetails);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -339,7 +423,7 @@ export default function DashboardContent() {
                     </Link>
                   ) : (
                     <Card className="overflow-hidden border-white/10 bg-black/40">
-                      <div className="aspect-video relative">
+                      <div className="relative h-[220px] w-full overflow-hidden bg-black">
                         {exp.poster_url ? (
                           <img
                             src={exp.poster_url}
@@ -387,6 +471,11 @@ export default function DashboardContent() {
                                 )
                               : "Not Available"}
                           </p>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm">Posted</p>
+                          <p className="text-sm">{`${exp.posted_reels}/${exp.total_reels}`}</p>
                         </div>
 
                         <p className="text-xs text-muted-foreground text-center">

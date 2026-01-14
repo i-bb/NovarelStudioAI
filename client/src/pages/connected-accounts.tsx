@@ -48,7 +48,7 @@ export default function ConnectedAccountsPage() {
       setConnectedAccounts(accounts ? { ...accounts } : null);
     } catch (error: any) {
       toast({
-        description: error?.response?.data?.description,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {

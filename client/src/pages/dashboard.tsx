@@ -90,21 +90,23 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
             <div className="p-2 rounded-lg bg-emerald-400/10">
               <Zap className="h-5 w-5 text-emerald-400" />
             </div>
-            <div>
-              <h3 className="font-display text-lg font-semibold capitalize cursor-default">
-                {subscription?.active_plan?.name}
-              </h3>
-              <Badge
-                variant={
-                  subscription?.active_plan?.status === "active"
-                    ? "secondary"
-                    : "destructive"
-                }
-                className="text-[10px] cursor-default hover:text-white"
-              >
-                {subscription?.active_plan?.status}
-              </Badge>
-            </div>
+            {subscription?.active_plan && (
+              <div>
+                <h3 className="font-display text-lg font-semibold capitalize cursor-default">
+                  {subscription?.active_plan?.name}
+                </h3>
+                <Badge
+                  variant={
+                    subscription?.active_plan?.status === "active"
+                      ? "secondary"
+                      : "destructive"
+                  }
+                  className="text-[10px] cursor-default hover:text-white"
+                >
+                  {subscription?.active_plan?.status}
+                </Badge>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col items-end justify-center gap-2 text-right">

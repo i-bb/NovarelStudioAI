@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const API_BASE_URL = "https://kora-undeluding-nathanael.ngrok-free.dev";
-const API_BASE_URL = "https://api.novarelstudio.com/v1";
+const API_BASE_URL = "https://kora-undeluding-nathanael.ngrok-free.dev";
+// const API_BASE_URL = "https://api.novarelstudio.com/v1";
 // const API_BASE_URL = " https://oryx-patient-llama.ngrok-free.app";
 
 const apiClient = axios.create({

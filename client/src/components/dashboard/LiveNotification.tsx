@@ -1,68 +1,86 @@
 import { useEffect, useState } from "react";
-import api from "@/lib/api/api";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { getSocket } from "@/lib/socket";
 
 type Props = {
   initials: string;
 };
 
-interface streamingPlatformProps {
+interface StreamingPlatformProps {
   live: boolean;
-  started_at: string;
-  twitch_stream_url?: string;
-  kick_stream_url?: string;
+  started_at: string | null;
+  twitch_stream_url?: string | null;
+  kick_stream_url?: string | null;
 }
-const twitchDaata = {
-  live: false,
-  started_at: null,
-  twitch_stream_url: "#",
-};
-const kickData = {
-  live: false,
-  started_at: null,
-  kick_stream_url: "#",
-};
+
+interface PlatformStatus {
+  live: boolean;
+  started_at: string | null;
+  message?: string | null;
+  twitch_stream_url?: string | null;
+  kick_stream_url?: string | null;
+}
+
+interface LiveStatusPayload {
+  timestamp: string;
+  twitch_status: PlatformStatus;
+  kick_status: PlatformStatus;
+  connection_status: {
+    connected: boolean;
+    session_count: number;
+  };
+  tasks: {
+    pending_tasks: number;
+    completed_tasks: number;
+    failed_tasks: number;
+  };
+}
 
 export function LiveNotification({ initials }: Props) {
-  const [kickData, setKickData] = useState<streamingPlatformProps | null>(null);
-  const [twitchData, setTwitchData] = useState<streamingPlatformProps | null>(
-    null
-  );
-
+  const [liveStatus, setLiveStatus] = useState<LiveStatusPayload | null>(null);
   const [showCard, setShowCard] = useState(false);
 
-  const fetchTwitchStatus = async () => {
-    try {
-      const response = await api.getStreamerStreamingAccounts("twitch");
-      setTwitchData(response || null);
-    } catch (error) {
-      console.error("Error polling Twitch account status:", error);
-    }
-  };
-
-  const fetchKickStatus = async () => {
-    try {
-      const response = await api.getStreamerStreamingAccounts("kick");
-      setKickData(response);
-    } catch (error) {
-      console.error("Error polling Twitch account status:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchTwitchStatus();
-    fetchKickStatus();
+    const socket = getSocket();
 
-    const interval = setInterval(() => {
-      fetchTwitchStatus();
-      fetchKickStatus();
-    }, 50 * 1000);
+    const handleConnect = () => {
+      console.log("[socket] connected:", socket.id);
+    };
 
-    return () => clearInterval(interval);
+    const handleDisconnect = (reason: string) => {
+      console.warn("[socket] disconnected:", reason);
+      setLiveStatus(null);
+    };
+
+    const handleConnectError = (err: Error) => {
+      console.error("[socket] connection error:", err.message);
+    };
+
+    const handleStreamerStatus = (payload: LiveStatusPayload) => {
+      setLiveStatus(payload);
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+    socket.on("streamer_status", handleStreamerStatus);
+
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
+      socket.off("streamer_status", handleStreamerStatus);
+    };
   }, []);
 
-  const isLive = kickData?.live || twitchData?.live;
+  const twitchData: StreamingPlatformProps | null =
+    liveStatus?.twitch_status ?? null;
+
+  const kickData: StreamingPlatformProps | null =
+    liveStatus?.kick_status ?? null;
+
+  const isLive = Boolean(twitchData?.live || kickData?.live);
 
   return (
     <div
@@ -71,9 +89,13 @@ export function LiveNotification({ initials }: Props) {
       onMouseLeave={() => setShowCard(false)}
     >
       <DropdownMenuTrigger asChild>
-        <button className="relative flex items-center rounded-full p-1 cursor-pointer focus-visible:outline-none focus-visible:ring-0">
+        <button className="relative flex items-center rounded-full p-1 cursor-pointer focus-visible:outline-none">
           {isLive && (
-            <span className="absolute inset-0 rounded-full p-[4px] bg-[conic-gradient(from_0deg,rgba(255,0,0,.9),rgba(255,0,128,.9),rgba(128,0,255,.9),rgba(255,0,0,.9))] animate-insta-rotate animate-live-glow-breath" />
+            <span
+              className="absolute inset-0 rounded-full p-[4px]
+              bg-[conic-gradient(from_0deg,rgba(255,0,0,.9),rgba(255,0,128,.9),rgba(128,0,255,.9),rgba(255,0,0,.9))]
+              animate-insta-rotate animate-live-glow-breath"
+            />
           )}
 
           <span className="relative rounded-full bg-black p-[3px]">
@@ -85,7 +107,11 @@ export function LiveNotification({ initials }: Props) {
           </span>
 
           {isLive && (
-            <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-sm bg-red-600 px-1 py-[1px] text-[9px] font-bold text-white uppercase tracking-wider">
+            <span
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2
+              rounded-sm bg-red-600 px-1 py-[1px]
+              text-[9px] font-bold text-white uppercase"
+            >
               Live
             </span>
           )}
@@ -93,7 +119,7 @@ export function LiveNotification({ initials }: Props) {
       </DropdownMenuTrigger>
 
       {isLive && showCard && (
-        <div className="z-10 absolute right-0 top-full mt-4 z-50 animate-fade-down">
+        <div className="absolute right-0 top-full mt-4 z-50 animate-fade-down">
           <LiveStatusCard kickData={kickData} twitchData={twitchData} />
         </div>
       )}
@@ -105,8 +131,8 @@ import { SiTwitch } from "react-icons/si";
 import { FaKickstarterK } from "react-icons/fa6";
 
 interface LiveStatusCardProps {
-  kickData: streamingPlatformProps | null;
-  twitchData: streamingPlatformProps | null;
+  kickData: StreamingPlatformProps | null;
+  twitchData: StreamingPlatformProps | null;
 }
 
 function LiveStatusCard({ kickData, twitchData }: LiveStatusCardProps) {
@@ -257,7 +283,7 @@ function LiveStatusCard({ kickData, twitchData }: LiveStatusCardProps) {
           <div className="mt-6 flex gap-3">
             {isTwitchLive && (
               <a
-                href={twitchData?.twitch_stream_url}
+                href={twitchData?.twitch_stream_url!}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 rounded-full bg-purple-600/90 px-4 py-2
@@ -270,7 +296,7 @@ function LiveStatusCard({ kickData, twitchData }: LiveStatusCardProps) {
 
             {isKickLive && (
               <a
-                href={kickData?.kick_stream_url}
+                href={kickData?.kick_stream_url!}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 rounded-full bg-green-500 px-4 py-2
