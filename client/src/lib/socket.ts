@@ -31,8 +31,13 @@ export function getSocket() {
   if (socket) return socket;
 
   const token = localStorage.getItem("auth_token");
+  if (!token) return null;
 
-  socket = io("https://kora-undeluding-nathanael.ngrok-free.dev/ws", {
+  //   socket = io("https://kora-undeluding-nathanael.ngrok-free.dev/ws", {
+  socket = io("https://api.novarelstudio.com/v1/ws", {
+    //   socket = io("https://subtle-husky-solely.ngrok-free.app/v1/ws", {
+
+    path: "/v1/ws",
     auth: { token },
     transports: ["websocket", "polling"],
     timeout: 30000,
@@ -43,7 +48,7 @@ export function getSocket() {
   // ---- core socket lifecycle ----
 
   socket.on("connect", () => {
-    console.log("[socket] connected:", socket!.id);
+    console.log("[socket] connected:", socket?.id);
   });
 
   socket.on("connected", (data: { session_id: string }) => {

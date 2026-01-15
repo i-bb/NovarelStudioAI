@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,9 +21,12 @@ export default function DashboardContent() {
   const [exportsLoading, setExportsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<"kick" | "twitch">("twitch");
+  const [isShifting, setIsShifting] = useState(false);
 
   const ITEMS_PER_PAGE = 12;
   const totalPages = totalCount;
+  const currentPageRef = useRef(currentPage);
+  const activeTabRef = useRef(activeTab);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -100,11 +103,50 @@ export default function DashboardContent() {
     });
   };
 
+  const addNewVideoFromSocket = (newVideo: any) => {
+    // ✅ use ref, NOT state
+    if (newVideo.provider !== activeTabRef.current) return;
+
+    if (currentPageRef.current !== 1) {
+      console.log(
+        "[socket] new video received, user not on page 1 → ignored",
+        newVideo.public_id
+      );
+      return;
+    }
+
+    setIsShifting(true);
+
+    setTimeout(() => {
+      setExports((prev: any[]) => {
+        if (!prev || !Array.isArray(prev)) return [newVideo];
+
+        if (prev.some((v) => v.public_id === newVideo.public_id)) return prev;
+
+        return [newVideo, ...prev].slice(0, ITEMS_PER_PAGE);
+      });
+
+      toast({
+        title: "New video added 🎬",
+      });
+
+      setIsShifting(false);
+    }, 800);
+  };
+
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
   useEffect(() => {
     const socket = getSocket();
 
     const handleConnect = () => {
-      console.log("[socket] connected:", socket.id);
+      console.log("[socket] connected:", socket?.id);
     };
 
     const handleDisconnect = (reason: string) => {
@@ -123,22 +165,26 @@ export default function DashboardContent() {
       updateVideoStatusBySocket(video_id, status);
     };
 
-    // const handleNewVideoDetails = (payload: any) => {
-    //   console.log("[socket] video_details:", payload);
-    // };
+    const handleNewVideoDetails = (payload: any) => {
+      console.log("[socket] video_details:", payload);
 
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
-    socket.on("connect_error", handleConnectError);
-    socket.on("video_status", handleVideoStatus);
-    // socket.on("video_details", handleNewVideoDetails);
+      if (!payload?.public_id) return;
+
+      addNewVideoFromSocket(payload);
+    };
+
+    socket?.on("connect", handleConnect);
+    socket?.on("disconnect", handleDisconnect);
+    socket?.on("connect_error", handleConnectError);
+    socket?.on("video_status", handleVideoStatus);
+    socket?.on("video_details", handleNewVideoDetails);
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
-      socket.off("connect_error", handleConnectError);
-      socket.off("video_status", handleVideoStatus);
-      // socket.on("video_details", handleNewVideoDetails);
+      socket?.off("connect", handleConnect);
+      socket?.off("disconnect", handleDisconnect);
+      socket?.off("connect_error", handleConnectError);
+      socket?.off("video_status", handleVideoStatus);
+      socket?.off("video_details", handleNewVideoDetails);
     };
   }, []);
 
@@ -214,6 +260,14 @@ export default function DashboardContent() {
   if (isPlanExpired) {
     return (
       <main className="min-h-[70vh] flex items-center justify-center px-4 ">
+        {isShifting && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+            <div className="bg-black/80 border border-white/20 rounded-xl px-6 py-4 flex items-center gap-3 shadow-lg">
+              <div className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              <p className="text-sm text-white">Updating content…</p>
+            </div>
+          </div>
+        )}
         <Card className="p-10 text-center border-none">
           <h2 className="text-2xl font-bold mb-3">No Content Available</h2>
           {isClipLimitReached ? (

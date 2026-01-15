@@ -45,7 +45,7 @@ export function LiveNotification({ initials }: Props) {
     const socket = getSocket();
 
     const handleConnect = () => {
-      console.log("[socket] connected:", socket.id);
+      console.log("[socket] connected:", socket?.id);
     };
 
     const handleDisconnect = (reason: string) => {
@@ -61,16 +61,16 @@ export function LiveNotification({ initials }: Props) {
       setLiveStatus(payload);
     };
 
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
-    socket.on("connect_error", handleConnectError);
-    socket.on("streamer_status", handleStreamerStatus);
+    socket?.on("connect", handleConnect);
+    socket?.on("disconnect", handleDisconnect);
+    socket?.on("connect_error", handleConnectError);
+    socket?.on("streamer_status", handleStreamerStatus);
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
-      socket.off("connect_error", handleConnectError);
-      socket.off("streamer_status", handleStreamerStatus);
+      socket?.off("connect", handleConnect);
+      socket?.off("disconnect", handleDisconnect);
+      socket?.off("connect_error", handleConnectError);
+      socket?.off("streamer_status", handleStreamerStatus);
     };
   }, []);
 
