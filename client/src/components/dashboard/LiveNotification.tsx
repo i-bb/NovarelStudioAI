@@ -58,6 +58,7 @@ export function LiveNotification({ initials }: Props) {
     };
 
     const handleStreamerStatus = (payload: LiveStatusPayload) => {
+      console.log("[socket] streamer_status:", payload);
       setLiveStatus(payload);
     };
 

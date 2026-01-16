@@ -110,6 +110,7 @@ export interface MetaDataJSON {
   used_clips: number;
   posting_limit_complete: boolean;
   clips_limit_reached: boolean;
+  daily_posted_count: number;
 }
 
 export interface User {

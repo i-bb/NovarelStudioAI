@@ -75,8 +75,10 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
     subscription?.active_plan?.meta_data_json?.used_clips || 0;
   const dailyPostingLimitReached =
     subscription?.active_plan?.meta_data_json?.posting_limit_complete || false;
-  const postingLimit =
+  const dailyPostingLimit =
     subscription?.active_plan?.meta_data_json?.daily_posting_limit || 0;
+  const postedReels =
+    subscription?.active_plan?.meta_data_json?.daily_posted_count || 0;
   const isTopPlan = subscription?.active_plan?.is_top_plan || false;
 
   const usagePercentage =
@@ -152,13 +154,17 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
           </div>
           <Progress value={usagePercentage} className="h-2" />
         </div>
-        {dailyPostingLimitReached && (
-          <div className="space-y-2">
-            <div className="px-2 py-4 bg-red-500/10 text-red-400 rounded-md mt-4">
-              <p>{`You have utilized your daily positing limit of ${postingLimit} posts`}</p>
-            </div>
+        <div className="space-y-2">
+          <div
+            className={`flex justify-between ${
+              dailyPostingLimitReached
+                ? "bg-red-500/10 text-red-400 mt-4 px-2 py-4 rounded-md"
+                : "mt-2 px-1 py-2"
+            }`}
+          >
+            <p>{`Daily Posting Limit: ${postedReels}/${dailyPostingLimit}`}</p>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );

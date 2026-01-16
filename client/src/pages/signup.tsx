@@ -19,6 +19,7 @@ type PlanInfo = {
   credits: string;
   features: string[];
   badge?: string;
+  annualPrice?: string;
 };
 
 export default function SignupPage() {
@@ -66,25 +67,6 @@ export default function SignupPage() {
     getSubscriptionPlans();
   }, []);
 
-  // const selectedPlanInfo = useMemo((): PlanInfo => {
-  //   // const planDef = plans[planParam] || plans.starter;
-  //   const planDef =
-  //     plans.find((p) => p.id === planParam) ||
-  //     plans.find((p) => p.id === "starter");
-  //   const tier = planDef.tiers[tierParam] || planDef.tiers[0];
-  //   const price =
-  //     billingParam === "monthly" ? tier.monthlyPrice : tier.annualPrice;
-
-  //   return {
-  //     name: planDef.name,
-  //     tagline: planDef.tagline,
-  //     price: price === 0 ? "Free" : `$${price}/mo`,
-  //     credits: tier.credits,
-  //     features: planDef.features,
-  //     badge: planDef.badge,
-  //   };
-  // }, [planParam, tierParam, billingParam]);
-
   const selectedPlanInfo = useMemo((): PlanInfo => {
     const planDef =
       plans.find((p) => p.id === planParam) ||
@@ -116,7 +98,8 @@ export default function SignupPage() {
     const tier = planDef.creditTiers?.[tierParam] ?? planDef.creditTiers?.[0];
 
     const price =
-      billingPeriod === "monthly" ? tier?.monthlyPrice : tier?.annualPrice;
+      billingPeriod === "monthly" ? tier?.price : tier?.monthlyPrice;
+    const annualPrice = tier?.price;
 
     return {
       name: planDef.name,
@@ -125,150 +108,9 @@ export default function SignupPage() {
       credits: tier?.credits ?? "",
       features: planDef.features,
       badge: planDef.badge ?? undefined,
+      annualPrice: `${annualPrice}`,
     };
   }, [plans, planParam, tierParam, billingPeriod]);
-
-  // const handleSignup = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   if (!name.trim()) {
-  //     toast({ title: "Name is required", variant: "destructive" });
-  //     return;
-  //   }
-  //   if (!email.trim()) {
-  //     toast({ title: "Email is required", variant: "destructive" });
-  //     return;
-  //   }
-  //   if (password.length < 8) {
-  //     toast({
-  //       description: "Password is too short. Minimum 8 characters",
-  //       variant: "destructive",
-  //     });
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     const response = await api.signup({
-  //       name: name.trim(),
-  //       email: email.trim(),
-  //       password,
-  //     });
-
-  //     // Save auth
-  //     localStorage.setItem("auth_token", response?.access_token);
-  //     localStorage.setItem("auth_user", JSON.stringify(response.user));
-
-  //     toast({ description: "Your account has been created successfully" });
-
-  //     const planId = STATIC_PLAN_ID_MAP[planParam];
-
-  //     if (!planId) {
-  //       throw new Error("Invalid subscription plan selected");
-  //     }
-
-  //     const subRes = await api.purchaseSubscription(planId);
-
-  //     if (subRes?.checkout_url) {
-  //       window.location.href = subRes.checkout_url;
-  //       return;
-  //     }
-
-  //     throw new Error("Failed to initiate subscription checkout");
-  //   } catch (error: any) {
-  //     toast({
-  //       description: getErrorMessage(
-  //         error,
-  //         "Failed to create account. Please try again."
-  //       ),
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // const handleSignup = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   if (!name.trim()) {
-  //     toast({ title: "Name is required", variant: "destructive" });
-  //     return;
-  //   }
-
-  //   if (!email.trim()) {
-  //     toast({ title: "Email is required", variant: "destructive" });
-  //     return;
-  //   }
-
-  //   if (password.length < 8) {
-  //     toast({
-  //       description: "Password must be at least 8 characters",
-  //       variant: "destructive",
-  //     });
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     const response = await api.signup({
-  //       name: name.trim(),
-  //       email: email.trim(),
-  //       password,
-  //     });
-
-  //     // 2️⃣ Save auth
-  //     localStorage.setItem("auth_token", response.access_token);
-  //     localStorage.setItem("auth_user", JSON.stringify(response.user));
-
-  //     toast({ description: "Your account has been created successfully" });
-
-  //     // 3️⃣ Find selected plan
-  //     const selectedPlan =
-  //       plans.find((p) => p.id === planParam) ||
-  //       plans.find((p) => p.id === "starter");
-
-  //     if (!selectedPlan) {
-  //       throw new Error("Invalid subscription plan selected");
-  //     }
-
-  //     // 🟢 Starter plan → no payment
-  //     if (selectedPlan.id === "starter") {
-  //       setLocation("/dashboard");
-  //       return;
-  //     }
-
-  //     // 4️⃣ Get selected tier
-  //     const selectedTier =
-  //       selectedPlan.creditTiers?.[tierParam] || selectedPlan.creditTiers?.[0];
-
-  //     if (!selectedTier?.planId) {
-  //       throw new Error("Invalid subscription tier selected");
-  //     }
-
-  //     // 5️⃣ Purchase subscription
-  //     const subRes = await api.purchaseSubscription(selectedTier.planId);
-
-  //     if (subRes?.checkout_url) {
-  //       window.location.href = subRes.checkout_url;
-  //       return;
-  //     }
-
-  //     throw new Error("Failed to initiate subscription checkout");
-  //   } catch (error: any) {
-  //     toast({
-  //       description: getErrorMessage(
-  //         error,
-  //         "Failed to create account. Please try again."
-  //       ),
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -390,13 +232,20 @@ export default function SignupPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 {selectedPlanInfo.tagline}
               </p>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-3xl font-display font-semibold">
-                  {selectedPlanInfo.price}
-                </span>
-                {planParam !== "starter" && (
+              <div className="flex flex-col gap-1 mb-4">
+                <div className="flex gap-1 items-baseline">
+                  <span className="text-3xl font-display font-semibold">
+                    {selectedPlanInfo.price}
+                  </span>
+                  {planParam !== "starter" && (
+                    <span className="text-sm text-muted-foreground">
+                      {billingParam === "annual" && " /month"}
+                    </span>
+                  )}
+                </div>
+                {planParam !== "starter" && billingParam === "annual" && (
                   <span className="text-sm text-muted-foreground">
-                    {billingParam === "annual" && " (billed annually)"}
+                    <p className="text-xs mt-1">{`$${selectedPlanInfo.annualPrice} billed annually`}</p>
                   </span>
                 )}
               </div>
