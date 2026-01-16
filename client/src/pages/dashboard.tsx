@@ -81,8 +81,10 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
     subscription?.active_plan?.meta_data_json?.daily_posted_count || 0;
   const isTopPlan = subscription?.active_plan?.is_top_plan || false;
 
-  const usagePercentage =
+  const clipCreditUsagePercentage =
     clipCreditsTotal > 0 ? (clipCreditsUsed / clipCreditsTotal) * 100 : 0;
+  const reelPostedPercentage =
+    dailyPostingLimit > 0 ? (postedReels / dailyPostingLimit) * 100 : 0;
 
   return (
     <Card className="border-white/10 bg-black/40 overflow-hidden mb-8">
@@ -152,18 +154,16 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
               {clipCreditsUsed} / {clipCreditsTotal} Used
             </span>
           </div>
-          <Progress value={usagePercentage} className="h-2" />
+          <Progress value={clipCreditUsagePercentage} className="h-2" />
         </div>
-        <div className="space-y-2">
-          <div
-            className={`flex justify-between ${
-              dailyPostingLimitReached
-                ? "bg-red-500/10 text-red-400 mt-4 px-2 py-4 rounded-md"
-                : "mt-2 px-1 py-2"
-            }`}
-          >
-            <p>{`Daily Posting Limit: ${postedReels}/${dailyPostingLimit}`}</p>
+        <div className="space-y-2 mt-8">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Daily Posting Limit</span>
+            <span className="font-medium">
+              {postedReels} / {dailyPostingLimit} Used
+            </span>
           </div>
+          <Progress value={reelPostedPercentage} className="h-2" />
         </div>
       </CardContent>
     </Card>
