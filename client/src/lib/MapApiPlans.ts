@@ -8,6 +8,7 @@ export type CreditTier = {
   planId: number;
   clipLimit: number;
   price: number;
+  dailyPostingLimit: number;
 };
 
 export type Plan = {
@@ -23,6 +24,7 @@ export type Plan = {
   fixedMonthlyPrice?: number;
   fixedAnnualPrice?: number;
   clipLimit?: number;
+  dailyPostingLimit?: number;
 };
 
 export const TransformApiResponseToPlans = (apiData: any): Plan[] => {
@@ -34,6 +36,8 @@ export const TransformApiResponseToPlans = (apiData: any): Plan[] => {
     const monthlyCredits = totalClipLimit / 12;
     const clipLimit =
       apiPlan.prices[0]?.interval === "month" ? totalClipLimit : monthlyCredits;
+    const dailyPostingLimit =
+      apiPlan.prices[0]?.metadata_json?.daily_posting_limit;
 
     if (planName === "starter") {
       result.push({
@@ -49,6 +53,7 @@ export const TransformApiResponseToPlans = (apiData: any): Plan[] => {
         fixedAnnualPrice: apiPlan.prices[0]?.price,
         planId: apiPlan.prices[0]?.plan_id,
         clipLimit: clipLimit,
+        dailyPostingLimit,
       });
     } else {
       const creditTiers: CreditTier[] = apiPlan.prices
@@ -56,6 +61,8 @@ export const TransformApiResponseToPlans = (apiData: any): Plan[] => {
           const clipLimit = price.metadata_json?.clip_limit || 0;
           const dailyClips = Math.round(clipLimit / 30);
           const monthlyCredits = clipLimit / 12;
+          const dailyPostingLimit =
+            price.metadata_json?.daily_posting_limit || 0;
 
           return {
             credits: `${
@@ -68,6 +75,7 @@ export const TransformApiResponseToPlans = (apiData: any): Plan[] => {
             monthlyPrice: price.price / 12,
             planId: price.plan_id,
             clipLimit,
+            dailyPostingLimit,
           };
         })
         .sort((a: CreditTier, b: CreditTier) => a.clipLimit - b.clipLimit);

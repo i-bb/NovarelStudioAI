@@ -186,7 +186,7 @@ export default function Subscription() {
       return "Unavailable";
     }
 
-    if (isPlanActive(plan)) return "Cancel";
+    if (isPlanActive(plan)) return "Cancel Subscription";
 
     if (hasActiveSubscription && isLowerPlan(plan)) {
       return "Unavailable";
@@ -213,7 +213,7 @@ export default function Subscription() {
 
   const getButtonClass = (label: string) => {
     switch (label.toLowerCase()) {
-      case "cancel":
+      case "cancel subscription":
         return "bg-red-900 border-none hover:bg-red-800 text-white";
       case "upgrade":
         return "bg-primary border-none hover:bg-primary/60 text-white";
@@ -358,6 +358,21 @@ export default function Subscription() {
     if (plan.creditTiers) {
       handleSubscribe(getSelectedTierPlanId(plan)!);
     }
+  };
+
+  const getDailyClipLimit = (plan: Plan) => {
+    // Starter plan (no tiers)
+    if (!plan.creditTiers) {
+      return plan.dailyPostingLimit
+        ? `About ${plan.dailyPostingLimit} clips/day`
+        : null;
+    }
+
+    // Tier-based plans
+    const tier = plan.creditTiers[getSelectedTier(plan.id)];
+    return tier?.dailyPostingLimit
+      ? `About ${tier.dailyPostingLimit} clips/day`
+      : null;
   };
 
   /* ================= EFFECTS ================= */
@@ -554,9 +569,15 @@ export default function Subscription() {
                 </CardHeader>
 
                 <CardContent className="flex-1">
+                  <div className="flex items-center gap-4 py-1">
+                    <CheckBadge color="purple" />
+                    <span className="text-[14px] text-gray-400">
+                      {getDailyClipLimit(plan)}
+                    </span>
+                  </div>
                   {plan.features.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <Check className="h-3 w-3 text-gray-400" />
+                    <div key={i} className="flex items-center gap-4 py-1">
+                      <CheckBadge color="emerald" />
                       <span className="text-[14px] text-gray-400">{f}</span>
                     </div>
                   ))}
@@ -632,5 +653,20 @@ function BillingToggleButton({
     >
       {label}
     </button>
+  );
+}
+
+function CheckBadge({ color = "emerald" }: { color?: "emerald" | "purple" }) {
+  const colorMap = {
+    emerald: "bg-emerald-500/20 text-emerald-300",
+    purple: "bg-purple-500/20 text-purple-300",
+  };
+
+  return (
+    <span
+      className={`flex h-5 w-5 items-center justify-center rounded-full ${colorMap[color]}`}
+    >
+      <Check className="h-3 w-3" />
+    </span>
   );
 }

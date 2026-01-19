@@ -45,7 +45,7 @@ function PlatformStatCard({
       }`}
     >
       {comingSoon && (
-        <Badge className="cursor-default absolute top-3 right-3 bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">
+        <Badge className="cursor-default absolute top-1 right-1 lg:top-3 lg:right-3 bg-amber-500/20 text-amber-400 border-amber-500/30 text-[9px] lg:text-[10px]">
           Coming Soon
         </Badge>
       )}
@@ -94,7 +94,7 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
             <div className="p-2 rounded-lg bg-emerald-400/10">
               <Zap className="h-5 w-5 text-emerald-400" />
             </div>
-            {subscription?.active_plan && (
+            {subscription?.active_plan ? (
               <div>
                 <h3 className="font-display text-lg font-semibold capitalize cursor-default">
                   {subscription?.active_plan?.name}
@@ -109,6 +109,12 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
                 >
                   {subscription?.active_plan?.status}
                 </Badge>
+              </div>
+            ) : (
+              <div>
+                <h3 className="font-display text-lg font-semibold capitalize cursor-default">
+                  No Active Plan
+                </h3>
               </div>
             )}
           </div>
@@ -141,7 +147,7 @@ function PlanStatusCard({ subscription }: { subscription: User | null }) {
               <Link href="/subscription">
                 <Button size="sm">
                   <Zap className="h-4 w-4 mr-2" />
-                  Upgrade
+                  {subscription?.active_plan === null ? "Purchase" : "Upgrade"}
                 </Button>
               </Link>
             )}

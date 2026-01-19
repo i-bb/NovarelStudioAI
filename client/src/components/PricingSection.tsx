@@ -16,12 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check } from "lucide-react";
 import logoImage from "@assets/ChatGPT Image Nov 26, 2025, 05_11_54 PM_1764195119264.png";
 import api from "@/lib/api/api";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
+import { Check } from "lucide-react";
 
 export default function PricingSection() {
   const [, navigate] = useLocation();
@@ -29,20 +29,36 @@ export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
     "monthly"
   );
+
+  const [plansByBilling, setPlansByBilling] = useState<{
+    monthly: Plan[];
+    annual: Plan[];
+  }>({
+    monthly: [],
+    annual: [],
+  });
+
   const [creatorTier, setCreatorTier] = useState(0);
   const [studioTier, setStudioTier] = useState(0);
-  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const plans = plansByBilling[billingPeriod];
 
   /* ---------------- LOAD PLANS ---------------- */
   useEffect(() => {
     const loadPlans = async () => {
       try {
         setLoading(true);
-        const response = await api.getSubscriptionPlansByInterval(
-          billingPeriod === "monthly" ? "month" : "year"
-        );
-        setPlans(TransformApiResponseToPlans(response));
+
+        const [monthlyRes, annualRes] = await Promise.all([
+          api.getSubscriptionPlansByInterval("month"),
+          api.getSubscriptionPlansByInterval("year"),
+        ]);
+
+        setPlansByBilling({
+          monthly: TransformApiResponseToPlans(monthlyRes),
+          annual: TransformApiResponseToPlans(annualRes),
+        });
       } catch (err) {
         toast({
           description: getErrorMessage(err || "Failed to load plans"),
@@ -54,7 +70,7 @@ export default function PricingSection() {
     };
 
     loadPlans();
-  }, [billingPeriod]);
+  }, []);
 
   /* ---------------- SAME SIGNUP FLOW (NO CHANGE) ---------------- */
   const handlePlanSelect = (planId: string) => {
@@ -99,6 +115,21 @@ export default function PricingSection() {
       return `$${tier.price} billed annually`;
     }
     return null;
+  };
+
+  const getDailyClipLimit = (plan: Plan) => {
+    // Starter plan (no tiers)
+    if (!plan.creditTiers) {
+      return plan.dailyPostingLimit
+        ? `About ${plan.dailyPostingLimit} clips/day`
+        : null;
+    }
+
+    // Tier-based plans
+    const tier = plan.creditTiers[getSelectedTier(plan.id)];
+    return tier?.dailyPostingLimit
+      ? `About ${tier.dailyPostingLimit} clips/day`
+      : null;
   };
 
   if (loading) {
@@ -167,14 +198,6 @@ export default function PricingSection() {
                     )}
                   </div>
 
-                  {plan.id === "starter" && plan.clipLimit && (
-                    <div className="border border-input rounded-md px-[12px] py-[8px]">
-                      <p className="text-[14px] text-white leading-[20px]">
-                        Upto {plan.clipLimit.toLocaleString()} clips/month
-                      </p>
-                    </div>
-                  )}
-
                   {plan.creditTiers && (
                     <Select
                       value={getSelectedTier(plan.id).toString()}
@@ -197,10 +220,16 @@ export default function PricingSection() {
                 </CardHeader>
 
                 <CardContent className="flex-1">
+                  <div className="flex items-center gap-4 py-1">
+                    <CheckBadge color="purple" />
+                    <span className="text-[14px] text-gray-400">
+                      {getDailyClipLimit(plan)}
+                    </span>
+                  </div>
                   {plan.features.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <Check className="h-3 w-3 text-emerald-300" />
-                      <span>{f}</span>
+                    <div key={i} className="flex items-center gap-4 py-1">
+                      <CheckBadge color="emerald" />
+                      <span className="text-[14px] text-gray-400">{f}</span>
                     </div>
                   ))}
                 </CardContent>
@@ -240,5 +269,20 @@ function BillingToggleButton({
     >
       {label}
     </button>
+  );
+}
+
+function CheckBadge({ color = "emerald" }: { color?: "emerald" | "purple" }) {
+  const colorMap = {
+    emerald: "bg-emerald-500/20 text-emerald-300",
+    purple: "bg-purple-500/20 text-purple-300",
+  };
+
+  return (
+    <span
+      className={`flex h-5 w-5 items-center justify-center rounded-full ${colorMap[color]}`}
+    >
+      <Check className="h-3 w-3" />
+    </span>
   );
 }

@@ -19,9 +19,14 @@ export default function DashboardContent() {
   const [exports, setExports] = useState<any | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [exportsLoading, setExportsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<"kick" | "twitch">("twitch");
-  const [isShifting, setIsShifting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const savedPage = localStorage.getItem("content_active_page");
+    return savedPage && !isNaN(Number(savedPage)) ? Number(savedPage) : 1;
+  });
+  const [activeTab, setActiveTab] = useState<"kick" | "twitch">(() => {
+    const savedTab = localStorage.getItem("content_active_tab");
+    return savedTab === "kick" || savedTab === "twitch" ? savedTab : "twitch";
+  });
 
   const ITEMS_PER_PAGE = 12;
   const totalPages = totalCount;
@@ -34,12 +39,11 @@ export default function DashboardContent() {
         description: "You need to be logged in to access the dashboard.",
         variant: "destructive",
       });
-
       setTimeout(() => {
         window.location.href = "/login";
       }, 500);
     }
-  }, [isAuthenticated, authLoading, toast]);
+  }, [isAuthenticated, authLoading]);
 
   const fetchExportData = async (page = 1) => {
     try {
@@ -50,7 +54,13 @@ export default function DashboardContent() {
         activeTab
       );
 
-      setExports(response?.videos || []);
+      const filteredVideos =
+        response?.videos?.filter(
+          (video: any) =>
+            video.status !== "failed" && video.status !== "skipped"
+        ) || [];
+
+      setExports(filteredVideos || []);
       setTotalCount(response?.total_pages || 0);
       setExportsLoading(false);
     } catch (error: any) {
@@ -74,7 +84,6 @@ export default function DashboardContent() {
         if (next.length !== prev.length) {
           console.log(`[socket] video removed (${status}):`, videoId);
         }
-
         return next;
       }
 
@@ -84,9 +93,7 @@ export default function DashboardContent() {
       const next = prev.map((video) => {
         if (video.public_id === videoId) {
           updated = true;
-
           if (video.status === status) return video;
-
           return {
             ...video,
             status,
@@ -102,7 +109,6 @@ export default function DashboardContent() {
       return next;
     });
   };
-
   const addNewVideoFromSocket = (newVideo: any) => {
     // ✅ use ref, NOT state
     if (newVideo.provider !== activeTabRef.current) return;
@@ -115,22 +121,16 @@ export default function DashboardContent() {
       return;
     }
 
-    setIsShifting(true);
-
     setTimeout(() => {
       setExports((prev: any[]) => {
         if (!prev || !Array.isArray(prev)) return [newVideo];
-
         if (prev.some((v) => v.public_id === newVideo.public_id)) return prev;
-
         return [newVideo, ...prev].slice(0, ITEMS_PER_PAGE);
       });
 
       toast({
         title: "New video added 🎬",
       });
-
-      setIsShifting(false);
     }, 800);
   };
 
@@ -144,19 +144,15 @@ export default function DashboardContent() {
 
   useEffect(() => {
     const socket = getSocket();
-
     const handleConnect = () => {
       console.log("[socket] connected:", socket?.id);
     };
-
     const handleDisconnect = (reason: string) => {
       console.warn("[socket] disconnected:", reason);
     };
-
     const handleConnectError = (err: Error) => {
       console.error("[socket] connection error:", err.message);
     };
-
     const handleVideoStatus = (payload: any) => {
       console.log("[socket] video_status:", payload);
       const { video_id, status } = payload;
@@ -164,21 +160,17 @@ export default function DashboardContent() {
 
       updateVideoStatusBySocket(video_id, status);
     };
-
     const handleNewVideoDetails = (payload: any) => {
       console.log("[socket] video_details:", payload);
-
       if (!payload?.public_id) return;
 
       addNewVideoFromSocket(payload);
     };
-
     socket?.on("connect", handleConnect);
     socket?.on("disconnect", handleDisconnect);
     socket?.on("connect_error", handleConnectError);
     socket?.on("video_status", handleVideoStatus);
     socket?.on("video_details", handleNewVideoDetails);
-
     return () => {
       socket?.off("connect", handleConnect);
       socket?.off("disconnect", handleDisconnect);
@@ -187,11 +179,6 @@ export default function DashboardContent() {
       socket?.off("video_details", handleNewVideoDetails);
     };
   }, []);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    setCurrentPage(1);
-  }, [activeTab, isAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -208,40 +195,31 @@ export default function DashboardContent() {
   useEffect(() => {
     const isReturning = sessionStorage.getItem("content_returning");
 
-    if (!isReturning) {
-      // Fresh entry → always default
-      setActiveTab("twitch");
-      setCurrentPage(1);
-
-      localStorage.removeItem("content_active_tab");
-      localStorage.removeItem("content_active_page");
-      return;
+    if (sessionStorage.getItem("content_session_initialized")) {
+      // Continuing in session (e.g., reload), do nothing
+    } else {
+      if (isReturning) {
+        // Returning from content-related page (video)
+        sessionStorage.setItem("content_session_initialized", "true");
+        sessionStorage.removeItem("content_returning");
+      } else {
+        // Fresh entry from other page or new session
+        setActiveTab("twitch");
+        setCurrentPage(1);
+        localStorage.removeItem("content_active_tab");
+        localStorage.removeItem("content_active_page");
+        sessionStorage.setItem("content_session_initialized", "true");
+      }
     }
-
-    // ✅ returning from video
-    const savedTab = localStorage.getItem("content_active_tab") as
-      | "kick"
-      | "twitch"
-      | null;
-
-    const savedPage = localStorage.getItem("content_active_page");
-
-    if (savedTab) {
-      setActiveTab(savedTab);
-    }
-
-    if (savedPage && !isNaN(Number(savedPage))) {
-      setCurrentPage(Number(savedPage));
-    }
-
-    // 🔥 IMPORTANT: consume the flag
-    sessionStorage.removeItem("content_returning");
+    return () => {
+      sessionStorage.removeItem("content_session_initialized");
+    };
   }, []);
 
   const isPlanExpired = (() => {
+    // const endDate = "2026-02-15T07:32:47.961082+00:00";
     const endDate = user?.active_plan?.end_date;
     if (!endDate) return false;
-
     return new Date(endDate).getTime() < Date.now();
   })();
 
@@ -254,20 +232,33 @@ export default function DashboardContent() {
   }
 
   if (!isAuthenticated) return null;
+
+  if (user?.active_plan === null) {
+    return (
+      <main className="min-h-[70vh] flex items-center justify-center px-4 ">
+        <Card className="p-10 text-center border-none">
+          <h2 className="text-2xl font-bold mb-3">No Content Available</h2>
+          <p className="text-muted-foreground">
+            You do not have an active subscription plan.
+          </p>
+          <p className="text-muted-foreground mb-6">
+            To unlock content features, please purchase a plan.
+          </p>
+          <Link href="/subscription">
+            <Button className="bg-primary hover:bg-primary-700 text-white">
+              Purchase Plan
+            </Button>
+          </Link>
+        </Card>
+      </main>
+    );
+  }
   const isClipLimitReached =
     user?.active_plan?.meta_data_json?.clips_limit_reached;
 
   if (isPlanExpired) {
     return (
       <main className="min-h-[70vh] flex items-center justify-center px-4 ">
-        {isShifting && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-            <div className="bg-black/80 border border-white/20 rounded-xl px-6 py-4 flex items-center gap-3 shadow-lg">
-              <div className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-              <p className="text-sm text-white">Updating content…</p>
-            </div>
-          </div>
-        )}
         <Card className="p-10 text-center border-none">
           <h2 className="text-2xl font-bold mb-3">No Content Available</h2>
           {isClipLimitReached ? (
@@ -290,7 +281,6 @@ export default function DashboardContent() {
               </p>
             </>
           )}
-
           <Link href="/subscription">
             <Button className="bg-primary hover:bg-primary-700 text-white">
               Purchase Plan
@@ -300,7 +290,6 @@ export default function DashboardContent() {
       </main>
     );
   }
-
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
       <div className="flex items-center gap-4 mb-8">
@@ -320,7 +309,6 @@ export default function DashboardContent() {
           Content Studio
         </h1>
       </div>
-
       <p className="text-muted-foreground mb-8 max-w-2xl">
         Your stream exports appear here. Click on any video to see the viral
         clips generated from it, along with transcriptions and virality
@@ -335,21 +323,19 @@ export default function DashboardContent() {
             { key: "twitch", label: "Twitch", logo: twitch },
             { key: "kick", label: "Kick", logo: kick },
           ].map((tab) => (
-            <Button
+            <div
               key={tab.key}
-              size="sm"
-              // onClick={() => setActiveTab(tab.key as any)}
               onClick={() => {
                 setActiveTab(tab.key as any);
                 setCurrentPage(1);
                 localStorage.setItem("content_active_tab", tab.key);
                 localStorage.setItem("content_active_page", "1");
               }}
-              className={` flex items-center gap-2 border ${
+              className={`${
                 activeTab === tab.key
                   ? "bg-primary border-primary"
                   : "bg-black/10 border-white/40 hover:bg-primary hover:border-primary"
-              }text-white transition-colors duration-300 transform !translate-y-0 hover:!translate-y-0 active:!translate-y-0`}
+              } px-3 py-0 rounded-md h-[32px] text-xs cursor-default flex items-center gap-2 border text-white transition-colors duration-300 transform !translate-y-0 hover:!translate-y-0 active:!translate-y-0`}
             >
               {tab.logo && (
                 <img
@@ -359,11 +345,10 @@ export default function DashboardContent() {
                 />
               )}
               {tab.label}
-            </Button>
+            </div>
           ))}
         </div>
       </div>
-
       {exportsLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(8)].map((_, i) => (
@@ -378,7 +363,7 @@ export default function DashboardContent() {
         </div>
       ) : exports && exports.length > 0 ? (
         <>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {exports.map((exp: any) => {
               const duration = Math.round(exp.duration);
               const minutes = Math.floor(duration / 60);
@@ -390,7 +375,6 @@ export default function DashboardContent() {
                 message,
               } = getStatusLabel(exp.status);
               const isAccessible = exp.status === "completed";
-
               return (
                 <div
                   key={exp.public_id}
@@ -430,20 +414,17 @@ export default function DashboardContent() {
                               <Play className="h-12 w-12 text-white/50" />
                             </div>
                           )}
-
                           {/* Duration */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
                             <Clock className="h-3 w-3" /> {minutes}:{seconds}
                           </div>
                         </div>
-
                         {/* Content */}
                         <CardContent className="p-4 space-y-3">
                           <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
                             {exp?.provider}
                           </span>
                           <p className="font-medium truncate">{exp.title}</p>
-
                           <div className="flex justify-between items-center">
                             <p className="text-sm">Status</p>
                             <span
@@ -452,7 +433,6 @@ export default function DashboardContent() {
                               <Icon className="h-3 w-3" /> {text}
                             </span>
                           </div>
-
                           <div className="flex justify-between items-center">
                             <p className="text-sm">Processed On</p>
                             <p className="text-sm text-muted-foreground">
@@ -470,7 +450,11 @@ export default function DashboardContent() {
                           </div>
                           <div className="flex justify-between items-center">
                             <p className="text-sm">Posted</p>
-                            <p className="text-sm">{`${exp.posted_reels}/${exp.total_reels}`}</p>
+                            <div className="px-2 py-1 rounded-md bg-white/10 border border-white/20">
+                              <p className="text-sm text-muted-foreground">
+                                {`${exp.posted_reels}/${exp.total_reels}`}
+                              </p>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -495,13 +479,11 @@ export default function DashboardContent() {
                         {/* 🚫 ACCESS OVERLAY */}
                         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white"></div>
                       </div>
-
                       <CardContent className="p-4 space-y-3">
                         <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
                           {exp?.provider}
                         </span>
                         <p className="font-medium truncate">{exp.title}</p>
-
                         <div className="flex justify-between items-center">
                           <p className="text-sm">Status</p>
                           <span
@@ -510,7 +492,6 @@ export default function DashboardContent() {
                             <Icon className="h-3 w-3" /> {text}
                           </span>
                         </div>
-
                         <div className="flex justify-between items-center">
                           <p className="text-sm">Processed On</p>
                           <p className="text-sm text-muted-foreground">
@@ -526,12 +507,14 @@ export default function DashboardContent() {
                               : "Not Available"}
                           </p>
                         </div>
-
                         <div className="flex justify-between items-center">
                           <p className="text-sm">Posted</p>
-                          <p className="text-sm">{`${exp.posted_reels}/${exp.total_reels}`}</p>
+                          <div className="px-2 py-1 rounded-md bg-white/10 border border-white/20">
+                            <p className="text-sm text-muted-foreground">
+                              {`${exp.posted_reels}/${exp.total_reels}`}
+                            </p>
+                          </div>
                         </div>
-
                         <p className="text-xs text-muted-foreground text-center">
                           {message}
                         </p>
@@ -542,7 +525,6 @@ export default function DashboardContent() {
               );
             })}
           </div>
-
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-8">
@@ -550,7 +532,6 @@ export default function DashboardContent() {
                 variant="ghost"
                 size="sm"
                 disabled={currentPage === 1}
-                // onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 onClick={() => {
                   setCurrentPage((p) => {
                     const next = Math.max(p - 1, 1);
@@ -561,7 +542,6 @@ export default function DashboardContent() {
               >
                 Previous
               </Button>
-
               {[...Array(totalPages)].map((_, index) => {
                 const page = index + 1;
                 return (
@@ -570,7 +550,6 @@ export default function DashboardContent() {
                     size="sm"
                     variant={page === currentPage ? "default" : "ghost"}
                     className="min-w-[36px]"
-                    // onClick={() => setCurrentPage(page)}
                     onClick={() => {
                       setCurrentPage(page);
                       localStorage.setItem("content_active_page", String(page));
@@ -580,14 +559,10 @@ export default function DashboardContent() {
                   </Button>
                 );
               })}
-
               <Button
                 variant="ghost"
                 size="sm"
                 disabled={currentPage === totalPages}
-                // onClick={() =>
-                //   setCurrentPage((p) => Math.min(p + 1, totalPages))
-                // }
                 onClick={() =>
                   setCurrentPage((p) => {
                     const next = Math.min(p + 1, totalPages);

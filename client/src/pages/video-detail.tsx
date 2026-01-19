@@ -150,6 +150,16 @@ export default function VideoDetail() {
   const [clipsData, setClipsData] = useState<Clip[]>([]);
   const [sourceVideoData, setSourceVideoData] = useState<any>();
 
+  useEffect(() => {
+    if (!exportId || !sourceVideoData?.public_id) return;
+
+    // If URL id doesn't match the stored export public_id → redirect
+    if (sourceVideoData.public_id !== exportId) {
+      localStorage.removeItem("selected_export");
+      window.location.href = "/dashboard";
+    }
+  }, [exportId, sourceVideoData]);
+
   const fetchReelsData = async (id: string, platform: string) => {
     try {
       const response = await api.getReelsData(platform, id || "");
@@ -214,7 +224,7 @@ export default function VideoDetail() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex flex-wrap items-center gap-4 mb-6">
         <Link
           href="/dashboard/content"
           onClick={() => localStorage.removeItem("selected_export")}
@@ -235,9 +245,13 @@ export default function VideoDetail() {
 
       <Card className="border-white/10 bg-black/40 mb-8">
         <CardContent className="p-4 flex items-center gap-4">
-          <div className="h-20 w-32 rounded-lg bg-gradient-to-br from-primary/20 to-emerald-500/20 flex items-center justify-center">
+          <div className="h-[120px] w-32 rounded-lg bg-gradient-to-br from-primary/20 to-emerald-500/20 flex items-center justify-center">
             {/* <Play className="h-8 w-8 text-white/50" /> */}
-            <img src={sourceVideoData?.poster_url} alt="Thumbnail" />
+            <img
+              src={sourceVideoData?.poster_url}
+              alt="Thumbnail"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
             <p className="text-sm text-muted-foreground mb-1">Source Video</p>

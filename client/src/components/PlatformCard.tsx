@@ -61,7 +61,7 @@ const PlatformCard = ({
   return (
     <Card className="bg-black/40 border-white/10 overflow-hidden">
       <CardContent className="p-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-xl overflow-hidden flex items-center justify-center bg-white/5">
               {isConnected && connectedAccount?.avatar_url ? (
@@ -80,7 +80,7 @@ const PlatformCard = ({
             </div>
 
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-display text-base font-medium text-foreground">
                   {platform.name}
                 </h3>

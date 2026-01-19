@@ -43,6 +43,9 @@ apiClient.interceptors.response.use(
       if (status === 401) {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("auth_user");
+        localStorage.removeItem("content_active_page");
+        localStorage.removeItem("content_active_tab");
+        sessionStorage.removeItem("content_session_initialized");
         // window.location.href = "/login";
       }
 
