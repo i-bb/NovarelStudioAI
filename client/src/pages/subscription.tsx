@@ -599,21 +599,23 @@ export default function Subscription() {
                   )}
                 </CardContent>
 
-                <CardFooter>
-                  {(() => {
-                    const label = getButtonLabel(plan);
+                {plan.id !== "starter" && (
+                  <CardFooter>
+                    {(() => {
+                      const label = getButtonLabel(plan);
 
-                    return (
-                      <Button
-                        className={`w-full ${getButtonClass(label)}`}
-                        disabled={isPlanDisabled(plan)}
-                        onClick={() => handlePlanSelect(plan)}
-                      >
-                        {label}
-                      </Button>
-                    );
-                  })()}
-                </CardFooter>
+                      return (
+                        <Button
+                          className={`w-full ${getButtonClass(label)}`}
+                          disabled={isPlanDisabled(plan)}
+                          onClick={() => handlePlanSelect(plan)}
+                        >
+                          {label}
+                        </Button>
+                      );
+                    })()}
+                  </CardFooter>
+                )}
               </Card>
             );
           })}
