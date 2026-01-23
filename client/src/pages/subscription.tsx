@@ -220,7 +220,7 @@ export default function Subscription() {
       case "unavailable":
         return "bg-gray-500 border-none text-white cursor-not-allowed";
       case "subscribe":
-        return "bg-primary text-primary-foreground hover:bg-primary/90";
+        return "bg-primary text-primary-foreground hover:bg-primary/60";
       default:
         return "";
     }
@@ -364,14 +364,14 @@ export default function Subscription() {
     // Starter plan (no tiers)
     if (!plan.creditTiers) {
       return plan.dailyPostingLimit
-        ? `About ${plan.dailyPostingLimit} clips/day`
+        ? `${plan.dailyPostingLimit} clips/day Posting Limit`
         : null;
     }
 
     // Tier-based plans
     const tier = plan.creditTiers[getSelectedTier(plan.id)];
     return tier?.dailyPostingLimit
-      ? `About ${tier.dailyPostingLimit} clips/day`
+      ? `${tier.dailyPostingLimit} clips/day Posting Limit`
       : null;
   };
 

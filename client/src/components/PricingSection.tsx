@@ -121,14 +121,14 @@ export default function PricingSection() {
     // Starter plan (no tiers)
     if (!plan.creditTiers) {
       return plan.dailyPostingLimit
-        ? `About ${plan.dailyPostingLimit} clips/day`
+        ? `${plan.dailyPostingLimit} clips/day Posting Limit`
         : null;
     }
 
     // Tier-based plans
     const tier = plan.creditTiers[getSelectedTier(plan.id)];
     return tier?.dailyPostingLimit
-      ? `About ${tier.dailyPostingLimit} clips/day`
+      ? `${tier.dailyPostingLimit} clips/day Posting Limit`
       : null;
   };
 
@@ -236,7 +236,7 @@ export default function PricingSection() {
 
                 <CardFooter>
                   <Button
-                    className="w-full border-none"
+                    className="w-full border-none bg-primary text-primary-foreground hover:bg-primary/60"
                     onClick={() => handlePlanSelect(plan.id)}
                   >
                     {plan.cta}

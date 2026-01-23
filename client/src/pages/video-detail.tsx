@@ -13,6 +13,7 @@ import {
   Youtube,
   Music2,
   Edit,
+  ScissorsLineDashed,
 } from "lucide-react";
 import type { Clip } from "@shared/schema";
 import { api } from "@/lib/api/api";
@@ -28,7 +29,8 @@ function ClipCard({ clip, exportId }: { clip: any; exportId: string }) {
         ).padStart(2, "0")}`
       : null;
 
-  const viralScore = clip.viral_score ?? clip.viralityScore;
+  // const viralScore = clip.viral_score ?? clip.viralityScore;
+  const isClipThatVideo = clip?.is_clip_that || false;
 
   const platforms = [];
 
@@ -58,80 +60,102 @@ function ClipCard({ clip, exportId }: { clip: any; exportId: string }) {
 
   return (
     <Link href={`/dashboard/content/${exportId}/reel/${clip.public_id}`}>
-      <div className="rounded-xl overflow-hidden border border-white/10 bg-black/40 cursor-pointer group hover:bg-black/60 transition">
-        <div className="relative aspect-[9/16]">
-          <img
-            src={clip.poster_url}
-            alt={clip.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          />
+      <div
+        className={`relative rounded-xl cursor-pointer group transition
+      ${isClipThatVideo ? "p-[2px]" : ""}
+    `}
+      >
+        {isClipThatVideo && (
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500 via-primary/500 to-fuchsia-500 blur-[6px] opacity-100"></div>
+        )}
+        <div className="rounded-xl overflow-hidden border border-white/10 bg-black/40 cursor-pointer group hover:bg-black/60 transition">
+          <div className="relative aspect-[9/16]">
+            <img
+              src={clip.poster_url}
+              alt={clip.title}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
 
-          {/* Duration */}
-          {duration && (
-            <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-1 font-medium">
-              <Clock className="h-3 w-3" />
-              {duration}
-            </div>
-          )}
-
-          {/* Viral Score */}
-          {viralScore !== undefined && (
-            <div className="absolute top-2 right-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-xs px-2 py-1 rounded flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              {viralScore.toFixed(1)}
-            </div>
-          )}
-
-          {/* Hover overlay */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300">
-            <div className="absolute inset-0 flex top-[40%] justify-center pointer-events-none">
-              <Play className="h-16 w-16 text-white drop-shadow-xl" />
-            </div>
-
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/85 to-transparent px-4 pt-10 pb-6 flex flex-col text-left gap-2">
-              <p className="font-semibold text-white text-sm leading-tight">
-                {clip.title}
-              </p>
-              {/* Posted on */}
-              {(clip.instagram_posted ||
-                clip.youtube_posted ||
-                clip.tiktok_posted) && (
-                <>
-                  <p className="text-xs text-white/80 font-medium">
-                    Posted on:
-                  </p>
-
-                  {/* Platform icons with correct backgrounds */}
-                  <div className="flex space-x-2">
-                    {platforms.map((p, idx) => {
-                      const Icon = p.icon;
-                      return (
-                        <div
-                          key={idx}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center ${p.bg}`}
-                        >
-                          <Icon className="w-4 h-4 text-white" />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-              {/* Viral reason */}
-              {clip.viral_reason && (
-                <p className="text-[11px] text-white/90 leading-relaxed line-clamp-2">
-                  {clip.viral_reason}
-                </p>
-              )}
-
-              {/* Transcript */}
-              {clip.transcript && (
-                <div className="bg-black/70 border border-white/10 rounded-md px-3 py-2">
-                  <p className="text-[11px] text-white/90 italic line-clamp-2">
-                    {clip.transcript}
-                  </p>
+            {isClipThatVideo && (
+              <div className="absolute top-4 -right-10 rotate-45 z-10">
+                <div className="bg-primary text-white text-[11px] font-semibold px-10 py-1 shadow-lg flex items-center gap-1">
+                  <ScissorsLineDashed className="h-3 w-3" />
+                  CLIP THAT
                 </div>
-              )}
+              </div>
+            )}
+
+            {/* Duration */}
+            {duration && (
+              <div className="absolute top-2 left-2 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-1 font-medium">
+                <Clock className="h-3 w-3" />
+                {duration}
+              </div>
+            )}
+
+            {/* Viral Score */}
+            {/* {viralScore !== undefined && (
+              <div
+                className={`${
+                  isClipThatVideo ? "top-10 left-2" : "top-2 right-2"
+                } absolute bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-xs px-2 py-1 rounded flex items-center gap-1`}
+              >
+                <TrendingUp className="h-3 w-3" />
+                {viralScore.toFixed(1)}
+              </div>
+            )} */}
+
+            {/* Hover overlay */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300">
+              <div className="absolute inset-0 flex top-[40%] justify-center pointer-events-none">
+                <Play className="h-16 w-16 text-white drop-shadow-xl" />
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/85 to-transparent px-4 pt-10 pb-6 flex flex-col text-left gap-2">
+                <p className="font-semibold text-white text-sm leading-tight">
+                  {clip.title}
+                </p>
+                {/* Posted on */}
+                {(clip.instagram_posted ||
+                  clip.youtube_posted ||
+                  clip.tiktok_posted) && (
+                  <>
+                    <p className="text-xs text-white/80 font-medium">
+                      Posted on:
+                    </p>
+
+                    {/* Platform icons with correct backgrounds */}
+                    <div className="flex space-x-2">
+                      {platforms.map((p, idx) => {
+                        const Icon = p.icon;
+                        return (
+                          <div
+                            key={idx}
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center ${p.bg}`}
+                          >
+                            <Icon className="w-4 h-4 text-white" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+                {/* Viral reason */}
+                {clip.viral_reason && (
+                  <p className="text-[11px] text-white/90 leading-relaxed line-clamp-2">
+                    {clip.viral_reason}
+                  </p>
+                )}
+
+                {/* Transcript */}
+                {clip.transcript && (
+                  <div className="bg-black/70 border border-white/10 rounded-md px-3 py-2">
+                    <p className="text-[11px] text-white/90 italic line-clamp-2">
+                      {clip.transcript}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -271,9 +295,9 @@ export default function VideoDetail() {
 
         {clipsData.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {clipsData.map((c) => (
-              <ClipCard key={c.id} clip={c} exportId={exportId || ""} />
-            ))}
+            {clipsData.map((c) => {
+              return <ClipCard key={c.id} clip={c} exportId={exportId || ""} />;
+            })}
           </div>
         ) : (
           <Card className="border-white/10 bg-black/40 p-12 text-center">

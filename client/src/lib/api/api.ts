@@ -124,6 +124,7 @@ export interface SignupPayload {
   name: string;
   email: string;
   password: string;
+  free_plan: boolean;
 }
 
 export interface SignupResponse {

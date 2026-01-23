@@ -53,6 +53,7 @@ export function DashboardNav() {
     localStorage.removeItem("auth_user");
     localStorage.removeItem("content_active_page");
     localStorage.removeItem("content_active_tab");
+    localStorage.removeItem("selected_export");
     sessionStorage.removeItem("content_session_initialized");
     window.location.href = "/login";
   };

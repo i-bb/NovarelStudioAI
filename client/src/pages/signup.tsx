@@ -136,19 +136,6 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      // 1️⃣ Signup
-      const response = await api.signup({
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      });
-
-      // 2️⃣ Save auth
-      localStorage.setItem("auth_token", response.access_token);
-      localStorage.setItem("auth_user", JSON.stringify(response.user));
-
-      toast({ description: "Your account has been created successfully" });
-
       // 3️⃣ Resolve selected plan
       const selectedPlan =
         plans.find((p) => p.id === planParam) ||
@@ -158,25 +145,38 @@ export default function SignupPage() {
         throw new Error("Invalid subscription plan selected");
       }
 
-      let stripePlanId: number | undefined;
+      const payload = {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        free_plan: selectedPlan.id === "starter",
+      };
 
-      // 🟢 Starter → use planId directly
+      // 1️⃣ Signup
+      const response = await api.signup(payload);
+
+      // 2️⃣ Save auth
+      localStorage.setItem("auth_token", response.access_token);
+      localStorage.setItem("auth_user", JSON.stringify(response.user));
+
+      toast({ description: "Your account has been created successfully" });
+
+      // 🟢 STARTER PLAN → LOGIN & REDIRECT (NO STRIPE)
       if (selectedPlan.id === "starter") {
-        stripePlanId = selectedPlan.planId;
-      } else {
-        // 🔵 Paid plans → use tier planId
-        const selectedTier =
-          selectedPlan.creditTiers?.[tierParam] ??
-          selectedPlan.creditTiers?.[0];
-
-        stripePlanId = selectedTier?.planId;
+        setLocation("/dashboard");
+        return;
       }
+
+      // 🔵 PAID PLANS → STRIPE FLOW
+      const selectedTier =
+        selectedPlan.creditTiers?.[tierParam] ?? selectedPlan.creditTiers?.[0];
+
+      const stripePlanId = selectedTier?.planId;
 
       if (!stripePlanId) {
         throw new Error("Invalid Stripe plan selected");
       }
 
-      // 4️⃣ Always redirect to Stripe
       const subRes = await api.purchaseSubscription(stripePlanId);
 
       if (subRes?.checkout_url) {
@@ -196,13 +196,6 @@ export default function SignupPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleGoogleSignup = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Google signup will be available soon!",
-    });
   };
 
   return (
