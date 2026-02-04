@@ -57,9 +57,9 @@ export default function DashboardContent() {
   //Storage Data Calculations
   const isTopPlan = user?.active_plan?.name === "Studio";
   const totalStorage = user?.active_plan?.meta_data_json?.total_storage_mb || 0;
-  const totalStorageGB = totalStorage / 1024 || 0;
+  const totalStorageGB = Number((totalStorage / 1024).toFixed(2));
   const usedStorage = user?.active_plan?.meta_data_json?.used_storage_mb || 0;
-  const usedStorageGB = usedStorage / 1024 || 0;
+  const usedStorageGB = Number((usedStorage / 1024).toFixed(2));
   const isStorageWarningLimit =
     user?.active_plan?.meta_data_json?.storage_warning_threshold_reached ||
     false;
