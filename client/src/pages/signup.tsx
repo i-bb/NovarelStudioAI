@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api/api";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
+import { trackEvent } from "@/lib/ga";
 
 type PlanInfo = {
   name: string;
@@ -159,6 +160,13 @@ export default function SignupPage() {
       localStorage.setItem("auth_token", response.access_token);
       localStorage.setItem("auth_user", JSON.stringify(response.user));
 
+      // 🔔 GA EVENT — ACCOUNT CREATED
+      trackEvent("account_created", {
+        method: "email",
+        plan: selectedPlan.id,
+        billing_period: billingPeriod,
+      });
+
       toast({ description: "Your account has been created successfully" });
 
       // 🟢 STARTER PLAN → LOGIN & REDIRECT (NO STRIPE)
@@ -180,6 +188,11 @@ export default function SignupPage() {
       const subRes = await api.purchaseSubscription(stripePlanId);
 
       if (subRes?.checkout_url) {
+        trackEvent("checkout_start", {
+          source: "signup_flow",
+          plan_id: stripePlanId,
+          billing_period: billingPeriod,
+        });
         window.location.href = subRes.checkout_url;
         return;
       }

@@ -105,6 +105,15 @@ export default function FeaturesSection() {
   return (
     <section id="features" className="relative">
       <div className="relative max-w-7xl mx-auto">
+        <div className="pt-4 mb-8 md:mb-10">
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
+            Connect Your Platforms
+          </h2>
+          <p className="text-sm sm:text-base text-muted-foreground/90">
+            Connect Twitch, Kick, and social platforms to auto-record streams,
+            detect highlights, and generate clips effortlessly.
+          </p>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* VIDEO */}
           <div className="relative min-h-[480px] rounded-3xl border border-white/10 bg-black overflow-hidden">

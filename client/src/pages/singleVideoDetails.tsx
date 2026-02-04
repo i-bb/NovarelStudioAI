@@ -36,6 +36,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/AuthContext";
+import { trackEvent } from "@/lib/ga";
 
 export default function SingleVideoDetails() {
   const params = useParams();
@@ -99,6 +100,13 @@ export default function SingleVideoDetails() {
       setPublishingPlatform(platform); // Start loading
 
       const response = await api.uploadReels(platform, reelData.public_id);
+
+      // 🔔 GA EVENT — REEL PUBLISHED
+      trackEvent("reel_published_manual", {
+        platform,
+        reel_id: reelData.public_id,
+        export_id: exportId,
+      });
 
       toast({
         description: response?.message || `Reel published on ${platform}!`,

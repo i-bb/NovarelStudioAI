@@ -4,19 +4,38 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Play, Clock, ArrowLeft, Film } from "lucide-react";
+import {
+  Play,
+  Clock,
+  ArrowLeft,
+  Film,
+  Trash,
+  Zap,
+  AlertTriangle,
+} from "lucide-react";
 import api from "@/lib/api/api";
 import { getStatusLabel } from "@/lib/common";
 import kick from "@assets/generated_images/kick.svg";
 import twitch from "@assets/generated_images/twitch.png";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { getSocket } from "@/lib/socket";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Progress } from "@/components/ui/progress";
 
 export default function DashboardContent() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
 
-  const [exports, setExports] = useState<any | null>(null);
+  const [videoData, setVideoData] = useState<any | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [exportsLoading, setExportsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(() => {
@@ -27,11 +46,25 @@ export default function DashboardContent() {
     const savedTab = localStorage.getItem("content_active_tab");
     return savedTab === "kick" || savedTab === "twitch" ? savedTab : "twitch";
   });
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 12;
   const totalPages = totalCount;
   const currentPageRef = useRef(currentPage);
   const activeTabRef = useRef(activeTab);
+
+  //Storage Data Calculations
+  const isTopPlan = user?.active_plan?.name === "Studio";
+  const totalStorage = user?.active_plan?.meta_data_json?.total_storage_mb || 0;
+  const totalStorageGB = totalStorage / 1024 || 0;
+  const usedStorage = user?.active_plan?.meta_data_json?.used_storage_mb || 0;
+  const usedStorageGB = usedStorage / 1024 || 0;
+  const isStorageWarningLimit =
+    user?.active_plan?.meta_data_json?.storage_warning_threshold_reached ||
+    false;
+  const totalStorageUsagePercentage =
+    totalStorageGB > 0 ? (usedStorageGB / totalStorageGB) * 100 : 0;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -48,7 +81,7 @@ export default function DashboardContent() {
   const fetchExportData = async (page = 1) => {
     try {
       setExportsLoading(true);
-      const response = await api.getContentStudios(
+      const response = await api.getVideos(
         String(page),
         String(ITEMS_PER_PAGE),
         activeTab
@@ -60,11 +93,12 @@ export default function DashboardContent() {
             video.status !== "failed" && video.status !== "skipped"
         ) || [];
 
-      setExports(filteredVideos || []);
+      setVideoData(filteredVideos || []);
       setTotalCount(response?.total_pages || 0);
       setExportsLoading(false);
     } catch (error: any) {
       console.error("Content Studio API failed:", error);
+      setExportsLoading(false);
       toast({
         description: getErrorMessage(error, "Something went wrong!"),
         variant: "destructive",
@@ -73,7 +107,7 @@ export default function DashboardContent() {
   };
 
   const updateVideoStatusBySocket = (videoId: string, status: string) => {
-    setExports((prev: any[]) => {
+    setVideoData((prev: any[]) => {
       if (!prev || !Array.isArray(prev)) return prev;
 
       // ❌ Remove video for skipped / failed
@@ -109,6 +143,7 @@ export default function DashboardContent() {
       return next;
     });
   };
+
   const addNewVideoFromSocket = (newVideo: any) => {
     // ✅ use ref, NOT state
     if (newVideo.provider !== activeTabRef.current) return;
@@ -122,7 +157,7 @@ export default function DashboardContent() {
     }
 
     setTimeout(() => {
-      setExports((prev: any[]) => {
+      setVideoData((prev: any[]) => {
         if (!prev || !Array.isArray(prev)) return [newVideo];
         if (prev.some((v) => v.public_id === newVideo.public_id)) return prev;
         return [newVideo, ...prev].slice(0, ITEMS_PER_PAGE);
@@ -166,6 +201,7 @@ export default function DashboardContent() {
 
       addNewVideoFromSocket(payload);
     };
+
     socket?.on("connect", handleConnect);
     socket?.on("disconnect", handleDisconnect);
     socket?.on("connect_error", handleConnectError);
@@ -222,6 +258,27 @@ export default function DashboardContent() {
     if (!endDate) return false;
     return new Date(endDate).getTime() < Date.now();
   })();
+
+  const onHandleDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      // 🔥 call your delete API here
+      const response = await api.deleteVideos(deleteTarget.public_id);
+      fetchExportData(currentPage);
+      toast({
+        description: response?.message,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: getErrorMessage(error, "Failed to delete video"),
+      });
+    } finally {
+      setIsDeleteOpen(false);
+      setDeleteTarget(null);
+    }
+  };
 
   if (authLoading) {
     return (
@@ -290,6 +347,7 @@ export default function DashboardContent() {
       </main>
     );
   }
+
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
       <div className="flex items-center gap-4 mb-8">
@@ -315,9 +373,58 @@ export default function DashboardContent() {
         insights.
       </p>
 
-      {/* Platform Tabs */}
+      {isStorageWarningLimit && (
+        <Card className="border border-white/10 bg-black/40 mb-8">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col w-full">
+                <div className="flex justify-between">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <AlertTriangle className="h-5 w-5 text-amber-400" />
+                    <p className="text-xl">Storage is low</p>
+                  </div>
+                  {isTopPlan ? (
+                    <Button
+                      size="sm"
+                      disabled
+                      className="cursor-not-allowed opacity-60"
+                    >
+                      <Zap className="h-4 w-4" />
+                      Upgrade
+                    </Button>
+                  ) : (
+                    <Link href="/subscription">
+                      <Button size="sm">
+                        <Zap className="h-4 w-4" />
+                        Upgrade
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  {isTopPlan
+                    ? "Please free up space to add more videos"
+                    : " Free up space or upgrade plan"}
+                </p>
+
+                {/* Progress */}
+                <div className="mt-3">
+                  <Progress
+                    value={totalStorageUsagePercentage}
+                    className="h-2"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {`${usedStorageGB}GB of ${totalStorageGB} GB used`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex items-center flex-wrap gap-4 justify-between mb-6">
-        {/* LEFT: Kick / Twitch */}
         <div className="flex gap-2">
           {[
             { key: "twitch", label: "Twitch", logo: twitch },
@@ -361,10 +468,10 @@ export default function DashboardContent() {
             </Card>
           ))}
         </div>
-      ) : exports && exports.length > 0 ? (
+      ) : videoData && videoData.length > 0 ? (
         <>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {exports.map((exp: any) => {
+            {videoData.map((exp: any) => {
               const duration = Math.round(exp.duration);
               const minutes = Math.floor(duration / 60);
               const seconds = String(duration % 60).padStart(2, "0");
@@ -421,9 +528,22 @@ export default function DashboardContent() {
                         </div>
                         {/* Content */}
                         <CardContent className="p-4 space-y-3">
-                          <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
-                            {exp?.provider}
-                          </span>
+                          <div className="flex justify-between">
+                            <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
+                              {exp?.provider}
+                            </span>
+                            <div
+                              className="bg-red/10 px-3 py-1 rounded border border-red text-red-500 cursor-pointer hover:text-red-400 transition"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setDeleteTarget(exp);
+                                setIsDeleteOpen(true);
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </div>
+                          </div>
                           <p className="font-medium truncate">{exp.title}</p>
                           <div className="flex justify-between items-center">
                             <p className="text-sm">Status</p>
@@ -589,6 +709,35 @@ export default function DashboardContent() {
           </p>
         </Card>
       )}
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-[420px] rounded-xl p-6">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this video?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The video and its generated clips
+              will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setDeleteTarget(null);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={onHandleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

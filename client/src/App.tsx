@@ -23,6 +23,9 @@ import Transactions from "./pages/transactions";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import ForgotPassword from "./pages/forgot-password";
 import { AuthProvider } from "./hooks/AuthProvider";
+import { useEffect } from "react";
+import { useLocation } from "wouter";
+import { trackPageView } from "@/lib/ga";
 
 function Router() {
   return (
@@ -108,6 +111,12 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    trackPageView(location);
+  }, [location]);
+
   return (
     <TooltipProvider>
       <Toaster />

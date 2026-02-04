@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check } from "lucide-react";
+import { Check, CircleAlert } from "lucide-react";
 import logoImage from "@assets/ChatGPT Image Nov 26, 2025, 05_11_54 PM_1764195119264.png";
 import { Badge } from "@/components/ui/badge";
 import PaymentSuccessModal from "@/components/PaymentSuccessModal";
@@ -26,6 +26,8 @@ import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
 import { getExpiryLabel } from "@/lib/utils";
 import { useAuth } from "@/hooks/AuthContext";
+import { trackEvent } from "@/lib/ga";
+import CancelSubscriptionModal from "@/components/CancelSubscriptionModal";
 
 export default function Subscription() {
   const { refreshUser } = useAuth();
@@ -64,6 +66,7 @@ export default function Subscription() {
   const [cancelling, setCancelling] = useState(false);
   const [loadingPlanId, setLoadingPlanId] = useState<number | null>(null);
   const [userLoaded, setUserLoaded] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   /* ================= DERIVED ================= */
 
@@ -297,6 +300,12 @@ export default function Subscription() {
     try {
       setLoadingPlanId(planId);
       const res = await api.purchaseSubscription(planId);
+      // 🔔 GA EVENT — CHECKOUT START
+      trackEvent("checkout_start", {
+        source: "subscription_page",
+        plan_id: planId,
+        billing_period: billingPeriod,
+      });
       window.location.href = res.checkout_url;
     } catch (e: any) {
       toast({
@@ -328,9 +337,16 @@ export default function Subscription() {
 
   const handlePlanSelect = async (plan: Plan) => {
     if (isPlanActive(plan)) {
-      await handleCancelSubscription();
+      setShowCancelConfirm(true);
       return;
     }
+
+    // 🔔 GA EVENT
+    trackEvent("subscribe_click", {
+      source: "subscription_page",
+      plan_id: plan.planId,
+      billing_period: billingPeriod,
+    });
 
     if (
       hasActiveSubscription &&
@@ -382,6 +398,22 @@ export default function Subscription() {
     fetchAllPlans();
   }, [userLoaded]);
 
+  const fireSubscriptionStartedOnce = (
+    sessionId: string | null,
+    planName?: string | null
+  ) => {
+    const key = `ga_subscription_started_${sessionId}`;
+
+    if (sessionStorage.getItem(key)) return;
+
+    trackEvent("subscription_started", {
+      source: "stripe_checkout",
+      plan_name: planName,
+    });
+
+    sessionStorage.setItem(key, "1");
+  };
+
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -407,6 +439,8 @@ export default function Subscription() {
 
         if (stripeSessionId) {
           await refreshUser();
+          // 🔔 GA EVENT — SUBSCRIPTION STARTED (ONCE)
+          fireSubscriptionStartedOnce(stripeSessionId, res?.active_plan?.name);
           setSessionDetails({
             planName: res?.active_plan?.name,
             date: res?.active_plan?.start_date,
@@ -508,11 +542,6 @@ export default function Subscription() {
                 }`}
               >
                 <CardHeader>
-                  {/* {plan.badge && (
-                    <span className="inline-block text-[10px] mt-2 bg-white/10 px-2 py-1 rounded-full border border-white/20">
-                      {plan.badge}
-                    </span>
-                  )} */}
                   {isPlanActive(plan) && (
                     <Badge className="absolute top-2 right-4 bg-green-500">
                       Active Plan
@@ -620,6 +649,54 @@ export default function Subscription() {
             );
           })}
         </div>
+
+        <div className="mt-12 mb-12 max-w-6xl mx-auto">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/60 backdrop-blur px-6 py-6">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-emerald-500/10" />
+
+            <div className="relative flex flex-col sm:flex-row gap-4">
+              {/* <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm"> */}
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm self-start sm:self-auto">
+                <CircleAlert />
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-white">
+                  Storage management
+                </p>
+
+                <div className="space-y-3 sm:space-y-2 text-sm text-gray-400">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-purple-400" />
+                    <p>
+                      When your storage limit is reached, the{" "}
+                      <span className="text-white">
+                        oldest video is automatically removed
+                      </span>{" "}
+                      to make room for new clips.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+                    <p>
+                      We recommend regularly reviewing and cleaning up unused or
+                      outdated clips to stay in control of your content.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+                    <p>
+                      Higher plans provide larger storage capacity, allowing you
+                      to retain more videos on the platform.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {showSuccess && sessionDetails && (
@@ -629,6 +706,18 @@ export default function Subscription() {
           date={sessionDetails.date}
           planName={sessionDetails.planName}
           onClose={() => (window.location.href = "/dashboard")}
+        />
+      )}
+
+      {showCancelConfirm && (
+        <CancelSubscriptionModal
+          open={showCancelConfirm}
+          loading={cancelling}
+          onClose={() => setShowCancelConfirm(false)}
+          onConfirm={async () => {
+            await handleCancelSubscription();
+            setShowCancelConfirm(false);
+          }}
         />
       )}
     </>

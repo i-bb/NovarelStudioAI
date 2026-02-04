@@ -21,7 +21,8 @@ import api from "@/lib/api/api";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
-import { Check } from "lucide-react";
+import { Check, CircleAlert } from "lucide-react";
+import { trackEvent } from "@/lib/ga";
 
 export default function PricingSection() {
   const [, navigate] = useLocation();
@@ -74,6 +75,12 @@ export default function PricingSection() {
 
   /* ---------------- SAME SIGNUP FLOW (NO CHANGE) ---------------- */
   const handlePlanSelect = (planId: string) => {
+    trackEvent("subscribe_click", {
+      source: "pricing_page",
+      plan_id: planId,
+      billing_period: billingPeriod,
+    });
+
     const tier = getSelectedTier(planId);
     const params = new URLSearchParams();
 
@@ -245,6 +252,53 @@ export default function PricingSection() {
               </Card>
             );
           })}
+        </div>
+      </div>
+      <div className="mt-12 mb-12 max-w-6xl mx-auto">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/60 backdrop-blur px-6 py-6">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-emerald-500/10" />
+
+          <div className="relative flex flex-col sm:flex-row gap-4">
+            {/* <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm"> */}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm self-start sm:self-auto">
+              <CircleAlert />
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-white">
+                Storage management
+              </p>
+
+              <div className="space-y-3 sm:space-y-2 text-sm text-gray-400">
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-purple-400" />
+                  <p>
+                    When your storage limit is reached, the{" "}
+                    <span className="text-white">
+                      oldest video is automatically removed
+                    </span>{" "}
+                    to make room for new clips.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+                  <p>
+                    We recommend regularly reviewing and cleaning up unused or
+                    outdated clips to stay in control of your content.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+                  <p>
+                    Higher plans provide larger storage capacity, allowing you
+                    to retain more videos on the platform.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
