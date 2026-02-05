@@ -110,6 +110,10 @@ export interface MetaDataJSON {
   used_clips: number;
   posting_limit_complete: boolean;
   clips_limit_reached: boolean;
+  daily_posted_count: number;
+  total_storage_mb: number;
+  used_storage_mb: number;
+  storage_warning_threshold_reached: boolean;
 }
 
 export interface User {
@@ -123,6 +127,7 @@ export interface SignupPayload {
   name: string;
   email: string;
   password: string;
+  free_plan: boolean;
 }
 
 export interface SignupResponse {
@@ -176,19 +181,23 @@ export const api = {
   getDashboard: () => request<DashboardResponse>("get", ENDPOINTS.dashboard),
 
   // CONTENT STUDIO
-  getContentStudios: (page: string, limit: string, platform?: string) =>
+  getVideos: (page: string, limit: string, platform?: string) =>
     request<any>(
       "get",
-      `${ENDPOINTS.contentStudios}/${platform}?page=${page}&limit=${limit}`
+      `${ENDPOINTS.videos}/${platform}?page=${page}&limit=${limit}`
     ),
 
-  // getReelsData: (public_id: string) =>
-  //   request<any>("get", `${ENDPOINTS.reels}?public_id=${public_id}`),
+  deleteVideos: (public_id: string) =>
+    request<any>("delete", `${ENDPOINTS.videos}/${public_id}`),
+
   getReelsData: (platform: string, public_id: string) =>
     request<any>("get", ENDPOINTS.reels(platform, public_id)),
 
   getSingleReelData: (reelId: string) =>
     request<any>("get", `${ENDPOINTS.singleReel}/${reelId}`),
+
+  deleteSingleReel: (reelId: string) =>
+    request<any>("delete", `${ENDPOINTS.singleReel}/${reelId}`),
 
   updateReelCaption: (reelId: string, caption: string) =>
     request<any>("put", ENDPOINTS.reelCaption(reelId), { caption: caption }),

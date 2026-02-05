@@ -36,6 +36,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/AuthContext";
+import { trackEvent } from "@/lib/ga";
 
 export default function SingleVideoDetails() {
   const params = useParams();
@@ -76,6 +77,8 @@ export default function SingleVideoDetails() {
         description: getErrorMessage(error, "Couldn't connect to server"),
         variant: "destructive",
       });
+      setIsLoading(false);
+      window.location.href = "/dashboard";
     }
   };
 
@@ -97,6 +100,13 @@ export default function SingleVideoDetails() {
       setPublishingPlatform(platform); // Start loading
 
       const response = await api.uploadReels(platform, reelData.public_id);
+
+      // 🔔 GA EVENT — REEL PUBLISHED
+      trackEvent("reel_published_manual", {
+        platform,
+        reel_id: reelData.public_id,
+        export_id: exportId,
+      });
 
       toast({
         description: response?.message || `Reel published on ${platform}!`,
@@ -253,42 +263,42 @@ export default function SingleVideoDetails() {
           </div>
           <div className="mx-auto rounded-lg overflow-hidden bg-black max-h-[calc(100vh-80px)] aspect-[9/16]">
             <video
-              src={reelData.video_url}
+              src={reelData?.video_url}
               controls
-              poster={reelData.poster_url}
+              poster={reelData?.poster_url}
               className="w-full h-full object-cover"
             />
           </div>
 
-          {(reelData.viralMoment || reelData.transcription) && (
+          {(reelData?.viralMoment || reelData?.transcription) && (
             <div className="absolute bottom-0 left-0 right-0 pb-6 px-4 pt-12 bg-gradient-to-t from-black/90 to-transparent">
-              {reelData.viralMoment && (
+              {reelData?.viralMoment && (
                 <p className="text-white font-semibold text-base mb-2">
-                  {reelData.viralMoment}
+                  {reelData?.viralMoment}
                 </p>
               )}
-              {reelData.transcription && (
+              {reelData?.transcription && (
                 <p className="text-white/80 text-sm line-clamp-3">
-                  {reelData.transcription}
+                  {reelData?.transcription}
                 </p>
               )}
             </div>
           )}
 
-          {reelData.durationSeconds && (
+          {reelData?.durationSeconds && (
             <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
               <Clock className="h-3 w-3" />
-              {Math.floor(reelData.durationSeconds / 60)}:
-              {String(reelData.durationSeconds % 60).padStart(2, "0")}
+              {Math.floor(reelData?.durationSeconds / 60)}:
+              {String(reelData?.durationSeconds % 60).padStart(2, "0")}
             </div>
           )}
         </div>
 
         <div className="space-y-6 p-6 lg:overflow-y-auto lg:pr-2">
           <h1 className="text-2xl font-bold text-white mt-[26px]">
-            {reelData.title}
+            {reelData?.title}
           </h1>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-6">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -320,7 +330,7 @@ export default function SingleVideoDetails() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="inline-block">
-                    <div className="flex items-center gap-3 bg-black/40 border border-primary/90 rounded-lg px-4 py-2 backdrop-blur min-w-[200px] cursor-pointer">
+                    <div className="flex items-center gap-3 bg-black/40 border border-primary/90 rounded-lg px-4 py-2 backdrop-blur min-w-[200px] cursor-pointer w-full">
                       <span className="text-sm text-muted-foreground">
                         Auto Post
                       </span>
@@ -380,17 +390,17 @@ export default function SingleVideoDetails() {
             <CardContent>
               <div className="flex items-end gap-3 mb-3">
                 <span className={`text-5xl font-bold`}>
-                  {reelData.viral_score || 0}
+                  {reelData?.viral_score || 0}
                 </span>
                 <span className="text-muted-foreground mb-1">/ 10</span>
               </div>
               <Progress
-                value={(reelData.viral_score || 0) * 10}
+                value={(reelData?.viral_score || 0) * 10}
                 className="h-2"
               />
             </CardContent>
           </Card>
-          {reelData.caption && (
+          {reelData?.caption && (
             <Card className="border-white/10 bg-black/60 mt-2">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -401,7 +411,7 @@ export default function SingleVideoDetails() {
               <CardContent className="flex items-center justify-between  gap-3">
                 <div className="text-[11px] text-white/70 overflow-hidden">
                   <Markdown remarkPlugins={[remarkGfm]}>
-                    {formatCaptionForUI(reelData.caption)}
+                    {formatCaptionForUI(reelData?.caption)}
                   </Markdown>
                 </div>
 
@@ -415,7 +425,7 @@ export default function SingleVideoDetails() {
                   disabled={!captionEditingAllowed}
                   onClick={(e) => {
                     e.stopPropagation();
-                    const raw = reelData.caption || "";
+                    const raw = reelData?.caption || "";
                     setRawCaption(raw);
                     setEditedCaption(formatCaptionForUI(raw));
                     setIsCaptionModalOpen(true);
@@ -436,7 +446,7 @@ export default function SingleVideoDetails() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                {reelData.viral_reason || "Analysis pending..."}
+                {reelData?.viral_reason || "Analysis pending..."}
               </p>
             </CardContent>
           </Card>
@@ -451,7 +461,7 @@ export default function SingleVideoDetails() {
             <CardContent>
               <div className="max-h-56 overflow-y-auto pr-2">
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {reelData.transcript || "Transcription pending..."}
+                  {reelData?.transcript || "Transcription pending..."}
                 </p>
               </div>
             </CardContent>
@@ -467,7 +477,7 @@ export default function SingleVideoDetails() {
               color,
               showToUpload,
             }) => {
-              const posted = postedKey && reelData[postedKey];
+              const posted = reelData && postedKey && reelData[postedKey];
 
               return (
                 <>
@@ -478,7 +488,7 @@ export default function SingleVideoDetails() {
                         integrated && !posted ? "" : "opacity-60"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 lg:gap-3">
                         <Icon className={`h-7 w-7 ${color}`} />
                         <div>
                           <p className="font-medium text-white text-sm">

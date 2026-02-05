@@ -1,28 +1,70 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Play, Clock, ArrowLeft, Film } from "lucide-react";
+import {
+  Play,
+  Clock,
+  ArrowLeft,
+  Film,
+  Trash,
+  Zap,
+  AlertTriangle,
+} from "lucide-react";
 import api from "@/lib/api/api";
 import { getStatusLabel } from "@/lib/common";
 import kick from "@assets/generated_images/kick.svg";
 import twitch from "@assets/generated_images/twitch.png";
 import { getErrorMessage } from "@/lib/getErrorMessage";
+import { getSocket } from "@/lib/socket";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Progress } from "@/components/ui/progress";
 
 export default function DashboardContent() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
 
-  const [exports, setExports] = useState<any | null>(null);
+  const [videoData, setVideoData] = useState<any | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [exportsLoading, setExportsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<"kick" | "twitch">("twitch");
+  const [currentPage, setCurrentPage] = useState(() => {
+    const savedPage = localStorage.getItem("content_active_page");
+    return savedPage && !isNaN(Number(savedPage)) ? Number(savedPage) : 1;
+  });
+  const [activeTab, setActiveTab] = useState<"kick" | "twitch">(() => {
+    const savedTab = localStorage.getItem("content_active_tab");
+    return savedTab === "kick" || savedTab === "twitch" ? savedTab : "twitch";
+  });
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 12;
   const totalPages = totalCount;
+  const currentPageRef = useRef(currentPage);
+  const activeTabRef = useRef(activeTab);
+
+  //Storage Data Calculations
+  const isTopPlan = user?.active_plan?.name === "Studio";
+  const totalStorage = user?.active_plan?.meta_data_json?.total_storage_mb || 0;
+  const totalStorageGB = Number((totalStorage / 1024).toFixed(2));
+  const usedStorage = user?.active_plan?.meta_data_json?.used_storage_mb || 0;
+  const usedStorageGB = Number((usedStorage / 1024).toFixed(2));
+  const isStorageWarningLimit =
+    user?.active_plan?.meta_data_json?.storage_warning_threshold_reached ||
+    false;
+  const totalStorageUsagePercentage =
+    totalStorageGB > 0 ? (usedStorageGB / totalStorageGB) * 100 : 0;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -30,27 +72,33 @@ export default function DashboardContent() {
         description: "You need to be logged in to access the dashboard.",
         variant: "destructive",
       });
-
       setTimeout(() => {
         window.location.href = "/login";
       }, 500);
     }
-  }, [isAuthenticated, authLoading, toast]);
+  }, [isAuthenticated, authLoading]);
 
   const fetchExportData = async (page = 1) => {
     try {
       setExportsLoading(true);
-      const response = await api.getContentStudios(
+      const response = await api.getVideos(
         String(page),
         String(ITEMS_PER_PAGE),
         activeTab
       );
 
-      setExports(response?.videos || []);
+      const filteredVideos =
+        response?.videos?.filter(
+          (video: any) =>
+            video.status !== "failed" && video.status !== "skipped"
+        ) || [];
+
+      setVideoData(filteredVideos || []);
       setTotalCount(response?.total_pages || 0);
       setExportsLoading(false);
     } catch (error: any) {
       console.error("Content Studio API failed:", error);
+      setExportsLoading(false);
       toast({
         description: getErrorMessage(error, "Something went wrong!"),
         variant: "destructive",
@@ -58,10 +106,115 @@ export default function DashboardContent() {
     }
   };
 
+  const updateVideoStatusBySocket = (videoId: string, status: string) => {
+    setVideoData((prev: any[]) => {
+      if (!prev || !Array.isArray(prev)) return prev;
+
+      // ❌ Remove video for skipped / failed
+      if (status === "skipped" || status === "failed") {
+        const next = prev.filter((video) => video.public_id !== videoId);
+
+        // optional debug
+        if (next.length !== prev.length) {
+          console.log(`[socket] video removed (${status}):`, videoId);
+        }
+        return next;
+      }
+
+      // ✅ Otherwise update status
+      let updated = false;
+
+      const next = prev.map((video) => {
+        if (video.public_id === videoId) {
+          updated = true;
+          if (video.status === status) return video;
+          return {
+            ...video,
+            status,
+          };
+        }
+        return video;
+      });
+
+      if (!updated) {
+        console.warn("[socket] status update for unknown video:", videoId);
+      }
+
+      return next;
+    });
+  };
+
+  const addNewVideoFromSocket = (newVideo: any) => {
+    // ✅ use ref, NOT state
+    if (newVideo.provider !== activeTabRef.current) return;
+
+    if (currentPageRef.current !== 1) {
+      console.log(
+        "[socket] new video received, user not on page 1 → ignored",
+        newVideo.public_id
+      );
+      return;
+    }
+
+    setTimeout(() => {
+      setVideoData((prev: any[]) => {
+        if (!prev || !Array.isArray(prev)) return [newVideo];
+        if (prev.some((v) => v.public_id === newVideo.public_id)) return prev;
+        return [newVideo, ...prev].slice(0, ITEMS_PER_PAGE);
+      });
+
+      toast({
+        title: "New video added 🎬",
+      });
+    }, 800);
+  };
+
   useEffect(() => {
-    if (!isAuthenticated) return;
-    setCurrentPage(1);
-  }, [activeTab, isAuthenticated]);
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    const handleConnect = () => {
+      console.log("[socket] connected:", socket?.id);
+    };
+    const handleDisconnect = (reason: string) => {
+      console.warn("[socket] disconnected:", reason);
+    };
+    const handleConnectError = (err: Error) => {
+      console.error("[socket] connection error:", err.message);
+    };
+    const handleVideoStatus = (payload: any) => {
+      console.log("[socket] video_status:", payload);
+      const { video_id, status } = payload;
+      if (!video_id || !status) return;
+
+      updateVideoStatusBySocket(video_id, status);
+    };
+    const handleNewVideoDetails = (payload: any) => {
+      console.log("[socket] video_details:", payload);
+      if (!payload?.public_id) return;
+
+      addNewVideoFromSocket(payload);
+    };
+
+    socket?.on("connect", handleConnect);
+    socket?.on("disconnect", handleDisconnect);
+    socket?.on("connect_error", handleConnectError);
+    socket?.on("video_status", handleVideoStatus);
+    socket?.on("video_details", handleNewVideoDetails);
+    return () => {
+      socket?.off("connect", handleConnect);
+      socket?.off("disconnect", handleDisconnect);
+      socket?.off("connect_error", handleConnectError);
+      socket?.off("video_status", handleVideoStatus);
+      socket?.off("video_details", handleNewVideoDetails);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -78,42 +231,54 @@ export default function DashboardContent() {
   useEffect(() => {
     const isReturning = sessionStorage.getItem("content_returning");
 
-    if (!isReturning) {
-      // Fresh entry → always default
-      setActiveTab("twitch");
-      setCurrentPage(1);
-
-      localStorage.removeItem("content_active_tab");
-      localStorage.removeItem("content_active_page");
-      return;
+    if (sessionStorage.getItem("content_session_initialized")) {
+      // Continuing in session (e.g., reload), do nothing
+    } else {
+      if (isReturning) {
+        // Returning from content-related page (video)
+        sessionStorage.setItem("content_session_initialized", "true");
+        sessionStorage.removeItem("content_returning");
+      } else {
+        // Fresh entry from other page or new session
+        setActiveTab("twitch");
+        setCurrentPage(1);
+        localStorage.removeItem("content_active_tab");
+        localStorage.removeItem("content_active_page");
+        sessionStorage.setItem("content_session_initialized", "true");
+      }
     }
-
-    // ✅ returning from video
-    const savedTab = localStorage.getItem("content_active_tab") as
-      | "kick"
-      | "twitch"
-      | null;
-
-    const savedPage = localStorage.getItem("content_active_page");
-
-    if (savedTab) {
-      setActiveTab(savedTab);
-    }
-
-    if (savedPage && !isNaN(Number(savedPage))) {
-      setCurrentPage(Number(savedPage));
-    }
-
-    // 🔥 IMPORTANT: consume the flag
-    sessionStorage.removeItem("content_returning");
+    return () => {
+      sessionStorage.removeItem("content_session_initialized");
+    };
   }, []);
 
   const isPlanExpired = (() => {
+    // const endDate = "2026-02-15T07:32:47.961082+00:00";
     const endDate = user?.active_plan?.end_date;
     if (!endDate) return false;
-
     return new Date(endDate).getTime() < Date.now();
   })();
+
+  const onHandleDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      // 🔥 call your delete API here
+      const response = await api.deleteVideos(deleteTarget.public_id);
+      fetchExportData(currentPage);
+      toast({
+        description: response?.message,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: getErrorMessage(error, "Failed to delete video"),
+      });
+    } finally {
+      setIsDeleteOpen(false);
+      setDeleteTarget(null);
+    }
+  };
 
   if (authLoading) {
     return (
@@ -124,6 +289,27 @@ export default function DashboardContent() {
   }
 
   if (!isAuthenticated) return null;
+
+  if (user?.active_plan === null) {
+    return (
+      <main className="min-h-[70vh] flex items-center justify-center px-4 ">
+        <Card className="p-10 text-center border-none">
+          <h2 className="text-2xl font-bold mb-3">No Content Available</h2>
+          <p className="text-muted-foreground">
+            You do not have an active subscription plan.
+          </p>
+          <p className="text-muted-foreground mb-6">
+            To unlock content features, please purchase a plan.
+          </p>
+          <Link href="/subscription">
+            <Button className="bg-primary hover:bg-primary-700 text-white">
+              Purchase Plan
+            </Button>
+          </Link>
+        </Card>
+      </main>
+    );
+  }
   const isClipLimitReached =
     user?.active_plan?.meta_data_json?.clips_limit_reached;
 
@@ -152,7 +338,6 @@ export default function DashboardContent() {
               </p>
             </>
           )}
-
           <Link href="/subscription">
             <Button className="bg-primary hover:bg-primary-700 text-white">
               Purchase Plan
@@ -182,36 +367,82 @@ export default function DashboardContent() {
           Content Studio
         </h1>
       </div>
-
       <p className="text-muted-foreground mb-8 max-w-2xl">
         Your stream exports appear here. Click on any video to see the viral
         clips generated from it, along with transcriptions and virality
         insights.
       </p>
 
-      {/* Platform Tabs */}
+      {isStorageWarningLimit && (
+        <Card className="border border-white/10 bg-black/40 mb-8">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col w-full">
+                <div className="flex justify-between">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <AlertTriangle className="h-5 w-5 text-amber-400" />
+                    <p className="text-xl">Storage is low</p>
+                  </div>
+                  {isTopPlan ? (
+                    <Button
+                      size="sm"
+                      disabled
+                      className="cursor-not-allowed opacity-60"
+                    >
+                      <Zap className="h-4 w-4" />
+                      Upgrade
+                    </Button>
+                  ) : (
+                    <Link href="/subscription">
+                      <Button size="sm">
+                        <Zap className="h-4 w-4" />
+                        Upgrade
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  {isTopPlan
+                    ? "Please free up space to add more videos"
+                    : " Free up space or upgrade plan"}
+                </p>
+
+                {/* Progress */}
+                <div className="mt-3">
+                  <Progress
+                    value={totalStorageUsagePercentage}
+                    className="h-2"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {`${usedStorageGB}GB of ${totalStorageGB} GB used`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex items-center flex-wrap gap-4 justify-between mb-6">
-        {/* LEFT: Kick / Twitch */}
         <div className="flex gap-2">
           {[
             { key: "twitch", label: "Twitch", logo: twitch },
             { key: "kick", label: "Kick", logo: kick },
           ].map((tab) => (
-            <Button
+            <div
               key={tab.key}
-              size="sm"
-              // onClick={() => setActiveTab(tab.key as any)}
               onClick={() => {
                 setActiveTab(tab.key as any);
                 setCurrentPage(1);
                 localStorage.setItem("content_active_tab", tab.key);
                 localStorage.setItem("content_active_page", "1");
               }}
-              className={` flex items-center gap-2 border ${
+              className={`${
                 activeTab === tab.key
                   ? "bg-primary border-primary"
                   : "bg-black/10 border-white/40 hover:bg-primary hover:border-primary"
-              }text-white transition-colors duration-300 transform !translate-y-0 hover:!translate-y-0 active:!translate-y-0`}
+              } px-3 py-0 rounded-md h-[32px] text-xs cursor-default flex items-center gap-2 border text-white transition-colors duration-300 transform !translate-y-0 hover:!translate-y-0 active:!translate-y-0`}
             >
               {tab.logo && (
                 <img
@@ -221,11 +452,10 @@ export default function DashboardContent() {
                 />
               )}
               {tab.label}
-            </Button>
+            </div>
           ))}
         </div>
       </div>
-
       {exportsLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(8)].map((_, i) => (
@@ -238,10 +468,10 @@ export default function DashboardContent() {
             </Card>
           ))}
         </div>
-      ) : exports && exports.length > 0 ? (
+      ) : videoData && videoData.length > 0 ? (
         <>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {exports.map((exp: any) => {
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {videoData.map((exp: any) => {
               const duration = Math.round(exp.duration);
               const minutes = Math.floor(duration / 60);
               const seconds = String(duration % 60).padStart(2, "0");
@@ -252,7 +482,6 @@ export default function DashboardContent() {
                 message,
               } = getStatusLabel(exp.status);
               const isAccessible = exp.status === "completed";
-
               return (
                 <div
                   key={exp.public_id}
@@ -292,20 +521,30 @@ export default function DashboardContent() {
                               <Play className="h-12 w-12 text-white/50" />
                             </div>
                           )}
-
                           {/* Duration */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
                             <Clock className="h-3 w-3" /> {minutes}:{seconds}
                           </div>
                         </div>
-
                         {/* Content */}
                         <CardContent className="p-4 space-y-3">
-                          <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
-                            {exp?.provider}
-                          </span>
+                          <div className="flex justify-between">
+                            <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
+                              {exp?.provider}
+                            </span>
+                            <div
+                              className="bg-red/10 px-3 py-1 rounded border border-red text-red-500 cursor-pointer hover:text-red-400 transition"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setDeleteTarget(exp);
+                                setIsDeleteOpen(true);
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </div>
+                          </div>
                           <p className="font-medium truncate">{exp.title}</p>
-
                           <div className="flex justify-between items-center">
                             <p className="text-sm">Status</p>
                             <span
@@ -314,7 +553,6 @@ export default function DashboardContent() {
                               <Icon className="h-3 w-3" /> {text}
                             </span>
                           </div>
-
                           <div className="flex justify-between items-center">
                             <p className="text-sm">Processed On</p>
                             <p className="text-sm text-muted-foreground">
@@ -332,14 +570,18 @@ export default function DashboardContent() {
                           </div>
                           <div className="flex justify-between items-center">
                             <p className="text-sm">Posted</p>
-                            <p className="text-sm">{`${exp.posted_reels}/${exp.total_reels}`}</p>
+                            <div className="px-2 py-1 rounded-md bg-white/10 border border-white/20">
+                              <p className="text-sm text-muted-foreground">
+                                {`${exp.posted_reels}/${exp.total_reels}`}
+                              </p>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
                     </Link>
                   ) : (
                     <Card className="overflow-hidden border-white/10 bg-black/40">
-                      <div className="aspect-video relative">
+                      <div className="relative h-[220px] w-full overflow-hidden bg-black">
                         {exp.poster_url ? (
                           <img
                             src={exp.poster_url}
@@ -357,13 +599,11 @@ export default function DashboardContent() {
                         {/* 🚫 ACCESS OVERLAY */}
                         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white"></div>
                       </div>
-
                       <CardContent className="p-4 space-y-3">
                         <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
                           {exp?.provider}
                         </span>
                         <p className="font-medium truncate">{exp.title}</p>
-
                         <div className="flex justify-between items-center">
                           <p className="text-sm">Status</p>
                           <span
@@ -372,7 +612,6 @@ export default function DashboardContent() {
                             <Icon className="h-3 w-3" /> {text}
                           </span>
                         </div>
-
                         <div className="flex justify-between items-center">
                           <p className="text-sm">Processed On</p>
                           <p className="text-sm text-muted-foreground">
@@ -388,7 +627,14 @@ export default function DashboardContent() {
                               : "Not Available"}
                           </p>
                         </div>
-
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm">Posted</p>
+                          <div className="px-2 py-1 rounded-md bg-white/10 border border-white/20">
+                            <p className="text-sm text-muted-foreground">
+                              {`${exp.posted_reels}/${exp.total_reels}`}
+                            </p>
+                          </div>
+                        </div>
                         <p className="text-xs text-muted-foreground text-center">
                           {message}
                         </p>
@@ -399,7 +645,6 @@ export default function DashboardContent() {
               );
             })}
           </div>
-
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-8">
@@ -407,7 +652,6 @@ export default function DashboardContent() {
                 variant="ghost"
                 size="sm"
                 disabled={currentPage === 1}
-                // onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 onClick={() => {
                   setCurrentPage((p) => {
                     const next = Math.max(p - 1, 1);
@@ -418,7 +662,6 @@ export default function DashboardContent() {
               >
                 Previous
               </Button>
-
               {[...Array(totalPages)].map((_, index) => {
                 const page = index + 1;
                 return (
@@ -427,7 +670,6 @@ export default function DashboardContent() {
                     size="sm"
                     variant={page === currentPage ? "default" : "ghost"}
                     className="min-w-[36px]"
-                    // onClick={() => setCurrentPage(page)}
                     onClick={() => {
                       setCurrentPage(page);
                       localStorage.setItem("content_active_page", String(page));
@@ -437,14 +679,10 @@ export default function DashboardContent() {
                   </Button>
                 );
               })}
-
               <Button
                 variant="ghost"
                 size="sm"
                 disabled={currentPage === totalPages}
-                // onClick={() =>
-                //   setCurrentPage((p) => Math.min(p + 1, totalPages))
-                // }
                 onClick={() =>
                   setCurrentPage((p) => {
                     const next = Math.min(p + 1, totalPages);
@@ -471,6 +709,35 @@ export default function DashboardContent() {
           </p>
         </Card>
       )}
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-[420px] rounded-xl p-6">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this video?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The video and its generated clips
+              will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setDeleteTarget(null);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={onHandleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
