@@ -19,11 +19,11 @@ import {
 } from "lucide-react";
 import { RxCross2 } from "react-icons/rx";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { GrTransaction } from "react-icons/gr";
 import { MdSubscriptions } from "react-icons/md";
 import { useLocation } from "wouter";
 import { LiveNotification } from "./LiveNotification";
+import { useAuth } from "@/hooks/AuthContext";
 
 export function DashboardNav() {
   const [location] = useLocation();
@@ -51,6 +51,10 @@ export function DashboardNav() {
   const handleLogout = async () => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_user");
+    localStorage.removeItem("content_active_page");
+    localStorage.removeItem("content_active_tab");
+    localStorage.removeItem("selected_export");
+    sessionStorage.removeItem("content_session_initialized");
     window.location.href = "/login";
   };
 
@@ -133,15 +137,20 @@ export function DashboardNav() {
                 </div>
               </DropdownMenuLabel>
 
-              {user?.active_plan ? (
-                <div className="inline-flex items-center rounded-[30px] bg-green-100 px-2 py-1 text-[10px] font-semibold text-green-700 my-3 mx-2">
-                  Active Plan: {user?.active_plan?.name}
-                </div>
-              ) : (
-                <div className="inline-flex items-center rounded-[30px] bg-gray-100 px-2 py-1 text-[10px] font-semibold text-gray-700 my-3">
+              {user?.active_plan === null ? (
+                <div className="inline-flex items-center rounded-[30px] bg-gray-100 px-2 py-1 text-[10px] font-semibold text-gray-700 my-3 mx-2">
                   No Active Plan
                 </div>
+              ) : user?.active_plan?.status === "active" ? (
+                <div className="inline-flex items-center rounded-[30px] bg-green-100 px-2 py-1 text-[10px] font-semibold text-green-700 my-3 mx-2">
+                  Active Plan {user?.active_plan?.name}
+                </div>
+              ) : (
+                <div className="inline-flex items-center rounded-[30px] bg-red-900 px-2 py-1 text-[10px] font-semibold my-3 mx-2">
+                  Inactive Plan {user?.active_plan?.name}
+                </div>
               )}
+              {}
 
               <DropdownMenuSeparator />
 

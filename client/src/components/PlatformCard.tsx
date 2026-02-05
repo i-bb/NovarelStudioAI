@@ -61,7 +61,7 @@ const PlatformCard = ({
   return (
     <Card className="bg-black/40 border-white/10 overflow-hidden">
       <CardContent className="p-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-xl overflow-hidden flex items-center justify-center bg-white/5">
               {isConnected && connectedAccount?.avatar_url ? (
@@ -80,16 +80,16 @@ const PlatformCard = ({
             </div>
 
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-display text-base font-medium text-foreground">
                   {platform.name}
                 </h3>
 
-                {!platform.available && (
+                {/* {!platform.available && (
                   <Badge variant="outline" className="text-xs border-white/20">
                     Coming Soon
                   </Badge>
-                )}
+                )} */}
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -99,12 +99,6 @@ const PlatformCard = ({
               {isConnected && connectedAccount?.display_name && (
                 <p className="text-primary">@{connectedAccount.display_name}</p>
               )}
-
-              {/* {hasReachedStreamingLimit && (
-                <p className="text-xs text-red-400 mt-1">
-                  Streaming platform limit reached for your plan
-                </p>
-              )} */}
             </div>
           </div>
 
@@ -150,12 +144,18 @@ const PlatformCard = ({
                         }
                         className="gap-2"
                       >
-                        {isConnecting ? (
+                        {!platform.available ? (
+                          <span className="text-xs font-medium uppercase tracking-wide">
+                            Coming Soon
+                          </span>
+                        ) : isConnecting ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <Link2 className="h-4 w-4" />
+                          <>
+                            <Link2 className="h-4 w-4" />
+                            Connect
+                          </>
                         )}
-                        Connect
                       </Button>
                     </div>
                   </TooltipTrigger>

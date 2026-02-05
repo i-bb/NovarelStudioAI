@@ -7,16 +7,23 @@ export default function HowItWorks() {
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
-            <img src={logoImage} alt="NovarelStudio" className="w-24 h-24 mb-6 grayscale" style={{ clipPath: "circle(38% at center)" }} />
+            <img
+              src={logoImage}
+              alt="NovarelStudio"
+              className="w-24 h-24 mb-6 grayscale"
+              style={{ clipPath: "circle(38% at center)" }}
+            />
             <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
               From "Go Live" to multi-platform drops
             </h2>
             <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
-              The flow is simple on purpose. No new scenes, bots or OBS sorcery. You keep streaming; the system quietly does the rest.
+              The flow is simple on purpose. No new scenes, bots or OBS sorcery.
+              You keep streaming; the system quietly does the rest.
             </p>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground/80 max-w-xs">
-            Designed with high-volume streamers: the fewer knobs you need to touch, the more likely you&apos;ll actually use it every night.
+            Designed with high-volume streamers: the fewer knobs you need to
+            touch, the more likely you&apos;ll actually use it every night.
           </p>
         </div>
 
@@ -42,10 +49,19 @@ export default function HowItWorks() {
   );
 }
 
-function StepCard({ step, title, description }: { step: string, title: string, description: string }) {
+function StepCard({
+  step,
+  title,
+  description,
+}: {
+  step: string;
+  title: string;
+  description: string;
+}) {
   return (
     <li className="relative group rounded-3xl border border-white/8 bg-black/70 px-5 py-6 sm:px-6 sm:py-7 flex flex-col gap-4 overflow-hidden">
-      <div className="flex items-center justify-between gap-4">
+      {/* <div className="flex flex-row md:flex-col xl:flex-row items-center justify-between gap-4"> */}
+      <div className="flex flex-row md:flex-col lg:flex-row items-center justify-between gap-4">
         <span className="font-display text-4xl sm:text-5xl font-semibold text-white/8 group-hover:text-primary/20 transition-colors select-none">
           {step}
         </span>
@@ -54,8 +70,12 @@ function StepCard({ step, title, description }: { step: string, title: string, d
         </span>
       </div>
       <div>
-        <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-1.5">{title}</h3>
-        <p className="text-xs sm:text-sm text-muted-foreground/90 leading-relaxed">{description}</p>
+        <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-1.5">
+          {title}
+        </h3>
+        <p className="text-xs sm:text-sm text-muted-foreground/90 leading-relaxed">
+          {description}
+        </p>
       </div>
       <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.25),_transparent_60%)]" />
     </li>

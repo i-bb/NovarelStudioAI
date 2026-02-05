@@ -16,12 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check } from "lucide-react";
 import logoImage from "@assets/ChatGPT Image Nov 26, 2025, 05_11_54 PM_1764195119264.png";
 import api from "@/lib/api/api";
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
+import { Check, CircleAlert } from "lucide-react";
+import { trackEvent } from "@/lib/ga";
 
 export default function PricingSection() {
   const [, navigate] = useLocation();
@@ -29,20 +30,36 @@ export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
     "monthly"
   );
+
+  const [plansByBilling, setPlansByBilling] = useState<{
+    monthly: Plan[];
+    annual: Plan[];
+  }>({
+    monthly: [],
+    annual: [],
+  });
+
   const [creatorTier, setCreatorTier] = useState(0);
   const [studioTier, setStudioTier] = useState(0);
-  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const plans = plansByBilling[billingPeriod];
 
   /* ---------------- LOAD PLANS ---------------- */
   useEffect(() => {
     const loadPlans = async () => {
       try {
         setLoading(true);
-        const response = await api.getSubscriptionPlansByInterval(
-          billingPeriod === "monthly" ? "month" : "year"
-        );
-        setPlans(TransformApiResponseToPlans(response));
+
+        const [monthlyRes, annualRes] = await Promise.all([
+          api.getSubscriptionPlansByInterval("month"),
+          api.getSubscriptionPlansByInterval("year"),
+        ]);
+
+        setPlansByBilling({
+          monthly: TransformApiResponseToPlans(monthlyRes),
+          annual: TransformApiResponseToPlans(annualRes),
+        });
       } catch (err) {
         toast({
           description: getErrorMessage(err || "Failed to load plans"),
@@ -54,10 +71,16 @@ export default function PricingSection() {
     };
 
     loadPlans();
-  }, [billingPeriod]);
+  }, []);
 
   /* ---------------- SAME SIGNUP FLOW (NO CHANGE) ---------------- */
   const handlePlanSelect = (planId: string) => {
+    trackEvent("subscribe_click", {
+      source: "pricing_page",
+      plan_id: planId,
+      billing_period: billingPeriod,
+    });
+
     const tier = getSelectedTier(planId);
     const params = new URLSearchParams();
 
@@ -99,6 +122,21 @@ export default function PricingSection() {
       return `$${tier.price} billed annually`;
     }
     return null;
+  };
+
+  const getDailyClipLimit = (plan: Plan) => {
+    // Starter plan (no tiers)
+    if (!plan.creditTiers) {
+      return plan.dailyPostingLimit
+        ? `${plan.dailyPostingLimit} clips/day Posting Limit`
+        : null;
+    }
+
+    // Tier-based plans
+    const tier = plan.creditTiers[getSelectedTier(plan.id)];
+    return tier?.dailyPostingLimit
+      ? `${tier.dailyPostingLimit} clips/day Posting Limit`
+      : null;
   };
 
   if (loading) {
@@ -158,18 +196,14 @@ export default function PricingSection() {
                     <div className="text-3xl font-semibold">
                       {getPrice(plan)}
                     </div>
+
+                    {plan.id !== "starter" && (
+                      <p className="text-[14px]">1 credit = 1 clip</p>
+                    )}
                     {billingPeriod === "annual" && plan.creditTiers && (
                       <p className="text-xs mt-1">{getAnnualBilling(plan)}</p>
                     )}
                   </div>
-
-                  {plan.id === "starter" && plan.clipLimit && (
-                    <div className="border border-input rounded-md px-[12px] py-[8px]">
-                      <p className="text-[14px] text-white leading-[20px]">
-                        Upto {plan.clipLimit.toLocaleString()} clips/month
-                      </p>
-                    </div>
-                  )}
 
                   {plan.creditTiers && (
                     <Select
@@ -193,17 +227,23 @@ export default function PricingSection() {
                 </CardHeader>
 
                 <CardContent className="flex-1">
+                  <div className="flex items-center gap-4 py-1">
+                    <CheckBadge color="purple" />
+                    <span className="text-[14px] text-gray-400">
+                      {getDailyClipLimit(plan)}
+                    </span>
+                  </div>
                   {plan.features.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <Check className="h-3 w-3 text-emerald-300" />
-                      <span>{f}</span>
+                    <div key={i} className="flex items-center gap-4 py-1">
+                      <CheckBadge color="emerald" />
+                      <span className="text-[14px] text-gray-400">{f}</span>
                     </div>
                   ))}
                 </CardContent>
 
                 <CardFooter>
                   <Button
-                    className="w-full border-none"
+                    className="w-full border-none bg-primary text-primary-foreground hover:bg-primary/60"
                     onClick={() => handlePlanSelect(plan.id)}
                   >
                     {plan.cta}
@@ -212,6 +252,53 @@ export default function PricingSection() {
               </Card>
             );
           })}
+        </div>
+      </div>
+      <div className="mt-12 mb-12 max-w-6xl mx-auto">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/60 backdrop-blur px-6 py-6">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-emerald-500/10" />
+
+          <div className="relative flex flex-col sm:flex-row gap-4">
+            {/* <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm"> */}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm self-start sm:self-auto">
+              <CircleAlert />
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-white">
+                Storage management
+              </p>
+
+              <div className="space-y-3 sm:space-y-2 text-sm text-gray-400">
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-purple-400" />
+                  <p>
+                    When your storage limit is reached, the{" "}
+                    <span className="text-white">
+                      oldest video is automatically removed
+                    </span>{" "}
+                    to make room for new clips.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+                  <p>
+                    We recommend regularly reviewing and cleaning up unused or
+                    outdated clips to stay in control of your content.
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+                  <p>
+                    Higher plans provide larger storage capacity, allowing you
+                    to retain more videos on the platform.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -236,5 +323,20 @@ function BillingToggleButton({
     >
       {label}
     </button>
+  );
+}
+
+function CheckBadge({ color = "emerald" }: { color?: "emerald" | "purple" }) {
+  const colorMap = {
+    emerald: "bg-emerald-500/20 text-emerald-300",
+    purple: "bg-purple-500/20 text-purple-300",
+  };
+
+  return (
+    <span
+      className={`flex h-5 w-5 items-center justify-center rounded-full ${colorMap[color]}`}
+    >
+      <Check className="h-3 w-3" />
+    </span>
   );
 }

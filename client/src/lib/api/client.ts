@@ -1,48 +1,9 @@
-// import axios from "axios";
-
-// const API_BASE_URL = "https://kora-undeluding-nathanael.ngrok-free.dev";
-// // const API_BASE_URL = "https://api.novarelstudio.com/v1";
-// // const API_BASE_URL = " https://oryx-patient-llama.ngrok-free.app";
-
-// const apiClient = axios.create({
-//   baseURL: API_BASE_URL,
-//   timeout: 600000,
-//   headers: {
-//     "Content-Type": "application/json",
-//     "ngrok-skip-browser-warning": "true", // bypass ngrok
-//   },
-// });
-
-// apiClient.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("auth_token");
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
-
-// apiClient.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response?.status === 401) {
-//       localStorage.removeItem("auth_token");
-//       localStorage.removeItem("auth_user");
-//       // window.location.href = "/login";
-//     }
-//     return Promise.reject(error);
-//   }
-// );
-
-// export default apiClient;
-
 import axios from "axios";
 
 // const API_BASE_URL = "https://kora-undeluding-nathanael.ngrok-free.dev";
 const API_BASE_URL = "https://api.novarelstudio.com/v1";
-// const API_BASE_URL = " https://oryx-patient-llama.ngrok-free.app";
+// const API_BASE_URL = "https://subtle-husky-solely.ngrok-free.app/v1";
+// const API_BASE_URL = "https://api.novarelstudio.com/v1";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -82,6 +43,10 @@ apiClient.interceptors.response.use(
       if (status === 401) {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("auth_user");
+        localStorage.removeItem("content_active_page");
+        localStorage.removeItem("content_active_tab");
+        localStorage.removeItem("selected_export");
+        sessionStorage.removeItem("content_session_initialized");
         // window.location.href = "/login";
       }
 

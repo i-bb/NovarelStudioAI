@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import api from "@/lib/api/api";
+import { toast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/lib/getErrorMessage";
 
 interface TransactionItem {
   created_at: string;
@@ -43,8 +45,11 @@ const Transactions = () => {
       setPage(response?.current_page || pageNum);
       setTotalPages(response?.total_pages || 1);
       setError("");
-    } catch (err) {
-      setError("Failed to load transactions. Please try again.");
+    } catch (err: any) {
+      toast({
+        description: getErrorMessage(err, "Something went wrong!"),
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -77,157 +82,153 @@ const Transactions = () => {
         )}
 
         {/* Error */}
-        {!loading && error && (
+        {/* {!loading && error && (
           <div className="text-center py-6 text-red-500 font-medium">
             {error}
           </div>
-        )}
+        )} */}
 
         {/* CONTENT */}
-        {!loading && !error && (
-          <>
-            {/* 🟣 MOBILE CARD VIEW */}
-            <div className="sm:hidden p-4 space-y-4">
-              {transactions.length > 0 ? (
-                transactions.map((item, index) => (
-                  <div
-                    key={index}
-                    className="rounded-xl border dark:bg-neutral-800 shadow-sm p-4 space-y-2"
-                  >
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Date</span>
-                      <span className="font-medium">
-                        {formatDate(item.created_at)}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Plan</span>
-                      <span className="font-medium">{item.plan_name}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Amount</span>
-                      <span className="font-medium">USD {item.amount}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Status</span>
-                      <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300 px-3 py-1 rounded-full capitalize">
-                        {item.status}
-                      </Badge>
-                    </div>
+        {/* {!loading && !error && ( */}
+        <>
+          {/* 🟣 MOBILE CARD VIEW */}
+          <div className="sm:hidden p-4 space-y-4">
+            {transactions.length > 0 ? (
+              transactions.map((item, index) => (
+                <div
+                  key={index}
+                  className="rounded-xl border dark:bg-neutral-800 shadow-sm p-4 space-y-2"
+                >
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Date</span>
+                    <span className="font-medium">
+                      {formatDate(item.created_at)}
+                    </span>
                   </div>
-                ))
-              ) : (
-                <div className="text-center text-muted-foreground py-10">
-                  No transactions found.
+
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Plan</span>
+                    <span className="font-medium">{item.plan_name}</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Amount</span>
+                    <span className="font-medium">USD {item.amount}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Status</span>
+                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300 px-3 py-1 rounded-full capitalize">
+                      {item.status}
+                    </Badge>
+                  </div>
                 </div>
-              )}
-            </div>
+              ))
+            ) : (
+              <div className="text-center text-muted-foreground py-10">
+                No transactions found.
+              </div>
+            )}
+          </div>
 
-            {/* 🟣 DESKTOP TABLE VIEW */}
-            <div className="hidden sm:block relative">
+          {/* 🟣 DESKTOP TABLE VIEW */}
+          <div className="hidden sm:block relative">
+            <table className="w-full text-sm border-collapse">
+              <thead className="bg-muted/40 text-muted-foreground">
+                <tr>
+                  <th className="text-left p-4 font-medium w-[30%]">Date</th>
+                  <th className="text-left p-4 font-medium w-[25%]">Plan</th>
+                  <th className="text-left p-4 font-medium w-[25%]">Amount</th>
+                  <th className="text-left p-4 font-medium w-[20%]">Status</th>
+                </tr>
+              </thead>
+            </table>
+
+            <div>
               <table className="w-full text-sm border-collapse">
-                <thead className="bg-muted/40 text-muted-foreground">
-                  <tr>
-                    <th className="text-left p-4 font-medium w-[30%]">Date</th>
-                    <th className="text-left p-4 font-medium w-[25%]">Plan</th>
-                    <th className="text-left p-4 font-medium w-[25%]">
-                      Amount
-                    </th>
-                    <th className="text-left p-4 font-medium w-[20%]">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-              </table>
-
-              <div>
-                <table className="w-full text-sm border-collapse">
-                  <tbody>
-                    {transactions.length > 0 ? (
-                      transactions.map((item, index) => (
-                        <tr
-                          key={index}
-                          className="border-t hover:bg-muted/30 transition-colors"
-                        >
-                          <td className="p-4 w-[30%]">
-                            {formatDate(item.created_at)}
-                          </td>
-                          <td className="p-4 w-[25%]">{item.plan_name}</td>
-                          <td className="p-4 w-[25%]">USD {item.amount}</td>
-                          <td className="p-4 w-[20%]">
-                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300 px-3 py-1 rounded-full capitalize">
-                              {item.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={4}
-                          className="text-center text-muted-foreground py-10"
-                        >
-                          No transactions found.
+                <tbody>
+                  {transactions.length > 0 ? (
+                    transactions.map((item, index) => (
+                      <tr
+                        key={index}
+                        className="border-t hover:bg-muted/30 transition-colors"
+                      >
+                        <td className="p-4 w-[30%]">
+                          {formatDate(item.created_at)}
+                        </td>
+                        <td className="p-4 w-[25%]">{item.plan_name}</td>
+                        <td className="p-4 w-[25%]">USD {item.amount}</td>
+                        <td className="p-4 w-[20%]">
+                          <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300 px-3 py-1 rounded-full capitalize">
+                            {item.status}
+                          </Badge>
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-center text-muted-foreground py-10"
+                      >
+                        No transactions found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
+          </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-4 px-4 py-3 border-t">
-                <button
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                  className={`text-sm font-medium transition ${
-                    page === 1
-                      ? "text-muted-foreground opacity-50 cursor-not-allowed"
-                      : "text-white hover:text-purple-400"
-                  }`}
-                >
-                  Previous
-                </button>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 px-4 py-3 border-t">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+                className={`text-sm font-medium transition ${
+                  page === 1
+                    ? "text-muted-foreground opacity-50 cursor-not-allowed"
+                    : "text-white hover:text-purple-400"
+                }`}
+              >
+                Previous
+              </button>
 
-                <div className="flex items-center gap-4">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (num) => (
-                      <button
-                        key={num}
-                        onClick={() => setPage(num)}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition
+              <div className="flex items-center gap-4">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (num) => (
+                    <button
+                      key={num}
+                      onClick={() => setPage(num)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition
                           ${
                             page === num
                               ? "bg-purple-600 text-white shadow"
                               : "text-white/80 hover:text-white"
                           }`}
-                      >
-                        {num}
-                      </button>
-                    )
-                  )}
-                </div>
-
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => setPage(page + 1)}
-                  className={`text-sm font-medium transition ${
-                    page === totalPages
-                      ? "text-muted-foreground opacity-50 cursor-not-allowed"
-                      : "text-white hover:text-purple-400"
-                  }`}
-                >
-                  Next
-                </button>
+                    >
+                      {num}
+                    </button>
+                  )
+                )}
               </div>
-            )}
-          </>
-        )}
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage(page + 1)}
+                className={`text-sm font-medium transition ${
+                  page === totalPages
+                    ? "text-muted-foreground opacity-50 cursor-not-allowed"
+                    : "text-white hover:text-purple-400"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+        {/* )} */}
       </div>
     </main>
   );

@@ -10,8 +10,8 @@ import { useLocation, Link, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api/api";
 import { getErrorMessage } from "@/lib/getErrorMessage";
-import { Plan } from "./subscription";
-import { TransformApiResponseToPlans } from "@/lib/MapApiPlans";
+import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
+import { trackEvent } from "@/lib/ga";
 
 type PlanInfo = {
   name: string;
@@ -20,6 +20,7 @@ type PlanInfo = {
   credits: string;
   features: string[];
   badge?: string;
+  annualPrice?: string;
 };
 
 export default function SignupPage() {
@@ -33,8 +34,6 @@ export default function SignupPage() {
     | "monthly"
     | "annual";
   const emailParam = params.get("email") || "";
-
-  console.log("planParam", planParam);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState(emailParam);
@@ -69,25 +68,6 @@ export default function SignupPage() {
     getSubscriptionPlans();
   }, []);
 
-  // const selectedPlanInfo = useMemo((): PlanInfo => {
-  //   // const planDef = plans[planParam] || plans.starter;
-  //   const planDef =
-  //     plans.find((p) => p.id === planParam) ||
-  //     plans.find((p) => p.id === "starter");
-  //   const tier = planDef.tiers[tierParam] || planDef.tiers[0];
-  //   const price =
-  //     billingParam === "monthly" ? tier.monthlyPrice : tier.annualPrice;
-
-  //   return {
-  //     name: planDef.name,
-  //     tagline: planDef.tagline,
-  //     price: price === 0 ? "Free" : `$${price}/mo`,
-  //     credits: tier.credits,
-  //     features: planDef.features,
-  //     badge: planDef.badge,
-  //   };
-  // }, [planParam, tierParam, billingParam]);
-
   const selectedPlanInfo = useMemo((): PlanInfo => {
     const planDef =
       plans.find((p) => p.id === planParam) ||
@@ -119,7 +99,8 @@ export default function SignupPage() {
     const tier = planDef.creditTiers?.[tierParam] ?? planDef.creditTiers?.[0];
 
     const price =
-      billingPeriod === "monthly" ? tier?.monthlyPrice : tier?.annualPrice;
+      billingPeriod === "monthly" ? tier?.price : tier?.monthlyPrice;
+    const annualPrice = tier?.price;
 
     return {
       name: planDef.name,
@@ -128,152 +109,9 @@ export default function SignupPage() {
       credits: tier?.credits ?? "",
       features: planDef.features,
       badge: planDef.badge ?? undefined,
+      annualPrice: `${annualPrice}`,
     };
   }, [plans, planParam, tierParam, billingPeriod]);
-
-  console.log("selectedPlanInfo", selectedPlanInfo);
-
-  // const handleSignup = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   if (!name.trim()) {
-  //     toast({ title: "Name is required", variant: "destructive" });
-  //     return;
-  //   }
-  //   if (!email.trim()) {
-  //     toast({ title: "Email is required", variant: "destructive" });
-  //     return;
-  //   }
-  //   if (password.length < 8) {
-  //     toast({
-  //       description: "Password is too short. Minimum 8 characters",
-  //       variant: "destructive",
-  //     });
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     const response = await api.signup({
-  //       name: name.trim(),
-  //       email: email.trim(),
-  //       password,
-  //     });
-
-  //     // Save auth
-  //     localStorage.setItem("auth_token", response?.access_token);
-  //     localStorage.setItem("auth_user", JSON.stringify(response.user));
-
-  //     toast({ description: "Your account has been created successfully" });
-
-  //     const planId = STATIC_PLAN_ID_MAP[planParam];
-
-  //     if (!planId) {
-  //       throw new Error("Invalid subscription plan selected");
-  //     }
-
-  //     const subRes = await api.purchaseSubscription(planId);
-
-  //     if (subRes?.checkout_url) {
-  //       window.location.href = subRes.checkout_url;
-  //       return;
-  //     }
-
-  //     throw new Error("Failed to initiate subscription checkout");
-  //   } catch (error: any) {
-  //     toast({
-  //       description: getErrorMessage(
-  //         error,
-  //         "Failed to create account. Please try again."
-  //       ),
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // const handleSignup = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   if (!name.trim()) {
-  //     toast({ title: "Name is required", variant: "destructive" });
-  //     return;
-  //   }
-
-  //   if (!email.trim()) {
-  //     toast({ title: "Email is required", variant: "destructive" });
-  //     return;
-  //   }
-
-  //   if (password.length < 8) {
-  //     toast({
-  //       description: "Password must be at least 8 characters",
-  //       variant: "destructive",
-  //     });
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     const response = await api.signup({
-  //       name: name.trim(),
-  //       email: email.trim(),
-  //       password,
-  //     });
-
-  //     // 2️⃣ Save auth
-  //     localStorage.setItem("auth_token", response.access_token);
-  //     localStorage.setItem("auth_user", JSON.stringify(response.user));
-
-  //     toast({ description: "Your account has been created successfully" });
-
-  //     // 3️⃣ Find selected plan
-  //     const selectedPlan =
-  //       plans.find((p) => p.id === planParam) ||
-  //       plans.find((p) => p.id === "starter");
-
-  //     if (!selectedPlan) {
-  //       throw new Error("Invalid subscription plan selected");
-  //     }
-
-  //     // 🟢 Starter plan → no payment
-  //     if (selectedPlan.id === "starter") {
-  //       setLocation("/dashboard");
-  //       return;
-  //     }
-
-  //     // 4️⃣ Get selected tier
-  //     const selectedTier =
-  //       selectedPlan.creditTiers?.[tierParam] || selectedPlan.creditTiers?.[0];
-
-  //     if (!selectedTier?.planId) {
-  //       throw new Error("Invalid subscription tier selected");
-  //     }
-
-  //     // 5️⃣ Purchase subscription
-  //     const subRes = await api.purchaseSubscription(selectedTier.planId);
-
-  //     if (subRes?.checkout_url) {
-  //       window.location.href = subRes.checkout_url;
-  //       return;
-  //     }
-
-  //     throw new Error("Failed to initiate subscription checkout");
-  //   } catch (error: any) {
-  //     toast({
-  //       description: getErrorMessage(
-  //         error,
-  //         "Failed to create account. Please try again."
-  //       ),
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -299,19 +137,6 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      // 1️⃣ Signup
-      const response = await api.signup({
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      });
-
-      // 2️⃣ Save auth
-      localStorage.setItem("auth_token", response.access_token);
-      localStorage.setItem("auth_user", JSON.stringify(response.user));
-
-      toast({ description: "Your account has been created successfully" });
-
       // 3️⃣ Resolve selected plan
       const selectedPlan =
         plans.find((p) => p.id === planParam) ||
@@ -321,28 +146,53 @@ export default function SignupPage() {
         throw new Error("Invalid subscription plan selected");
       }
 
-      let stripePlanId: number | undefined;
+      const payload = {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        free_plan: selectedPlan.id === "starter",
+      };
 
-      // 🟢 Starter → use planId directly
+      // 1️⃣ Signup
+      const response = await api.signup(payload);
+
+      // 2️⃣ Save auth
+      localStorage.setItem("auth_token", response.access_token);
+      localStorage.setItem("auth_user", JSON.stringify(response.user));
+
+      // 🔔 GA EVENT — ACCOUNT CREATED
+      trackEvent("account_created", {
+        method: "email",
+        plan: selectedPlan.id,
+        billing_period: billingPeriod,
+      });
+
+      toast({ description: "Your account has been created successfully" });
+
+      // 🟢 STARTER PLAN → LOGIN & REDIRECT (NO STRIPE)
       if (selectedPlan.id === "starter") {
-        stripePlanId = selectedPlan.planId;
-      } else {
-        // 🔵 Paid plans → use tier planId
-        const selectedTier =
-          selectedPlan.creditTiers?.[tierParam] ??
-          selectedPlan.creditTiers?.[0];
-
-        stripePlanId = selectedTier?.planId;
+        setLocation("/dashboard");
+        return;
       }
+
+      // 🔵 PAID PLANS → STRIPE FLOW
+      const selectedTier =
+        selectedPlan.creditTiers?.[tierParam] ?? selectedPlan.creditTiers?.[0];
+
+      const stripePlanId = selectedTier?.planId;
 
       if (!stripePlanId) {
         throw new Error("Invalid Stripe plan selected");
       }
 
-      // 4️⃣ Always redirect to Stripe
       const subRes = await api.purchaseSubscription(stripePlanId);
 
       if (subRes?.checkout_url) {
+        trackEvent("checkout_start", {
+          source: "signup_flow",
+          plan_id: stripePlanId,
+          billing_period: billingPeriod,
+        });
         window.location.href = subRes.checkout_url;
         return;
       }
@@ -359,13 +209,6 @@ export default function SignupPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleGoogleSignup = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Google signup will be available soon!",
-    });
   };
 
   return (
@@ -395,13 +238,20 @@ export default function SignupPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 {selectedPlanInfo.tagline}
               </p>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-3xl font-display font-semibold">
-                  {selectedPlanInfo.price}
-                </span>
-                {planParam !== "starter" && (
+              <div className="flex flex-col gap-1 mb-4">
+                <div className="flex gap-1 items-baseline">
+                  <span className="text-3xl font-display font-semibold">
+                    {selectedPlanInfo.price}
+                  </span>
+                  {planParam !== "starter" && (
+                    <span className="text-sm text-muted-foreground">
+                      {billingParam === "annual" && " /month"}
+                    </span>
+                  )}
+                </div>
+                {planParam !== "starter" && billingParam === "annual" && (
                   <span className="text-sm text-muted-foreground">
-                    {billingParam === "annual" && " (billed annually)"}
+                    <p className="text-xs mt-1">{`$${selectedPlanInfo.annualPrice} billed annually`}</p>
                   </span>
                 )}
               </div>

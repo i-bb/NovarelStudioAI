@@ -22,6 +22,10 @@ import Subscription from "./pages/subscription";
 import Transactions from "./pages/transactions";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import ForgotPassword from "./pages/forgot-password";
+import { AuthProvider } from "./hooks/AuthProvider";
+import { useEffect } from "react";
+import { useLocation } from "wouter";
+import { trackPageView } from "@/lib/ga";
 
 function Router() {
   return (
@@ -37,51 +41,67 @@ function Router() {
       <Route path="/terms" component={TermsPage} />
 
       <Route path="/dashboard">
-        <DashboardLayout>
-          <Dashboard />
-        </DashboardLayout>
+        <AuthProvider>
+          <DashboardLayout>
+            <Dashboard />
+          </DashboardLayout>
+        </AuthProvider>
       </Route>
 
       <Route path="/dashboard/content">
-        <DashboardLayout>
-          <DashboardContent />
-        </DashboardLayout>
+        <AuthProvider>
+          <DashboardLayout>
+            <DashboardContent />
+          </DashboardLayout>
+        </AuthProvider>
       </Route>
 
       <Route path="/dashboard/content/:id">
-        <DashboardLayout>
-          <VideoDetail />
-        </DashboardLayout>
+        <AuthProvider>
+          <DashboardLayout>
+            <VideoDetail />
+          </DashboardLayout>
+        </AuthProvider>
       </Route>
 
       <Route path="/subscription">
-        <DashboardLayout>
-          <Subscription />
-        </DashboardLayout>
+        <AuthProvider>
+          <DashboardLayout>
+            <Subscription />
+          </DashboardLayout>
+        </AuthProvider>
       </Route>
 
       <Route path="/transactions">
-        <DashboardLayout>
-          <Transactions />
-        </DashboardLayout>
+        <AuthProvider>
+          <DashboardLayout>
+            <Transactions />
+          </DashboardLayout>
+        </AuthProvider>
       </Route>
 
       <Route path="/dashboard/content/:id/reel/:reelId">
-        <DashboardLayout>
-          <SingleVideoDetails />
-        </DashboardLayout>
+        <AuthProvider>
+          <DashboardLayout>
+            <SingleVideoDetails />
+          </DashboardLayout>
+        </AuthProvider>
       </Route>
 
       <Route path="/dashboard/accounts">
-        <DashboardLayout>
-          <ConnectedAccountsPage />
-        </DashboardLayout>
+        <AuthProvider>
+          <DashboardLayout>
+            <ConnectedAccountsPage />
+          </DashboardLayout>
+        </AuthProvider>
       </Route>
 
       <Route path="/dashboard/profile">
-        <DashboardLayout>
-          <ProfilePage />
-        </DashboardLayout>
+        <AuthProvider>
+          <DashboardLayout>
+            <ProfilePage />
+          </DashboardLayout>
+        </AuthProvider>
       </Route>
       <Route path="/checkout/success" component={CheckoutSuccessPage} />
       <Route path="/checkout/cancel" component={CheckoutCancelPage} />
@@ -91,6 +111,12 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    trackPageView(location);
+  }, [location]);
+
   return (
     <TooltipProvider>
       <Toaster />

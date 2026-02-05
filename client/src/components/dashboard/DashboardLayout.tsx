@@ -1,6 +1,7 @@
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
+import { useAuth } from "@/hooks/AuthContext";
+import { AuthProvider } from "@/hooks/AuthProvider";
 import { toast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 
 export default function DashboardLayout({ children }: any) {
@@ -29,13 +30,14 @@ export default function DashboardLayout({ children }: any) {
 
   if (!isAuthenticated) return null;
   return (
+    // <AuthProvider>
     <div
       className="min-h-screen bg-gradient-to-b from-background via-background/95 to-black/95"
       style={{ display: "flex", flexDirection: "column" }}
     >
       <DashboardNav />
-      {/* Right side: Content */}
       <div style={{ flex: 1 }}>{children}</div>
     </div>
+    // </AuthProvider>
   );
 }

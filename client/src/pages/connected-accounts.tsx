@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -8,6 +7,7 @@ import { api } from "@/lib/api/api";
 import { platforms } from "@/lib/common";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import PlatformCard from "@/components/PlatformCard";
+import { useAuth } from "@/hooks/AuthContext";
 
 export interface PlatformAccount {
   avatar_url: string | null;
@@ -48,7 +48,7 @@ export default function ConnectedAccountsPage() {
       setConnectedAccounts(accounts ? { ...accounts } : null);
     } catch (error: any) {
       toast({
-        description: error?.response?.data?.description,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -327,7 +327,7 @@ export default function ConnectedAccountsPage() {
       </main>
       {/* Disconnect Confirmation Modal */}
       {confirmModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
           <div className="bg-[#111] border border-white/10 rounded-xl p-6 w-full max-w-sm shadow-xl">
             <h2 className="text-xl font-semibold mb-2">
               Disconnect {selectedPlatform}?

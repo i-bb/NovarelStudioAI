@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -17,6 +16,7 @@ import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { Loader2, Save, User } from "lucide-react";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import api from "@/lib/api/api";
+import { useAuth } from "@/hooks/AuthContext";
 
 export default function ProfilePage() {
   const { toast } = useToast();
@@ -90,7 +90,7 @@ export default function ProfilePage() {
       </h1>
 
       <Card className="border-white/10 bg-black/40">
-        <CardHeader>
+        <CardHeader className="px-4 sm:p-6">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
               <AvatarImage src={undefined} />
@@ -111,7 +111,7 @@ export default function ProfilePage() {
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="px-4 sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
