@@ -93,13 +93,13 @@ const howToUseContent = [
     icon: <Mic className="h-6 w-6 text-primary" />,
     title: "Say the command",
     description:
-      "Just say “Clip it” or “Clip that” during gameplay. No hotkeys, no overlays, no breaking focus mid-game.",
+      "Just say “Clip that” or “Clip it” during your stream. No hotkeys, no overlays, no interruptions, just effortless, hands-free clipping.",
   },
   {
     icon: <AudioWaveform className="h-6 w-6 text-primary" />,
     title: "Highlights saved instantly",
     description:
-      "We capture the moments you don’t want to lose and turn them into clean, share-ready clips — automatically.",
+      "We capture the moments you don't want to lose and turn them into clean, share-ready clips automatically.",
   },
 ];
 
@@ -113,11 +113,12 @@ const ClipThatFeature = () => {
           <div className="relative">
             <div className="pt-4 mb-8 md:mb-10">
               <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-3">
-                Voice Command Clip
+                Clip that — Voice Command
               </h2>
               <p className="max-w-xl text-sm sm:text-base text-muted-foreground/90">
-                Effortlessly capture your gameplay with Voice Command. Just say
-                “Clip it” while streaming to instantly save highlights.
+                Turn live moments into instant clips. Just say “clip that” or
+                “clip it” during your stream and Novarel captures your best
+                reactions and conversations automatically.
               </p>
             </div>
             <img src={image} alt="clip that feature" />
