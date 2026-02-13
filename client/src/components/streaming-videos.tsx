@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { Play, Film, Trash } from "lucide-react";
@@ -8,6 +8,7 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
+import { useLocation } from "wouter";
 
 const StreamingVideos = ({
   isLoading,
@@ -19,6 +20,24 @@ const StreamingVideos = ({
   setIsDeleteOpen,
   setDeleteTarget,
 }: any) => {
+  const [, setLocation] = useLocation();
+  const [windowSize, setWindowSize] = useState(5);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const handleResize = () => {
+      setWindowSize(mediaQuery.matches ? 2 : 5);
+    };
+
+    handleResize(); // initial check
+    mediaQuery.addEventListener("change", handleResize);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleResize);
+    };
+  }, []);
+
   return (
     <>
       {isLoading ? (
@@ -46,18 +65,12 @@ const StreamingVideos = ({
                   className="transition-all cursor-pointer"
                 >
                   <Link
-                    href={`/dashboard/content/${data.streaming_session_id}`}
+                    href={`/dashboard/content/${data.streaming_session_id}?tab=${activeTab}&streampage=${currentPage}`}
                     onClick={() => {
                       localStorage.setItem(
                         "selected_streaming_video",
                         JSON.stringify(data),
                       );
-                      localStorage.setItem("content_active_tab", activeTab);
-                      localStorage.setItem(
-                        "content_active_page",
-                        String(currentPage),
-                      );
-                      sessionStorage.setItem("content_returning", "true");
                     }}
                   >
                     <Card className="group overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 flex flex-col h-full">
@@ -70,7 +83,7 @@ const StreamingVideos = ({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-emerald-500/20">
                             <Play className="h-12 w-12 text-white/50" />
                           </div>
                         )}
@@ -107,12 +120,14 @@ const StreamingVideos = ({
                             <Trash className="h-4 w-4" />
                           </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm font-medium">Streamer</p>
-                          <p className="font-medium truncate">
-                            {data.streamer_username}
-                          </p>
-                        </div>
+                        {data.streamer_username !== "default_streamer" && (
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm font-medium">Streamer</p>
+                            <p className="font-medium truncate">
+                              {data.streamer_username}
+                            </p>
+                          </div>
+                        )}
 
                         <div className="flex justify-between items-center">
                           <p className="text-sm">Started On</p>
@@ -178,9 +193,8 @@ const StreamingVideos = ({
 
                       setCurrentPage((p: any) => {
                         const next = Math.max(p - 1, 1);
-                        localStorage.setItem(
-                          "content_active_page",
-                          String(next),
+                        setLocation(
+                          `/dashboard/content?tab=${activeTab}&streampage=${next}`,
                         );
                         return next;
                       });
@@ -197,32 +211,232 @@ const StreamingVideos = ({
                 </PaginationItem>
 
                 {/* Page Numbers */}
-                {Array.from({ length: totalPages }, (_, index) => {
-                  const page = index + 1;
-                  const isActive = currentPage === page;
 
-                  return (
-                    <PaginationItem key={page}>
-                      <button
-                        onClick={() => {
-                          setCurrentPage(page);
-                          localStorage.setItem(
-                            "content_active_page",
-                            String(page),
-                          );
-                        }}
-                        className={cn(
-                          "h-9 w-9 text-sm rounded-lg transition-all",
-                          isActive
-                            ? "bg-primary text-white"
-                            : "text-white hover:bg-white/10",
-                        )}
-                      >
-                        {page}
-                      </button>
-                    </PaginationItem>
+                {/* {(() => {
+                  const pages = [];
+                  const windowSize = 5;
+
+                  // Center current page
+                  let start = Math.max(
+                    1,
+                    currentPage - Math.floor(windowSize / 2),
                   );
-                })}
+                  let end = start + windowSize - 1;
+
+                  if (end > totalPages) {
+                    end = totalPages;
+                    start = Math.max(1, end - windowSize + 1);
+                  }
+
+                  // Show first page if missing
+                  if (start > 1) {
+                    pages.push(
+                      <PaginationItem key={1}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(1);
+                            setLocation(
+                              `/dashboard/content?tab=${activeTab}&streampage=1`,
+                            );
+                          }}
+                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
+                        >
+                          1
+                        </button>
+                      </PaginationItem>,
+                    );
+
+                    if (start > 2) {
+                      pages.push(
+                        <PaginationItem key="start-ellipsis">
+                          <span className="px-2 text-white/60">...</span>
+                        </PaginationItem>,
+                      );
+                    }
+                  }
+
+                  // Main 5 pages
+                  for (let page = start; page <= end; page++) {
+                    const isActive = currentPage === page;
+
+                    pages.push(
+                      <PaginationItem key={page}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(page);
+                            setLocation(
+                              `/dashboard/content?tab=${activeTab}&streampage=${page}`,
+                            );
+                          }}
+                          className={cn(
+                            "h-9 w-9 text-sm rounded-lg transition-all",
+                            isActive
+                              ? "bg-primary text-white"
+                              : "text-white hover:bg-white/10",
+                          )}
+                        >
+                          {page}
+                        </button>
+                      </PaginationItem>,
+                    );
+                  }
+
+                  // Show last page if missing
+                  if (end < totalPages) {
+                    if (end < totalPages - 1) {
+                      pages.push(
+                        <PaginationItem key="end-ellipsis">
+                          <span className="px-2 text-white/60">...</span>
+                        </PaginationItem>,
+                      );
+                    }
+
+                    pages.push(
+                      <PaginationItem key={totalPages}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(totalPages);
+                            setLocation(
+                              `/dashboard/content?tab=${activeTab}&streampage=${totalPages}`,
+                            );
+                          }}
+                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
+                        >
+                          {totalPages}
+                        </button>
+                      </PaginationItem>,
+                    );
+                  }
+
+                  return pages;
+                })()} */}
+
+                {(() => {
+                  const pages = [];
+
+                  // 🔥 Always show all if totalPages is small (4 or less)
+                  if (totalPages <= 4) {
+                    for (let page = 1; page <= totalPages; page++) {
+                      const isActive = currentPage === page;
+
+                      pages.push(
+                        <PaginationItem key={page}>
+                          <button
+                            onClick={() => {
+                              setCurrentPage(page);
+                              setLocation(
+                                `/dashboard/content?tab=${activeTab}&streampage=${page}`,
+                              );
+                            }}
+                            className={cn(
+                              "h-9 w-9 text-sm rounded-lg transition-all",
+                              isActive
+                                ? "bg-primary text-white"
+                                : "text-white hover:bg-white/10",
+                            )}
+                          >
+                            {page}
+                          </button>
+                        </PaginationItem>,
+                      );
+                    }
+
+                    return pages;
+                  }
+
+                  // 🔥 Normal sliding window logic
+                  const half = Math.floor(windowSize / 2);
+
+                  let start = Math.max(1, currentPage - half);
+                  let end = start + windowSize - 1;
+
+                  if (end > totalPages) {
+                    end = totalPages;
+                    start = Math.max(1, end - windowSize + 1);
+                  }
+
+                  // First page
+                  if (start > 1) {
+                    pages.push(
+                      <PaginationItem key={1}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(1);
+                            setLocation(
+                              `/dashboard/content?tab=${activeTab}&streampage=1`,
+                            );
+                          }}
+                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
+                        >
+                          1
+                        </button>
+                      </PaginationItem>,
+                    );
+
+                    if (start > 2) {
+                      pages.push(
+                        <PaginationItem key="start-ellipsis">
+                          <span className="px-2 text-white/60">...</span>
+                        </PaginationItem>,
+                      );
+                    }
+                  }
+
+                  // Main window
+                  for (let page = start; page <= end; page++) {
+                    const isActive = currentPage === page;
+
+                    pages.push(
+                      <PaginationItem key={page}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(page);
+                            setLocation(
+                              `/dashboard/content?tab=${activeTab}&streampage=${page}`,
+                            );
+                          }}
+                          className={cn(
+                            "h-9 w-9 text-sm rounded-lg transition-all",
+                            isActive
+                              ? "bg-primary text-white"
+                              : "text-white hover:bg-white/10",
+                          )}
+                        >
+                          {page}
+                        </button>
+                      </PaginationItem>,
+                    );
+                  }
+
+                  // Last page
+                  if (end < totalPages) {
+                    if (end < totalPages - 1) {
+                      pages.push(
+                        <PaginationItem key="end-ellipsis">
+                          <span className="px-2 text-white/60">...</span>
+                        </PaginationItem>,
+                      );
+                    }
+
+                    pages.push(
+                      <PaginationItem key={totalPages}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(totalPages);
+                            setLocation(
+                              `/dashboard/content?tab=${activeTab}&streampage=${totalPages}`,
+                            );
+                          }}
+                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
+                        >
+                          {totalPages}
+                        </button>
+                      </PaginationItem>,
+                    );
+                  }
+
+                  return pages;
+                })()}
 
                 {/* Next */}
                 <PaginationItem>
@@ -233,9 +447,8 @@ const StreamingVideos = ({
 
                       setCurrentPage((p: any) => {
                         const next = Math.min(p + 1, totalPages);
-                        localStorage.setItem(
-                          "content_active_page",
-                          String(next),
+                        setLocation(
+                          `/dashboard/content?tab=${activeTab}&streampage=${next}`,
                         );
                         return next;
                       });

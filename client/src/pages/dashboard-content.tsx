@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link, useSearch, useLocation } from "wouter";
 import { ArrowLeft, Zap, AlertTriangle } from "lucide-react";
 import api from "@/lib/api/api";
 import kick from "@assets/generated_images/kick.svg";
@@ -44,18 +44,19 @@ export default function DashboardContent() {
     totalStorageUsagePercentage,
   } = useAuth();
 
+  const search = useSearch();
+  const searchParams = new URLSearchParams(search);
+  const tab = searchParams.get("tab");
+  const streampage = searchParams.get("streampage");
+
+  const [, setLocation] = useLocation();
+
   const [streamingVideos, setStreamingVideos] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(() => {
-    const savedPage = localStorage.getItem("content_active_page");
-    return savedPage && !isNaN(Number(savedPage)) ? Number(savedPage) : 1;
-  });
-  const [activeTab, setActiveTab] = useState<"kick" | "twitch">(() => {
-    const savedTab = localStorage.getItem("content_active_tab");
-    return savedTab === "kick" || savedTab === "twitch" ? savedTab : "twitch";
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<"kick" | "twitch">("twitch");
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -131,6 +132,33 @@ export default function DashboardContent() {
   };
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+    if (!totalPages) return; // wait until API loads
+
+    // ✅ Validate tab
+    const urlTab = tab === "kick" || tab === "twitch" ? tab : "twitch";
+
+    // ✅ Parse page safely
+    const parsedPage = Number(streampage);
+
+    const safePage =
+      parsedPage > 0 && parsedPage <= totalPages ? parsedPage : 1;
+
+    // 🔹 Update state only if changed
+    setActiveTab((prev) => (prev !== urlTab ? (urlTab as any) : prev));
+
+    setCurrentPage((prev) => (prev !== safePage ? safePage : prev));
+
+    // 🔥 If URL page was invalid → fix URL
+    if (String(safePage) !== streampage) {
+      setLocation(
+        `/dashboard/content?tab=${urlTab}&streampage=${safePage}`,
+        { replace: true }, // prevents history stacking
+      );
+    }
+  }, [tab, streampage, isAuthenticated, totalPages]);
+
+  useEffect(() => {
     currentPageRef.current = currentPage;
   }, [currentPage]);
 
@@ -201,17 +229,6 @@ export default function DashboardContent() {
       behavior: "smooth",
     });
   }, [currentPage]);
-
-  useEffect(() => {
-    const fromDashboard = document.referrer.includes("/dashboard");
-
-    if (!fromDashboard) {
-      setActiveTab("twitch");
-      setCurrentPage(1);
-      localStorage.removeItem("content_active_tab");
-      localStorage.removeItem("content_active_page");
-    }
-  }, []);
 
   const isPlanExpired = (() => {
     // const endDate = "2026-02-15T07:32:47.961082+00:00";
@@ -306,15 +323,8 @@ export default function DashboardContent() {
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
       <div className="flex flex-col">
-        <div className="flex gap-4 mb-2 items-center">
-          <Link
-            href="/dashboard"
-            onClick={() => {
-              localStorage.removeItem("content_active_tab");
-              localStorage.removeItem("content_active_page");
-              sessionStorage.removeItem("content_returning");
-            }}
-          >
+        <div className="flex gap-1 sm:gap-4 mb-2 items-center">
+          <Link href="/dashboard">
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -407,10 +417,12 @@ export default function DashboardContent() {
             <div
               key={tab.key}
               onClick={() => {
-                setActiveTab(tab.key as any);
+                const newTab = tab.key;
+                setActiveTab(newTab as any);
                 setCurrentPage(1);
-                localStorage.setItem("content_active_tab", tab.key);
-                localStorage.setItem("content_active_page", "1");
+                setLocation(`/dashboard/content?tab=${newTab}&streampage=1`, {
+                  replace: true,
+                });
               }}
               className={`${
                 activeTab === tab.key

@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useSearch, useLocation } from "wouter";
 import { Play, Clock, ArrowLeft, Film, Trash } from "lucide-react";
 import api from "@/lib/api/api";
 import { getStatusLabel } from "@/lib/common";
@@ -38,6 +38,15 @@ export default function Videos() {
   const params = useParams();
   const streamingId = params.streamingId;
 
+  const [, setLocation] = useLocation();
+
+  const search = useSearch();
+  const searchParams = new URLSearchParams(search);
+  const tab = searchParams.get("tab");
+  const streampage = searchParams.get("streampage");
+  const videopage = searchParams.get("videopage");
+  const dashboardContentURL = `/dashboard/content?tab=${tab}&streampage=${streampage}`;
+
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
 
@@ -46,16 +55,13 @@ export default function Videos() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [exportsLoading, setExportsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(() => {
-    const savedPage = localStorage.getItem("content_active_page");
-    return savedPage && !isNaN(Number(savedPage)) ? Number(savedPage) : 1;
-  });
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [windowSize, setWindowSize] = useState(5);
 
   const ITEMS_PER_PAGE = 12;
-  // const totalPages = totalCount;
   const currentPageRef = useRef(currentPage);
 
   const fetchVideosData = async (page = 1, id: string) => {
@@ -86,6 +92,20 @@ export default function Videos() {
       });
     }
   };
+
+  useEffect(() => {
+    if (!totalPages) return;
+
+    const parsedPage = Number(videopage);
+
+    const safePage =
+      parsedPage > 0 && parsedPage <= totalPages ? parsedPage : 1;
+
+    if (safePage !== currentPage) {
+      setCurrentPage(safePage);
+      setLocation(`/dashboard/content?tab=${tab}&videopage=${safePage}`);
+    }
+  }, [videopage, totalPages]);
 
   const updateVideoStatusBySocket = (videoId: string, status: string) => {
     setVideoData((prev: any[]) => {
@@ -191,17 +211,41 @@ export default function Videos() {
       addNewVideoFromSocket(payload);
     };
 
+    const handleStreamingSessionUpdated = (payload: any) => {
+      console.log("[socket] streaming_session_updated:", payload);
+
+      if (!payload?.streaming_session_id) return;
+
+      // ✅ Only update if it matches current streaming page
+      if (payload.streaming_session_id !== streamingId) return;
+
+      // ✅ Update UI state
+      setSourceStreamData((prev: any) => {
+        const updated = { ...prev, ...payload };
+
+        // ✅ Also persist in localStorage
+        localStorage.setItem(
+          "selected_streaming_video",
+          JSON.stringify(updated),
+        );
+
+        return updated;
+      });
+    };
+
     socket?.on("connect", handleConnect);
     socket?.on("disconnect", handleDisconnect);
     socket?.on("connect_error", handleConnectError);
     socket?.on("video_status", handleVideoStatus);
     socket?.on("video_details", handleNewVideoDetails);
+    socket?.on("streaming_session_updated", handleStreamingSessionUpdated);
     return () => {
       socket?.off("connect", handleConnect);
       socket?.off("disconnect", handleDisconnect);
       socket?.off("connect_error", handleConnectError);
       socket?.off("video_status", handleVideoStatus);
       socket?.off("video_details", handleNewVideoDetails);
+      socket?.off("streaming_session_updated", handleStreamingSessionUpdated);
     };
   }, []);
 
@@ -224,37 +268,31 @@ export default function Videos() {
     });
   }, [currentPage]);
 
-  // useEffect(() => {
-  //   const isReturning = sessionStorage.getItem("content_returning");
-
-  //   if (sessionStorage.getItem("content_session_initialized")) {
-  //     // Continuing in session (e.g., reload), do nothing
-  //   } else {
-  //     if (isReturning) {
-  //       // Returning from content-related page (video)
-  //       sessionStorage.setItem("content_session_initialized", "true");
-  //       sessionStorage.removeItem("content_returning");
-  //     } else {
-  //       setCurrentPage(1);
-
-  //       localStorage.removeItem("content_active_page");
-  //       sessionStorage.setItem("content_session_initialized", "true");
-  //     }
-  //   }
-  //   return () => {
-  //     sessionStorage.removeItem("content_session_initialized");
-  //   };
-  // }, []);
-
   const onHandleDelete = async () => {
     if (!deleteTarget) return;
 
     try {
       // 🔥 call your delete API here
       const response = await api.deleteVideos(deleteTarget.public_id);
+      // 🔥 Update total count safely
+      const updatedTotalCount = totalCount - 1;
+      if (updatedTotalCount <= 0) {
+        localStorage.removeItem("selected_streaming_video");
+        setLocation(dashboardContentURL);
+        toast({
+          description: getErrorMessage(
+            response?.message || "Video deleted successfully.",
+          ),
+        });
+        return;
+      }
+
+      // Otherwise refetch normally
       streamingId && fetchVideosData(currentPage, streamingId);
       toast({
-        description: response?.message,
+        description: getErrorMessage(
+          response?.message || "Video deleted successfully.",
+        ),
       });
     } catch (error: any) {
       toast({
@@ -267,14 +305,31 @@ export default function Videos() {
     }
   };
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const handleResize = () => {
+      setWindowSize(mediaQuery.matches ? 2 : 5);
+    };
+
+    handleResize(); // initial check
+    mediaQuery.addEventListener("change", handleResize);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleResize);
+    };
+  }, []);
+
+  const title = generateStreamName(sourceStreamData || {});
+
   if (!isAuthenticated) return null;
 
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
       <div className="flex flex-col">
-        <div className="flex flex-wrap items-center gap-4 mb-2">
+        <div className="flex items-center gap-1 sm:gap-4 mb-2">
           <Link
-            href="/dashboard/content"
+            href={dashboardContentURL}
             onClick={() => localStorage.removeItem("selected_streaming_video")}
           >
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -286,7 +341,13 @@ export default function Videos() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/dashboard" className="text-md">
+                  <Link
+                    href="/dashboard"
+                    onClick={() =>
+                      localStorage.removeItem("selected_streaming_video")
+                    }
+                    className="text-md"
+                  >
                     Dashboard
                   </Link>
                 </BreadcrumbLink>
@@ -296,7 +357,13 @@ export default function Videos() {
 
               <BreadcrumbItem>
                 <BreadcrumbLink>
-                  <Link href="/dashboard/content" className="text-md">
+                  <Link
+                    href={dashboardContentURL}
+                    onClick={() =>
+                      localStorage.removeItem("selected_streaming_video")
+                    }
+                    className="text-md"
+                  >
                     Streams
                   </Link>
                 </BreadcrumbLink>
@@ -311,12 +378,16 @@ export default function Videos() {
           </Breadcrumb>
         </div>
 
-        <h1 className="font-display text-3xl sm:text-4xl font-semibold mb-4">
-          Video of {generateStreamName(sourceStreamData || {})}
-        </h1>
-        <p className="text-muted-foreground mb-8 max-w-2xl">
-          Created on {formatDate(sourceStreamData?.created_on)}
-        </p>
+        {title !== "" && (
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold mb-4 break-all">
+            {title}
+          </h1>
+        )}
+        {sourceStreamData?.created_on && (
+          <p className="text-muted-foreground mb-8 max-w-2xl">
+            Created on {formatDate(sourceStreamData?.created_on)}
+          </p>
+        )}
       </div>
 
       <Card className="border-white/10 bg-black/40 mb-8">
@@ -337,9 +408,7 @@ export default function Videos() {
           </div>
           <div>
             <p className="text-sm text-muted-foreground mb-1">Source Stream</p>
-            <p className="font-medium">
-              {generateStreamName(sourceStreamData || {})}
-            </p>
+            <p className="font-medium">{title}</p>
           </div>
         </CardContent>
       </Card>
@@ -384,17 +453,12 @@ export default function Videos() {
                 >
                   {isAccessible ? (
                     <Link
-                      href={`/dashboard/content/${sourceStreamData?.streaming_session_id}/video/${exp.public_id}`}
+                      href={`/dashboard/content/${sourceStreamData?.streaming_session_id}/video/${exp.public_id}?tab=${tab}&streampage=${streampage}&videopage=${currentPage}`}
                       onClick={() => {
                         localStorage.setItem(
                           "selected_export",
                           JSON.stringify(exp),
                         );
-                        localStorage.setItem(
-                          "content_active_page",
-                          String(currentPage),
-                        );
-                        sessionStorage.setItem("content_returning", "true");
                       }}
                     >
                       <Card className="group overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 flex flex-col h-full">
@@ -535,56 +599,7 @@ export default function Videos() {
               );
             })}
           </div>
-          {/* Pagination */}
-          {/* {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={currentPage === 1}
-                onClick={() => {
-                  setCurrentPage((p) => {
-                    const next = Math.max(p - 1, 1);
-                    localStorage.setItem("content_active_page", String(next));
-                    return next;
-                  });
-                }}
-              >
-                Previous
-              </Button>
-              {[...Array(totalPages)].map((_, index) => {
-                const page = index + 1;
-                return (
-                  <Button
-                    key={page}
-                    size="sm"
-                    variant={page === currentPage ? "default" : "ghost"}
-                    className="min-w-[36px]"
-                    onClick={() => {
-                      setCurrentPage(page);
-                      localStorage.setItem("content_active_page", String(page));
-                    }}
-                  >
-                    {page}
-                  </Button>
-                );
-              })}
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={currentPage === totalPages}
-                onClick={() =>
-                  setCurrentPage((p) => {
-                    const next = Math.min(p + 1, totalPages);
-                    localStorage.setItem("content_active_page", String(next));
-                    return next;
-                  })
-                }
-              >
-                Next
-              </Button>
-            </div>
-          )} */}
+
           {totalPages > 1 && (
             <Pagination className="mt-8">
               <PaginationContent className="gap-4">
@@ -595,9 +610,8 @@ export default function Videos() {
                     onClick={() => {
                       setCurrentPage((p) => {
                         const next = Math.max(p - 1, 1);
-                        localStorage.setItem(
-                          "content_active_page",
-                          String(next),
+                        setLocation(
+                          `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${next}`,
                         );
                         return next;
                       });
@@ -614,7 +628,7 @@ export default function Videos() {
                 </PaginationItem>
 
                 {/* Page Numbers */}
-                {Array.from({ length: totalPages }, (_, index) => {
+                {/* {Array.from({ length: totalPages }, (_, index) => {
                   const page = index + 1;
                   const isActive = currentPage === page;
 
@@ -623,9 +637,8 @@ export default function Videos() {
                       <button
                         onClick={() => {
                           setCurrentPage(page);
-                          localStorage.setItem(
-                            "content_active_page",
-                            String(page),
+                          setLocation(
+                            `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${page}`,
                           );
                         }}
                         className={cn(
@@ -639,7 +652,233 @@ export default function Videos() {
                       </button>
                     </PaginationItem>
                   );
-                })}
+                })} */}
+
+                {/* {(() => {
+                  const pages = [];
+                  const windowSize = 5;
+
+                  // Center current page
+                  let start = Math.max(
+                    1,
+                    currentPage - Math.floor(windowSize / 2),
+                  );
+                  let end = start + windowSize - 1;
+
+                  if (end > totalPages) {
+                    end = totalPages;
+                    start = Math.max(1, end - windowSize + 1);
+                  }
+
+                  // Show first page if missing
+                  if (start > 1) {
+                    pages.push(
+                      <PaginationItem key={1}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(1);
+                            setLocation(
+                              `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=1`,
+                            );
+                          }}
+                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
+                        >
+                          1
+                        </button>
+                      </PaginationItem>,
+                    );
+
+                    if (start > 2) {
+                      pages.push(
+                        <PaginationItem key="start-ellipsis">
+                          <span className="px-2 text-white/60">...</span>
+                        </PaginationItem>,
+                      );
+                    }
+                  }
+
+                  // Main 5 pages
+                  for (let page = start; page <= end; page++) {
+                    const isActive = currentPage === page;
+
+                    pages.push(
+                      <PaginationItem key={page}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(page);
+                            setLocation(
+                              `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${page}`,
+                            );
+                          }}
+                          className={cn(
+                            "h-9 w-9 text-sm rounded-lg transition-all",
+                            isActive
+                              ? "bg-primary text-white"
+                              : "text-white hover:bg-white/10",
+                          )}
+                        >
+                          {page}
+                        </button>
+                      </PaginationItem>,
+                    );
+                  }
+
+                  // Show last page if missing
+                  if (end < totalPages) {
+                    if (end < totalPages - 1) {
+                      pages.push(
+                        <PaginationItem key="end-ellipsis">
+                          <span className="px-2 text-white/60">...</span>
+                        </PaginationItem>,
+                      );
+                    }
+
+                    pages.push(
+                      <PaginationItem key={totalPages}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(totalPages);
+                            setLocation(
+                              `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${totalPages}`,
+                            );
+                          }}
+                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
+                        >
+                          {totalPages}
+                        </button>
+                      </PaginationItem>,
+                    );
+                  }
+
+                  return pages;
+                })()} */}
+
+                {(() => {
+                  const pages = [];
+
+                  // 🔥 Always show all if totalPages is small (4 or less)
+                  if (totalPages <= 4) {
+                    for (let page = 1; page <= totalPages; page++) {
+                      const isActive = currentPage === page;
+
+                      pages.push(
+                        <PaginationItem key={page}>
+                          <button
+                            onClick={() => {
+                              setCurrentPage(page);
+                              setLocation(
+                                `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${page}`,
+                              );
+                            }}
+                            className={cn(
+                              "h-9 w-9 text-sm rounded-lg transition-all",
+                              isActive
+                                ? "bg-primary text-white"
+                                : "text-white hover:bg-white/10",
+                            )}
+                          >
+                            {page}
+                          </button>
+                        </PaginationItem>,
+                      );
+                    }
+
+                    return pages;
+                  }
+
+                  // 🔥 Normal sliding window logic
+                  const half = Math.floor(windowSize / 2);
+
+                  let start = Math.max(1, currentPage - half);
+                  let end = start + windowSize - 1;
+
+                  if (end > totalPages) {
+                    end = totalPages;
+                    start = Math.max(1, end - windowSize + 1);
+                  }
+
+                  // First page
+                  if (start > 1) {
+                    pages.push(
+                      <PaginationItem key={1}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(1);
+                            setLocation(
+                              `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=1`,
+                            );
+                          }}
+                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
+                        >
+                          1
+                        </button>
+                      </PaginationItem>,
+                    );
+
+                    if (start > 2) {
+                      pages.push(
+                        <PaginationItem key="start-ellipsis">
+                          <span className="px-2 text-white/60">...</span>
+                        </PaginationItem>,
+                      );
+                    }
+                  }
+
+                  // Main window
+                  for (let page = start; page <= end; page++) {
+                    const isActive = currentPage === page;
+
+                    pages.push(
+                      <PaginationItem key={page}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(page);
+                            setLocation(
+                              `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${page}`,
+                            );
+                          }}
+                          className={cn(
+                            "h-9 w-9 text-sm rounded-lg transition-all",
+                            isActive
+                              ? "bg-primary text-white"
+                              : "text-white hover:bg-white/10",
+                          )}
+                        >
+                          {page}
+                        </button>
+                      </PaginationItem>,
+                    );
+                  }
+
+                  // Last page
+                  if (end < totalPages) {
+                    if (end < totalPages - 1) {
+                      pages.push(
+                        <PaginationItem key="end-ellipsis">
+                          <span className="px-2 text-white/60">...</span>
+                        </PaginationItem>,
+                      );
+                    }
+
+                    pages.push(
+                      <PaginationItem key={totalPages}>
+                        <button
+                          onClick={() => {
+                            setCurrentPage(totalPages);
+                            setLocation(
+                              `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${totalPages}`,
+                            );
+                          }}
+                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
+                        >
+                          {totalPages}
+                        </button>
+                      </PaginationItem>,
+                    );
+                  }
+
+                  return pages;
+                })()}
 
                 {/* Next */}
                 <PaginationItem>
@@ -648,9 +887,8 @@ export default function Videos() {
                     onClick={() =>
                       setCurrentPage((p) => {
                         const next = Math.min(p + 1, totalPages);
-                        localStorage.setItem(
-                          "content_active_page",
-                          String(next),
+                        setLocation(
+                          `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${next}`,
                         );
                         return next;
                       })

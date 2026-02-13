@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import {
   Play,
   Clock,
@@ -36,6 +36,12 @@ function ClipCard({
   platform: string;
   streamingId: string;
 }) {
+  const search = useSearch();
+  const searchParams = new URLSearchParams(search);
+  const tab = searchParams.get("tab");
+  const streampage = searchParams.get("streampage");
+  const videopage = searchParams.get("videopage");
+
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const durationSeconds = clip.duration ?? clip.durationSeconds;
@@ -99,7 +105,7 @@ function ClipCard({
     <>
       <div className="relative">
         <Link
-          href={`/dashboard/content/${streamingId}/video/${exportId}/reel/${clip.public_id}`}
+          href={`/dashboard/content/${streamingId}/video/${exportId}/reel/${clip.public_id}?tab=${tab}&streampage=${streampage}&videopage=${videopage}`}
         >
           <div
             className={`relative rounded-xl cursor-pointer group transition mt-9 ${

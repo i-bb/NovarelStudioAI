@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useParams } from "wouter";
+import { useParams, useSearch } from "wouter";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api/api";
 import { platforms } from "@/lib/common";
@@ -43,6 +43,12 @@ export default function SingleVideoDetails() {
   const exportId = params?.id;
   const reelId = params?.reelId;
   const streamingId = params?.streamingId;
+
+  const search = useSearch();
+  const searchParams = new URLSearchParams(search);
+  const tab = searchParams.get("tab");
+  const streampage = searchParams.get("streampage");
+  const videopage = searchParams.get("videopage");
 
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const captionEditingAllowed =
@@ -246,7 +252,7 @@ export default function SingleVideoDetails() {
           <div
             className="hidden lg:flex absolute gap-4 top-4 left-2 hover:cursor-pointer hover:text-primary"
             onClick={() =>
-              (window.location.href = `/dashboard/content/${streamingId}/video/${exportId}`)
+              (window.location.href = `/dashboard/content/${streamingId}/video/${exportId}?tab=${tab}&streampage=${streampage}&videopage=${videopage}`)
             }
           >
             <ArrowLeft className="h-4 w-4" />
