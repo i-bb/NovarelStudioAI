@@ -1,86 +1,3 @@
-// import { useState, useEffect } from "react";
-// import api, { User } from "@/lib/api/api"; // your API file
-
-// export function useAuth() {
-//   const [user, setUser] = useState<User | null>(null);
-//   const [token, setToken] = useState<string | null>(null);
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   // Load from localStorage on mount
-//   useEffect(() => {
-//     const savedUser = localStorage.getItem("auth_user");
-//     const savedToken = localStorage.getItem("auth_token");
-
-//     if (savedUser && savedToken) {
-//       setUser(JSON.parse(savedUser));
-//       setToken(savedToken);
-//     }
-//     setIsLoading(false);
-//   }, []);
-
-//   return {
-//     user,
-//     token,
-//     isAuthenticated: !!user,
-//     isLoading,
-
-//     // ───────────────────────────────
-//     // LOGIN
-//     // ───────────────────────────────
-//     login: async (email: string, password: string) => {
-//       setIsLoading(true);
-//       try {
-//         const res = await api.login(email, password);
-
-//         const loggedInUser = res.user;
-//         const accessToken = res.access_token;
-
-//         // Save in state
-//         setUser(loggedInUser);
-//         setToken(accessToken);
-
-//         // Save in localStorage
-//         localStorage.setItem("auth_user", JSON.stringify(loggedInUser));
-//         localStorage.setItem("auth_token", accessToken);
-//         return loggedInUser;
-//       } catch (error) {
-//         throw error;
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     },
-
-//     // ───────────────────────────────
-//     // SIGNUP
-//     // ───────────────────────────────
-//     signup: async (payload: any) => {
-//       setIsLoading(true);
-//       try {
-//         const res = await api.signup(payload);
-
-//         const newUser = res.user;
-//         const accessToken = res?.access_token;
-
-//         setUser(newUser);
-//         setToken(accessToken || "");
-
-//         if (newUser) {
-//           localStorage.setItem("auth_user", JSON.stringify(newUser));
-//         }
-//         if (accessToken) {
-//           localStorage.setItem("auth_token", accessToken);
-//         }
-
-//         return newUser;
-//       } catch (error) {
-//         throw error;
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     },
-//   };
-// }
-
 import { useState, useEffect } from "react";
 import api, { User } from "@/lib/api/api";
 import { toast } from "./use-toast";
@@ -90,6 +7,16 @@ export function useAuth() {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const isTopPlan = user?.active_plan?.name === "Studio";
+  const totalStorage = user?.active_plan?.meta_data_json?.total_storage_mb || 0;
+  const totalStorageGB = Number((totalStorage / 1024).toFixed(2));
+  const usedStorage = user?.active_plan?.meta_data_json?.used_storage_mb || 0;
+  const usedStorageGB = Number((usedStorage / 1024).toFixed(2));
+  const isStorageWarningLimit =
+    user?.active_plan?.meta_data_json?.storage_warning_threshold_reached ||
+    false;
+  const totalStorageUsagePercentage =
+    totalStorageGB > 0 ? (usedStorageGB / totalStorageGB) * 100 : 0;
   // ───────────────────────────────
   // Load stored auth on startup
   // ───────────────────────────────
@@ -208,6 +135,11 @@ export function useAuth() {
     token,
     isAuthenticated: !!user,
     isLoading,
+    isTopPlan,
+    totalStorageGB,
+    usedStorageGB,
+    isStorageWarningLimit,
+    totalStorageUsagePercentage,
 
     login,
     signup,

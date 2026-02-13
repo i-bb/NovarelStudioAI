@@ -18,6 +18,14 @@ import { api } from "@/lib/api/api";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { useAuth } from "@/hooks/AuthContext";
 import ClipCard from "@/components/ClipCard";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 // function ClipCard({ clip, exportId }: { clip: any; exportId: string }) {
 //   const durationSeconds = clip.duration ?? clip.durationSeconds;
@@ -163,6 +171,7 @@ export default function VideoDetail() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const params = useParams();
   const exportId = params.id;
+  const streamingId = params.streamingId;
 
   const [isLoading, setIsLoading] = useState(true);
   const [clipsData, setClipsData] = useState<Clip[]>([]);
@@ -189,7 +198,7 @@ export default function VideoDetail() {
       toast({
         description: getErrorMessage(
           error,
-          "Something went wrong!. Please try again."
+          "Something went wrong!. Please try again.",
         ),
         variant: "destructive",
       });
@@ -199,7 +208,7 @@ export default function VideoDetail() {
   useEffect(() => {
     if (exportId) {
       const selectedExport = JSON.parse(
-        localStorage.getItem("selected_export") || "{}"
+        localStorage.getItem("selected_export") || "{}",
       );
       fetchReelsData(exportId, selectedExport?.provider);
       setSourceVideoData(selectedExport);
@@ -231,6 +240,13 @@ export default function VideoDetail() {
       day: "numeric",
     });
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, []);
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -242,20 +258,53 @@ export default function VideoDetail() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <Link
-          href="/dashboard/content"
-          onClick={() => localStorage.removeItem("selected_export")}
-        >
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
+      <div className="flex flex-col">
+        <div className="flex flex-wrap items-center gap-4 mb-2">
+          <Link
+            href={`/dashboard/content/${streamingId}`}
+            onClick={() => localStorage.removeItem("selected_export")}
+          >
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/dashboard">Dashboard</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbLink>
+                  <Link href="/dashboard/content">Streams</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbLink>
+                  <Link href={`/dashboard/content/${streamingId}`}>Videos</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbPage>Clips</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
         <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold">
-            {sourceVideoData?.title || ""}
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold mb-4">
+            Clips of {sourceVideoData?.title || ""}
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground mb-8 max-w-2xl">
             Exported on {formatDate(sourceVideoData?.processed_on)}
           </p>
         </div>
@@ -265,11 +314,17 @@ export default function VideoDetail() {
         <CardContent className="p-4 flex items-center gap-4">
           <div className="h-[120px] w-32 rounded-lg bg-gradient-to-br from-primary/20 to-emerald-500/20 flex items-center justify-center">
             {/* <Play className="h-8 w-8 text-white/50" /> */}
-            <img
-              src={sourceVideoData?.poster_url}
-              alt="Thumbnail"
-              className="w-full h-full object-cover"
-            />
+            {sourceVideoData?.poster_url ? (
+              <img
+                src={sourceVideoData?.poster_url}
+                alt="Thumbnail"
+                className="w-full h-full object-cover rounded-lg"
+              />
+            ) : (
+              <div>
+                <Play className="h-12 w-12 text-white/50" />
+              </div>
+            )}
           </div>
           <div>
             <p className="text-sm text-muted-foreground mb-1">Source Video</p>
@@ -295,6 +350,7 @@ export default function VideoDetail() {
                   key={c.id}
                   clip={c}
                   exportId={exportId || ""}
+                  streamingId={streamingId || ""}
                   fetchReelsData={fetchReelsData}
                   platform={sourceVideoData?.provider}
                 />

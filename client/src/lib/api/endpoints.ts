@@ -9,6 +9,7 @@ export const ENDPOINTS = {
 
   // Others --------------------------//
   dashboard: "/dashboard",
+  streaming: "/streaming",
   videos: "/videos",
   userDetails: "/auth/me",
   singleReel: "/reels",

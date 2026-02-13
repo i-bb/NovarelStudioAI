@@ -17,7 +17,7 @@ function startHeartbeat() {
 
     // optional debug
     console.log("[socket] heartbeat sent");
-  }, 30000); // ✅ 5 seconds
+  }, 30000);
 }
 
 function stopHeartbeat() {
@@ -33,8 +33,8 @@ export function getSocket() {
   const token = localStorage.getItem("auth_token");
   if (!token) return null;
 
-  // socket = io("https://kora-undeluding-nathanael.ngrok-free.dev/v1/ws", {
-  socket = io("https://api.novarelstudio.com/v1/ws", {
+  socket = io("https://kora-undeluding-nathanael.ngrok-free.dev/v1/ws", {
+    // socket = io("https://api.novarelstudio.com/v1/ws", {
     //   socket = io("https://subtle-husky-solely.ngrok-free.app/v1/ws", {
 
     path: "/v1/ws",
@@ -42,7 +42,7 @@ export function getSocket() {
     transports: ["websocket", "polling"],
     timeout: 30000,
     reconnection: true,
-    forceNew: true,
+    // forceNew: true,
   });
 
   // ---- core socket lifecycle ----

@@ -4,17 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import {
-  Play,
-  Clock,
-  ArrowLeft,
-  Film,
-  Trash,
-  Zap,
-  AlertTriangle,
-} from "lucide-react";
+import { ArrowLeft, Zap, AlertTriangle } from "lucide-react";
 import api from "@/lib/api/api";
-import { getStatusLabel } from "@/lib/common";
 import kick from "@assets/generated_images/kick.svg";
 import twitch from "@assets/generated_images/twitch.png";
 import { getErrorMessage } from "@/lib/getErrorMessage";
@@ -30,14 +21,33 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
+import StreamingVideos from "@/components/streaming-videos";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function DashboardContent() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    user,
+    isTopPlan,
+    totalStorageGB,
+    usedStorageGB,
+    isStorageWarningLimit,
+    totalStorageUsagePercentage,
+  } = useAuth();
 
-  const [videoData, setVideoData] = useState<any | null>(null);
+  const [streamingVideos, setStreamingVideos] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [exportsLoading, setExportsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(() => {
     const savedPage = localStorage.getItem("content_active_page");
     return savedPage && !isNaN(Number(savedPage)) ? Number(savedPage) : 1;
@@ -50,55 +60,25 @@ export default function DashboardContent() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 12;
-  const totalPages = totalCount;
   const currentPageRef = useRef(currentPage);
   const activeTabRef = useRef(activeTab);
 
-  //Storage Data Calculations
-  const isTopPlan = user?.active_plan?.name === "Studio";
-  const totalStorage = user?.active_plan?.meta_data_json?.total_storage_mb || 0;
-  const totalStorageGB = Number((totalStorage / 1024).toFixed(2));
-  const usedStorage = user?.active_plan?.meta_data_json?.used_storage_mb || 0;
-  const usedStorageGB = Number((usedStorage / 1024).toFixed(2));
-  const isStorageWarningLimit =
-    user?.active_plan?.meta_data_json?.storage_warning_threshold_reached ||
-    false;
-  const totalStorageUsagePercentage =
-    totalStorageGB > 0 ? (usedStorageGB / totalStorageGB) * 100 : 0;
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        description: "You need to be logged in to access the dashboard.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 500);
-    }
-  }, [isAuthenticated, authLoading]);
-
-  const fetchExportData = async (page = 1) => {
+  const fetchStreamingVideosData = async (page = 1) => {
     try {
-      setExportsLoading(true);
-      const response = await api.getVideos(
+      setIsLoading(true);
+      const response = await api.getStreamingVideos(
         String(page),
         String(ITEMS_PER_PAGE),
-        activeTab
+        activeTab,
       );
 
-      const filteredVideos =
-        response?.videos?.filter(
-          (video: any) =>
-            video.status !== "failed" && video.status !== "skipped"
-        ) || [];
-
-      setVideoData(filteredVideos || []);
-      setTotalCount(response?.total_pages || 0);
-      setExportsLoading(false);
+      setStreamingVideos(response?.sessions || []);
+      setTotalCount(response?.total_count || 0);
+      setTotalPages(response?.total_pages || 0);
+      setIsLoading(false);
     } catch (error: any) {
       console.error("Content Studio API failed:", error);
-      setExportsLoading(false);
+      setIsLoading(false);
       toast({
         description: getErrorMessage(error, "Something went wrong!"),
         variant: "destructive",
@@ -106,67 +86,48 @@ export default function DashboardContent() {
     }
   };
 
-  const updateVideoStatusBySocket = (videoId: string, status: string) => {
-    setVideoData((prev: any[]) => {
-      if (!prev || !Array.isArray(prev)) return prev;
-
-      // ❌ Remove video for skipped / failed
-      if (status === "skipped" || status === "failed") {
-        const next = prev.filter((video) => video.public_id !== videoId);
-
-        // optional debug
-        if (next.length !== prev.length) {
-          console.log(`[socket] video removed (${status}):`, videoId);
-        }
-        return next;
-      }
-
-      // ✅ Otherwise update status
-      let updated = false;
-
-      const next = prev.map((video) => {
-        if (video.public_id === videoId) {
-          updated = true;
-          if (video.status === status) return video;
-          return {
-            ...video,
-            status,
-          };
-        }
-        return video;
-      });
-
-      if (!updated) {
-        console.warn("[socket] status update for unknown video:", videoId);
-      }
-
-      return next;
-    });
-  };
-
   const addNewVideoFromSocket = (newVideo: any) => {
-    // ✅ use ref, NOT state
+    if (!newVideo?.streaming_session_id) return;
+
+    // provider filter
     if (newVideo.provider !== activeTabRef.current) return;
 
-    if (currentPageRef.current !== 1) {
-      console.log(
-        "[socket] new video received, user not on page 1 → ignored",
-        newVideo.public_id
-      );
-      return;
-    }
-
     setTimeout(() => {
-      setVideoData((prev: any[]) => {
-        if (!prev || !Array.isArray(prev)) return [newVideo];
-        if (prev.some((v) => v.public_id === newVideo.public_id)) return prev;
-        return [newVideo, ...prev].slice(0, ITEMS_PER_PAGE);
+      // 1️⃣ Update total count correctly
+      setTotalCount((prevCount) => {
+        const updatedCount = prevCount + 1;
+
+        // 2️⃣ Update total pages based on new count
+        setTotalPages(Math.ceil(updatedCount / ITEMS_PER_PAGE));
+
+        return updatedCount;
       });
+
+      // 3️⃣ Only update UI list if user is on page 1
+      if (currentPageRef.current === 1) {
+        setStreamingVideos((prev: any[]) => {
+          if (!Array.isArray(prev)) return [newVideo];
+
+          // avoid duplicates
+          if (
+            prev.some(
+              (v) => v.streaming_session_id === newVideo.streaming_session_id,
+            )
+          ) {
+            return prev;
+          }
+
+          const updated = [newVideo, ...prev];
+
+          // keep page size intact
+          return updated.slice(0, ITEMS_PER_PAGE);
+        });
+      }
 
       toast({
-        title: "New video added 🎬",
+        title: "New streaming video added 🎬",
       });
-    }, 800);
+    }, 300);
   };
 
   useEffect(() => {
@@ -188,37 +149,50 @@ export default function DashboardContent() {
     const handleConnectError = (err: Error) => {
       console.error("[socket] connection error:", err.message);
     };
-    const handleVideoStatus = (payload: any) => {
-      console.log("[socket] video_status:", payload);
-      const { video_id, status } = payload;
-      if (!video_id || !status) return;
 
-      updateVideoStatusBySocket(video_id, status);
-    };
-    const handleNewVideoDetails = (payload: any) => {
-      console.log("[socket] video_details:", payload);
-      if (!payload?.public_id) return;
+    const handleNewStreamDetails = (payload: any) => {
+      console.log("[socket] streaming_session_started:", payload);
+      if (!payload?.streaming_session_id) return;
 
       addNewVideoFromSocket(payload);
+    };
+
+    const handleStreamingSessionUpdated = (payload: any) => {
+      console.log("[socket] streaming_session_updated:", payload);
+
+      if (!payload?.streaming_session_id) return;
+
+      // Only update if provider matches active tab
+      if (payload.provider !== activeTabRef.current) return;
+
+      setStreamingVideos((prev: any[]) => {
+        if (!prev || !Array.isArray(prev)) return prev;
+
+        return prev.map((video) =>
+          video.streaming_session_id === payload.streaming_session_id
+            ? { ...video, ...payload } // merge updated fields
+            : video,
+        );
+      });
     };
 
     socket?.on("connect", handleConnect);
     socket?.on("disconnect", handleDisconnect);
     socket?.on("connect_error", handleConnectError);
-    socket?.on("video_status", handleVideoStatus);
-    socket?.on("video_details", handleNewVideoDetails);
+    socket?.on("streaming_session_started", handleNewStreamDetails);
+    socket?.on("streaming_session_updated", handleStreamingSessionUpdated);
     return () => {
       socket?.off("connect", handleConnect);
       socket?.off("disconnect", handleDisconnect);
       socket?.off("connect_error", handleConnectError);
-      socket?.off("video_status", handleVideoStatus);
-      socket?.off("video_details", handleNewVideoDetails);
+      socket?.off("streaming_session_started", handleNewStreamDetails);
+      socket?.off("streaming_session_updated", handleStreamingSessionUpdated);
     };
   }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    fetchExportData(currentPage);
+    fetchStreamingVideosData(currentPage);
   }, [currentPage, activeTab, isAuthenticated]);
 
   useEffect(() => {
@@ -229,27 +203,14 @@ export default function DashboardContent() {
   }, [currentPage]);
 
   useEffect(() => {
-    const isReturning = sessionStorage.getItem("content_returning");
+    const fromDashboard = document.referrer.includes("/dashboard");
 
-    if (sessionStorage.getItem("content_session_initialized")) {
-      // Continuing in session (e.g., reload), do nothing
-    } else {
-      if (isReturning) {
-        // Returning from content-related page (video)
-        sessionStorage.setItem("content_session_initialized", "true");
-        sessionStorage.removeItem("content_returning");
-      } else {
-        // Fresh entry from other page or new session
-        setActiveTab("twitch");
-        setCurrentPage(1);
-        localStorage.removeItem("content_active_tab");
-        localStorage.removeItem("content_active_page");
-        sessionStorage.setItem("content_session_initialized", "true");
-      }
+    if (!fromDashboard) {
+      setActiveTab("twitch");
+      setCurrentPage(1);
+      localStorage.removeItem("content_active_tab");
+      localStorage.removeItem("content_active_page");
     }
-    return () => {
-      sessionStorage.removeItem("content_session_initialized");
-    };
   }, []);
 
   const isPlanExpired = (() => {
@@ -264,29 +225,23 @@ export default function DashboardContent() {
 
     try {
       // 🔥 call your delete API here
-      const response = await api.deleteVideos(deleteTarget.public_id);
-      fetchExportData(currentPage);
+      const response = await api.deleteStreamingVideos(
+        deleteTarget.streaming_session_id,
+      );
+      fetchStreamingVideosData(currentPage);
       toast({
         description: response?.message,
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        description: getErrorMessage(error, "Failed to delete video"),
+        description: getErrorMessage(error, "Failed to delete streaming video"),
       });
     } finally {
       setIsDeleteOpen(false);
       setDeleteTarget(null);
     }
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
 
   if (!isAuthenticated) return null;
 
@@ -350,28 +305,47 @@ export default function DashboardContent() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-      <div className="flex items-center gap-4 mb-8">
-        <Link
-          href="/dashboard"
-          onClick={() => {
-            localStorage.removeItem("content_active_tab");
-            localStorage.removeItem("content_active_page");
-            sessionStorage.removeItem("content_returning");
-          }}
-        >
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h1 className="font-display text-3xl sm:text-4xl font-semibold">
+      <div className="flex flex-col">
+        <div className="flex gap-4 mb-2 items-center">
+          <Link
+            href="/dashboard"
+            onClick={() => {
+              localStorage.removeItem("content_active_tab");
+              localStorage.removeItem("content_active_page");
+              sessionStorage.removeItem("content_returning");
+            }}
+          >
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/dashboard" className="text-md">
+                    Dashboard
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-md">Streams</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold mb-4">
           Content Studio
         </h1>
+        <p className="text-muted-foreground mb-8 max-w-2xl">
+          Your stream exports appear here. Click on any streamin video to see
+          the videos and the viral clips generated from it, along with
+          transcriptions and virality insights.
+        </p>
       </div>
-      <p className="text-muted-foreground mb-8 max-w-2xl">
-        Your stream exports appear here. Click on any video to see the viral
-        clips generated from it, along with transcriptions and virality
-        insights.
-      </p>
 
       {isStorageWarningLimit && (
         <Card className="border border-white/10 bg-black/40 mb-8">
@@ -456,267 +430,25 @@ export default function DashboardContent() {
           ))}
         </div>
       </div>
-      {exportsLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[...Array(8)].map((_, i) => (
-            <Card key={i} className="border-white/10 bg-black/40 animate-pulse">
-              <div className="aspect-video bg-white/5" />
-              <CardContent className="p-3">
-                <div className="h-4 bg-white/5 rounded w-3/4 mb-2" />
-                <div className="h-3 bg-white/5 rounded w-1/2" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : videoData && videoData.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {videoData.map((exp: any) => {
-              const duration = Math.round(exp.duration);
-              const minutes = Math.floor(duration / 60);
-              const seconds = String(duration % 60).padStart(2, "0");
-              const {
-                text,
-                icon: Icon,
-                class: statusClass,
-                message,
-              } = getStatusLabel(exp.status);
-              const isAccessible = exp.status === "completed";
-              return (
-                <div
-                  key={exp.public_id}
-                  className={`transition-all ${
-                    isAccessible
-                      ? "cursor-pointer"
-                      : "opacity-60 cursor-not-allowed"
-                  }`}
-                >
-                  {isAccessible ? (
-                    <Link
-                      href={`/dashboard/content/${exp.public_id}`}
-                      onClick={() => {
-                        localStorage.setItem(
-                          "selected_export",
-                          JSON.stringify(exp)
-                        );
-                        localStorage.setItem("content_active_tab", activeTab);
-                        localStorage.setItem(
-                          "content_active_page",
-                          String(currentPage)
-                        );
-                        sessionStorage.setItem("content_returning", "true");
-                      }}
-                    >
-                      <Card className="group overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 flex flex-col h-full">
-                        {/* Thumbnail */}
-                        <div className="relative h-[220px] w-full overflow-hidden bg-black">
-                          {exp.poster_url ? (
-                            <img
-                              src={exp.poster_url}
-                              alt={exp.title || "Video Thumbnail"}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <Play className="h-12 w-12 text-white/50" />
-                            </div>
-                          )}
-                          {/* Duration */}
-                          <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
-                            <Clock className="h-3 w-3" /> {minutes}:{seconds}
-                          </div>
-                        </div>
-                        {/* Content */}
-                        <CardContent className="p-4 space-y-3">
-                          <div className="flex justify-between">
-                            <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
-                              {exp?.provider}
-                            </span>
-                            <div
-                              className="bg-red/10 px-3 py-1 rounded border border-red text-red-500 cursor-pointer hover:text-red-400 transition"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setDeleteTarget(exp);
-                                setIsDeleteOpen(true);
-                              }}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </div>
-                          </div>
-                          <p className="font-medium truncate">{exp.title}</p>
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Status</p>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${statusClass}`}
-                            >
-                              <Icon className="h-3 w-3" /> {text}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Processed On</p>
-                            <p className="text-sm text-muted-foreground">
-                              {exp.processed_on
-                                ? new Date(exp.processed_on).toLocaleString(
-                                    "en-US",
-                                    {
-                                      month: "short",
-                                      day: "2-digit",
-                                      year: "numeric",
-                                    }
-                                  )
-                                : "Not Available"}
-                            </p>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Posted</p>
-                            <div className="px-2 py-1 rounded-md bg-white/10 border border-white/20">
-                              <p className="text-sm text-muted-foreground">
-                                {`${exp.posted_reels}/${exp.total_reels}`}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ) : (
-                    <Card className="overflow-hidden border-white/10 bg-black/40">
-                      <div className="relative h-[220px] w-full overflow-hidden bg-black">
-                        {exp.poster_url ? (
-                          <img
-                            src={exp.poster_url}
-                            alt={exp.title || "Video Thumbnail"}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Play className="h-12 w-12 text-white/50" />
-                          </div>
-                        )}
-                        <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/70 px-2 py-1 text-xs text-white">
-                          <Clock className="h-3 w-3" /> {minutes}:{seconds}
-                        </div>
-                        {/* 🚫 ACCESS OVERLAY */}
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white"></div>
-                      </div>
-                      <CardContent className="p-4 space-y-3">
-                        <span className="inline-block text-[10px] bg-white/10 px-2 py-1 rounded-full border border-white/20">
-                          {exp?.provider}
-                        </span>
-                        <p className="font-medium truncate">{exp.title}</p>
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm">Status</p>
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${statusClass}`}
-                          >
-                            <Icon className="h-3 w-3" /> {text}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm">Processed On</p>
-                          <p className="text-sm text-muted-foreground">
-                            {exp.processed_on
-                              ? new Date(exp.processed_on).toLocaleString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "2-digit",
-                                    year: "numeric",
-                                  }
-                                )
-                              : "Not Available"}
-                          </p>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm">Posted</p>
-                          <div className="px-2 py-1 rounded-md bg-white/10 border border-white/20">
-                            <p className="text-sm text-muted-foreground">
-                              {`${exp.posted_reels}/${exp.total_reels}`}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground text-center">
-                          {message}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-8">
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={currentPage === 1}
-                onClick={() => {
-                  setCurrentPage((p) => {
-                    const next = Math.max(p - 1, 1);
-                    localStorage.setItem("content_active_page", String(next));
-                    return next;
-                  });
-                }}
-              >
-                Previous
-              </Button>
-              {[...Array(totalPages)].map((_, index) => {
-                const page = index + 1;
-                return (
-                  <Button
-                    key={page}
-                    size="sm"
-                    variant={page === currentPage ? "default" : "ghost"}
-                    className="min-w-[36px]"
-                    onClick={() => {
-                      setCurrentPage(page);
-                      localStorage.setItem("content_active_page", String(page));
-                    }}
-                  >
-                    {page}
-                  </Button>
-                );
-              })}
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={currentPage === totalPages}
-                onClick={() =>
-                  setCurrentPage((p) => {
-                    const next = Math.min(p + 1, totalPages);
-                    localStorage.setItem("content_active_page", String(next));
-                    return next;
-                  })
-                }
-              >
-                Next
-              </Button>
-            </div>
-          )}
-        </>
-      ) : (
-        <Card className="border-white/10 bg-black/40 p-12 text-center">
-          <Film className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
-          <h3 className="font-display text-2xl font-semibold mb-3">
-            No content yet
-          </h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Your stream exports will appear here once you connect your streaming
-            account and start streaming. We'll automatically detect and export
-            your best moments.
-          </p>
-        </Card>
-      )}
+
+      <StreamingVideos
+        isLoading={isLoading || authLoading}
+        videoData={streamingVideos}
+        totalPages={totalPages}
+        activeTab={activeTab}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        setIsDeleteOpen={setIsDeleteOpen}
+        setDeleteTarget={setDeleteTarget}
+      />
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-[420px] rounded-xl p-6">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this video?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this streaming video?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. The video and its generated clips
-              will be permanently removed.
+              The streaming video with all the generated videos and clips will
+              be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
 

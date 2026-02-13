@@ -28,11 +28,13 @@ function ClipCard({
   exportId,
   fetchReelsData,
   platform,
+  streamingId,
 }: {
   clip: any;
   exportId: string;
   fetchReelsData: any;
   platform: string;
+  streamingId: string;
 }) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -41,7 +43,7 @@ function ClipCard({
   const duration =
     typeof durationSeconds === "number"
       ? `${Math.floor(durationSeconds / 60)}:${String(
-          Math.floor(durationSeconds % 60)
+          Math.floor(durationSeconds % 60),
         ).padStart(2, "0")}`
       : null;
 
@@ -96,7 +98,9 @@ function ClipCard({
   return (
     <>
       <div className="relative">
-        <Link href={`/dashboard/content/${exportId}/reel/${clip.public_id}`}>
+        <Link
+          href={`/dashboard/content/${streamingId}/video/${exportId}/reel/${clip.public_id}`}
+        >
           <div
             className={`relative rounded-xl cursor-pointer group transition mt-9 ${
               isClipThatVideo ? "0px" : ""

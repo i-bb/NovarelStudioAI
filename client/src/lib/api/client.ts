@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const API_BASE_URL = "https://kora-undeluding-nathanael.ngrok-free.dev";
-const API_BASE_URL = "https://api.novarelstudio.com/v1";
+const API_BASE_URL = "https://kora-undeluding-nathanael.ngrok-free.dev";
+// const API_BASE_URL = "https://api.novarelstudio.com/v1";
 // const API_BASE_URL = "https://subtle-husky-solely.ngrok-free.app/v1";
 // const API_BASE_URL = "https://api.novarelstudio.com/v1";
 
@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
       message: error.message,
       originalError: error,
     });
-  }
+  },
 );
 
 apiClient.interceptors.response.use(
@@ -73,7 +73,7 @@ apiClient.interceptors.response.use(
       message: error.message,
       originalError: error,
     });
-  }
+  },
 );
 
 export default apiClient;

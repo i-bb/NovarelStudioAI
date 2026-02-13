@@ -26,6 +26,7 @@ import { AuthProvider } from "./hooks/AuthProvider";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { trackPageView } from "@/lib/ga";
+import Videos from "./pages/videos";
 
 function Router() {
   return (
@@ -56,10 +57,26 @@ function Router() {
         </AuthProvider>
       </Route>
 
-      <Route path="/dashboard/content/:id">
+      <Route path="/dashboard/content/:streamingId">
+        <AuthProvider>
+          <DashboardLayout>
+            <Videos />
+          </DashboardLayout>
+        </AuthProvider>
+      </Route>
+
+      <Route path="/dashboard/content/:streamingId/video/:id">
         <AuthProvider>
           <DashboardLayout>
             <VideoDetail />
+          </DashboardLayout>
+        </AuthProvider>
+      </Route>
+
+      <Route path="/dashboard/content/:streamingId/video/:id/reel/:reelId">
+        <AuthProvider>
+          <DashboardLayout>
+            <SingleVideoDetails />
           </DashboardLayout>
         </AuthProvider>
       </Route>
@@ -76,14 +93,6 @@ function Router() {
         <AuthProvider>
           <DashboardLayout>
             <Transactions />
-          </DashboardLayout>
-        </AuthProvider>
-      </Route>
-
-      <Route path="/dashboard/content/:id/reel/:reelId">
-        <AuthProvider>
-          <DashboardLayout>
-            <SingleVideoDetails />
           </DashboardLayout>
         </AuthProvider>
       </Route>

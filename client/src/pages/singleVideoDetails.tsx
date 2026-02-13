@@ -42,6 +42,7 @@ export default function SingleVideoDetails() {
   const params = useParams();
   const exportId = params?.id;
   const reelId = params?.reelId;
+  const streamingId = params?.streamingId;
 
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const captionEditingAllowed =
@@ -55,7 +56,7 @@ export default function SingleVideoDetails() {
   const [reelData, setReelData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [publishingPlatform, setPublishingPlatform] = useState<string | null>(
-    null
+    null,
   );
   const [isCaptionModalOpen, setIsCaptionModalOpen] = useState(false);
   const [captionSaving, setCaptionSaving] = useState(false);
@@ -134,7 +135,7 @@ export default function SingleVideoDetails() {
 
       const response = await api.updateReelCaption(
         reelData.public_id,
-        captionForApi
+        captionForApi,
       );
 
       toast({ description: response?.message });
@@ -245,7 +246,7 @@ export default function SingleVideoDetails() {
           <div
             className="hidden lg:flex absolute gap-4 top-4 left-2 hover:cursor-pointer hover:text-primary"
             onClick={() =>
-              (window.location.href = `/dashboard/content/${exportId}`)
+              (window.location.href = `/dashboard/content/${streamingId}/video/${exportId}`)
             }
           >
             <ArrowLeft className="h-4 w-4" />
@@ -344,8 +345,8 @@ export default function SingleVideoDetails() {
                             !manualPostingAllowed
                               ? "bg-primary/40"
                               : autoProcessing
-                              ? "bg-primary"
-                              : "bg-white/20"
+                                ? "bg-primary"
+                                : "bg-white/20"
                           }`}
                         >
                           <span
@@ -498,8 +499,8 @@ export default function SingleVideoDetails() {
                             {!integrated
                               ? "Coming Soon"
                               : posted
-                              ? "Published"
-                              : "Ready to Publish"}
+                                ? "Published"
+                                : "Ready to Publish"}
                           </p>
                         </div>
                       </div>
@@ -563,7 +564,7 @@ export default function SingleVideoDetails() {
                   )}
                 </>
               );
-            }
+            },
           )}
         </div>
       </div>
