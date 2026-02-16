@@ -5,18 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "wouter";
 import { SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
-import {
-  Play,
-  Clock,
-  Zap,
-  Film,
-  TrendingUp,
-  Users,
-  Eye,
-  Lock,
-  FolderCog,
-} from "lucide-react";
+import { Zap, Lock, FolderCog } from "lucide-react";
 import { CircularProgressBar } from "@/components/CircularProgressBar";
+import Footer from "@/components/Footer";
 
 function PreviewPlatformStatCard({
   platform,
@@ -376,6 +367,7 @@ export default function ShowcasePage() {
             </div>
           </div>
         </div>
+        <Footer />
       </main>
     </AppLayout>
   );

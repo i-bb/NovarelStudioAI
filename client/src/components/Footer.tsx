@@ -52,9 +52,9 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative border-t border-white/5 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.18),_transparent_55%),_linear-gradient(to_bottom,_#020617,_#020617)] pt-16 pb-10 mt-8">
+    <footer className="relative border-t border-white/5 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.18),_transparent_55%),_linear-gradient(to_bottom,_#020617,_#020617)] pt-4 sm:pt-16 pb-10 mt-8">
       <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-      <div className="absolute inset-x-0 -bottom-40 h-80 bg-[radial-gradient(circle_at_center,_rgba(15,23,42,0.9),_transparent_70%)] opacity-80" />
+      {/* <div className="absolute inset-x-0 -bottom-40 h-80 bg-[radial-gradient(circle_at_center,_rgba(15,23,42,0.9),_transparent_70%)] opacity-80" /> */}
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-12">
@@ -79,27 +79,25 @@ export default function Footer() {
             <p className="max-w-sm text-sm text-muted-foreground/90">
               Stream-to-clip automation for Twitch and Kick creators.
             </p>
-             <a
+            <a
               href="mailto:hello@novarelstudio.com"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
+            >
               <Mail className="h-4 w-4" />
               hello@novarelstudio.com
-              </a>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Early access open
-            </span>
-
-            <div className="flex gap-3 mt-1">
-              <SocialLink icon={Twitter} href="#" label="Twitter" />
-              <SocialLink icon={Github} href="#" label="GitHub" />
-              <SocialLink icon={Linkedin} href="#" label="LinkedIn" />
+            </a>
+            <div className="mt-2 text-sm text-muted-foreground/80 leading-relaxed">
+              <p className="font-medium text-foreground/90">
+                Merton Companies Innovation Labs 1 LLC
+              </p>
+              <p>1309 Coffeen Ave STE 1200</p>
+              <p>Sheridan, WY 82801</p>
+              <p>United States</p>
             </div>
           </div>
 
           <div className="md:col-span-3 flex flex-col gap-4 text-sm">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <h4 className="text-md font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Product
             </h4>
             <nav className="flex flex-col gap-2.5 text-muted-foreground/90">
@@ -113,7 +111,7 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-4 flex flex-col gap-4 text-sm">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <h4 className="text-md font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Get updates
             </h4>
 
@@ -124,7 +122,7 @@ export default function Footer() {
               </div>
             ) : (
               <form
-                className="flex flex-col sm:flex-row gap-3"
+                className="flex flex-col lg:flex-row gap-3"
                 onSubmit={handleSubmit}
               >
                 <input
@@ -152,13 +150,25 @@ export default function Footer() {
             {message && !success && (
               <p className="text-xs text-red-400">{message}</p>
             )}
+
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Early access open
+            </span>
+
+            <div className="flex gap-3 mt-1">
+              <SocialLink icon={Twitter} href="#" label="Twitter" />
+              <SocialLink icon={Github} href="#" label="GitHub" />
+              <SocialLink icon={Linkedin} href="#" label="LinkedIn" />
+            </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-[11px] sm:text-xs text-muted-foreground/80 md:flex-row md:items-center md:justify-center">
+        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-[11px] sm:text-xs text-muted-foreground/80 flex-row items-center">
           <p>
             © {new Date().getFullYear()} NovarelStudio. All rights reserved.
           </p>
+          <p>Operated by Merton Companies Innovation Labs 1 LLC</p>
         </div>
       </div>
     </footer>

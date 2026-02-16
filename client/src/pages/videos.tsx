@@ -211,41 +211,41 @@ export default function Videos() {
       addNewVideoFromSocket(payload);
     };
 
-    const handleStreamingSessionUpdated = (payload: any) => {
-      console.log("[socket] streaming_session_updated:", payload);
+    // const handleStreamingSessionUpdated = (payload: any) => {
+    //   console.log("[socket] streaming_session_updated:", payload);
 
-      if (!payload?.streaming_session_id) return;
+    //   if (!payload?.streaming_session_id) return;
 
-      // ✅ Only update if it matches current streaming page
-      if (payload.streaming_session_id !== streamingId) return;
+    //   // ✅ Only update if it matches current streaming page
+    //   if (payload.streaming_session_id !== streamingId) return;
 
-      // ✅ Update UI state
-      setSourceStreamData((prev: any) => {
-        const updated = { ...prev, ...payload };
+    //   // ✅ Update UI state
+    //   setSourceStreamData((prev: any) => {
+    //     const updated = { ...prev, ...payload };
 
-        // ✅ Also persist in localStorage
-        localStorage.setItem(
-          "selected_streaming_video",
-          JSON.stringify(updated),
-        );
+    //     // ✅ Also persist in localStorage
+    //     localStorage.setItem(
+    //       "selected_streaming_video",
+    //       JSON.stringify(updated),
+    //     );
 
-        return updated;
-      });
-    };
+    //     return updated;
+    //   });
+    // };
 
     socket?.on("connect", handleConnect);
     socket?.on("disconnect", handleDisconnect);
     socket?.on("connect_error", handleConnectError);
     socket?.on("video_status", handleVideoStatus);
     socket?.on("video_details", handleNewVideoDetails);
-    socket?.on("streaming_session_updated", handleStreamingSessionUpdated);
+    // socket?.on("streaming_session_updated", handleStreamingSessionUpdated);
     return () => {
       socket?.off("connect", handleConnect);
       socket?.off("disconnect", handleDisconnect);
       socket?.off("connect_error", handleConnectError);
       socket?.off("video_status", handleVideoStatus);
       socket?.off("video_details", handleNewVideoDetails);
-      socket?.off("streaming_session_updated", handleStreamingSessionUpdated);
+      // socket?.off("streaming_session_updated", handleStreamingSessionUpdated);
     };
   }, []);
 

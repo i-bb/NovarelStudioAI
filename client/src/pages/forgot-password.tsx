@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import api from "@/lib/api/api";
 import { toast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
+import Footer from "@/components/Footer";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState<"email" | "otp">("email");
@@ -258,6 +259,7 @@ const ForgotPassword = () => {
             </div>
           </Card>
         </div>
+        <Footer />
       </main>
     </AppLayout>
   );

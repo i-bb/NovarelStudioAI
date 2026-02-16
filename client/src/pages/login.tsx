@@ -8,6 +8,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useLocation, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api/api";
+import Footer from "@/components/Footer";
 
 export default function LoginPage() {
   const [location, setLocation] = useLocation();
@@ -220,14 +221,9 @@ export default function LoginPage() {
                 Get started
               </Link>
             </div>
-            {/* Real test account for demo/staging
-            <div className="mt-8 p-4 bg-yellow-900/20 border border-yellow-700/50 rounded-lg text-xs text-center text-yellow-300">
-              <p className="font-semibold mb-1">Test Account:</p>
-              <p>iisha.rai@gmail.com</p>
-              <p>Password: 000000</p>
-            </div> */}
           </Card>
         </div>
+        <Footer />
       </main>
     </AppLayout>
   );
