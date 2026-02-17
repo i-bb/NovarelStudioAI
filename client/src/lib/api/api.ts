@@ -199,8 +199,11 @@ export const api = {
   deleteVideos: (public_id: string) =>
     request<any>("delete", `${ENDPOINTS.videos}/${public_id}`),
 
-  getReelsData: (platform: string, public_id: string) =>
-    request<any>("get", ENDPOINTS.reels(platform, public_id)),
+  getReelsData: (page: string, limit: string, streaming_id: string) =>
+    request<any>(
+      "get",
+      `${ENDPOINTS.reels(streaming_id)}?page=${page}&limit=${limit}`,
+    ),
 
   getSingleReelData: (reelId: string) =>
     request<any>("get", `${ENDPOINTS.singleReel}/${reelId}`),

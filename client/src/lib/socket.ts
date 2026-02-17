@@ -35,8 +35,6 @@ export function getSocket() {
 
   // socket = io("https://kora-undeluding-nathanael.ngrok-free.dev/v1/ws", {
   socket = io("https://api.novarelstudio.com/v1/ws", {
-    //   socket = io("https://subtle-husky-solely.ngrok-free.app/v1/ws", {
-
     path: "/v1/ws",
     auth: { token },
     transports: ["websocket", "polling"],

@@ -2,15 +2,13 @@ import axios from "axios";
 
 // const API_BASE_URL = "https://kora-undeluding-nathanael.ngrok-free.dev";
 const API_BASE_URL = "https://api.novarelstudio.com/v1";
-// const API_BASE_URL = "https://subtle-husky-solely.ngrok-free.app/v1";
-// const API_BASE_URL = "https://api.novarelstudio.com/v1";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 600000,
   headers: {
     "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true", // bypass ngrok
+    "ngrok-skip-browser-warning": "true",
   },
 });
 

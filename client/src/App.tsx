@@ -60,20 +60,20 @@ function Router() {
       <Route path="/dashboard/content/:streamingId">
         <AuthProvider>
           <DashboardLayout>
-            <Videos />
-          </DashboardLayout>
-        </AuthProvider>
-      </Route>
-
-      <Route path="/dashboard/content/:streamingId/video/:id">
-        <AuthProvider>
-          <DashboardLayout>
             <VideoDetail />
           </DashboardLayout>
         </AuthProvider>
       </Route>
 
-      <Route path="/dashboard/content/:streamingId/video/:id/reel/:reelId">
+      {/* <Route path="/dashboard/content/:streamingId/video/:id">
+        <AuthProvider>
+          <DashboardLayout>
+            <VideoDetail />
+          </DashboardLayout>
+        </AuthProvider>
+      </Route> */}
+
+      <Route path="/dashboard/content/:streamingId/reel/:reelId">
         <AuthProvider>
           <DashboardLayout>
             <SingleVideoDetails />

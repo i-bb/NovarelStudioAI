@@ -66,12 +66,6 @@ const StreamingVideos = ({
                 >
                   <Link
                     href={`/dashboard/content/${data.streaming_session_id}?tab=${activeTab}&streampage=${currentPage}`}
-                    onClick={() => {
-                      localStorage.setItem(
-                        "selected_streaming_video",
-                        JSON.stringify(data),
-                      );
-                    }}
                   >
                     <Card className="group overflow-hidden border-white/10 bg-black/40 hover:border-primary/50 flex flex-col h-full">
                       {/* Thumbnail */}
@@ -122,10 +116,10 @@ const StreamingVideos = ({
                         </div>
                         {data.streamer_username !== "default_streamer" && (
                           <div className="flex justify-between items-center">
-                            <p className="text-sm font-medium">Streamer</p>
-                            <p className="font-medium truncate">
+                            <p className="text-sm font-medium">{data?.title}</p>
+                            {/* <p className="font-medium truncate">
                               {data.streamer_username}
-                            </p>
+                            </p> */}
                           </div>
                         )}
 
@@ -166,10 +160,10 @@ const StreamingVideos = ({
                           </p>
                         </div>
                         <div className="flex justify-between items-center">
-                          <p className="text-sm">Total Videos</p>
+                          <p className="text-sm">Total Clips</p>
                           <div className="px-2 py-1 rounded-md bg-white/10 border border-white/20">
                             <p className="text-sm text-muted-foreground">
-                              {data.total_videos}
+                              {data.total_clips || 0}
                             </p>
                           </div>
                         </div>
@@ -211,105 +205,6 @@ const StreamingVideos = ({
                 </PaginationItem>
 
                 {/* Page Numbers */}
-
-                {/* {(() => {
-                  const pages = [];
-                  const windowSize = 5;
-
-                  // Center current page
-                  let start = Math.max(
-                    1,
-                    currentPage - Math.floor(windowSize / 2),
-                  );
-                  let end = start + windowSize - 1;
-
-                  if (end > totalPages) {
-                    end = totalPages;
-                    start = Math.max(1, end - windowSize + 1);
-                  }
-
-                  // Show first page if missing
-                  if (start > 1) {
-                    pages.push(
-                      <PaginationItem key={1}>
-                        <button
-                          onClick={() => {
-                            setCurrentPage(1);
-                            setLocation(
-                              `/dashboard/content?tab=${activeTab}&streampage=1`,
-                            );
-                          }}
-                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
-                        >
-                          1
-                        </button>
-                      </PaginationItem>,
-                    );
-
-                    if (start > 2) {
-                      pages.push(
-                        <PaginationItem key="start-ellipsis">
-                          <span className="px-2 text-white/60">...</span>
-                        </PaginationItem>,
-                      );
-                    }
-                  }
-
-                  // Main 5 pages
-                  for (let page = start; page <= end; page++) {
-                    const isActive = currentPage === page;
-
-                    pages.push(
-                      <PaginationItem key={page}>
-                        <button
-                          onClick={() => {
-                            setCurrentPage(page);
-                            setLocation(
-                              `/dashboard/content?tab=${activeTab}&streampage=${page}`,
-                            );
-                          }}
-                          className={cn(
-                            "h-9 w-9 text-sm rounded-lg transition-all",
-                            isActive
-                              ? "bg-primary text-white"
-                              : "text-white hover:bg-white/10",
-                          )}
-                        >
-                          {page}
-                        </button>
-                      </PaginationItem>,
-                    );
-                  }
-
-                  // Show last page if missing
-                  if (end < totalPages) {
-                    if (end < totalPages - 1) {
-                      pages.push(
-                        <PaginationItem key="end-ellipsis">
-                          <span className="px-2 text-white/60">...</span>
-                        </PaginationItem>,
-                      );
-                    }
-
-                    pages.push(
-                      <PaginationItem key={totalPages}>
-                        <button
-                          onClick={() => {
-                            setCurrentPage(totalPages);
-                            setLocation(
-                              `/dashboard/content?tab=${activeTab}&streampage=${totalPages}`,
-                            );
-                          }}
-                          className="h-9 w-9 text-sm rounded-lg text-white hover:bg-white/10"
-                        >
-                          {totalPages}
-                        </button>
-                      </PaginationItem>,
-                    );
-                  }
-
-                  return pages;
-                })()} */}
 
                 {(() => {
                   const pages = [];

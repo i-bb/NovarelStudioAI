@@ -252,7 +252,7 @@ export default function SingleVideoDetails() {
           <div
             className="hidden lg:flex absolute gap-4 top-4 left-2 hover:cursor-pointer hover:text-primary"
             onClick={() =>
-              (window.location.href = `/dashboard/content/${streamingId}/video/${exportId}?tab=${tab}&streampage=${streampage}&videopage=${videopage}`)
+              (window.location.href = `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${videopage}`)
             }
           >
             <ArrowLeft className="h-4 w-4" />
