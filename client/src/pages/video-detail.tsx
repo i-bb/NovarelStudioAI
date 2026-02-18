@@ -350,33 +350,35 @@ export default function VideoDetail() {
       </Card> */}
 
       <Card className="border-white/10 bg-black/40 mb-8">
-        <CardContent className="p-6 flex items-center gap-6">
+        <CardContent className="p-6 flex flex-wrap items-center justify-between gap-6">
           {/* Thumbnail */}
-          <div className="h-[110px] w-28 shrink-0 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20">
-            {streamingVideoData?.thumbnail_url ? (
-              <img
-                src={streamingVideoData?.thumbnail_url}
-                alt="Thumbnail"
-                className="w-full h-full object-cover rounded-lg"
-              />
-            ) : (
-              <Play className="h-10 w-10 text-primary/50" />
-            )}
-          </div>
+          <div className="flex gap-6">
+            <div className="h-[110px] w-28 shrink-0 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20">
+              {streamingVideoData?.thumbnail_url ? (
+                <img
+                  src={streamingVideoData?.thumbnail_url}
+                  alt="Thumbnail"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <Play className="h-10 w-10 text-primary/50" />
+              )}
+            </div>
 
-          {/* Title Section */}
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground">Title</p>
-            <h2 className="text-lg font-semibold text-foreground truncate">
-              {streamingVideoData?.title}
-            </h2>
+            {/* Title Section */}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">Title</p>
+              <h2 className="text-lg font-semibold text-foreground truncate whitespace-pre-line">
+                {streamingVideoData?.title}
+              </h2>
 
-            <p className="text-sm text-muted-foreground mt-2">
-              Streamer ·{" "}
-              <span className="text-foreground/90">
-                {streamingVideoData?.streamer_username}
-              </span>
-            </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Streamer ·{" "}
+                <span className="text-foreground/90">
+                  {streamingVideoData?.streamer_username}
+                </span>
+              </p>
+            </div>
           </div>
 
           {/* Stats (Right Aligned) */}

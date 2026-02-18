@@ -30,7 +30,7 @@ export default function Hero() {
       <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-6 md:gap-8 lg:gap-12 items-stretch">
         {/* Left: Narrative & CTA */}
         <div>
-          <Badge className="mb-6 border-white/15 bg-white/5 text-xs font-medium tracking-[0.18em] uppercase rounded-full px-4 py-1.5 text-muted-foreground flex items-center gap-2">
+          <Badge className="whitespace-pre-line mb-6 border-white/15 bg-white/5 text-xs font-medium tracking-[0.18em] uppercase rounded-full px-4 py-1.5 text-muted-foreground flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
