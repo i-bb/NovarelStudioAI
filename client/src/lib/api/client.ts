@@ -2,15 +2,13 @@ import axios from "axios";
 
 // const API_BASE_URL = "https://kora-undeluding-nathanael.ngrok-free.dev";
 const API_BASE_URL = "https://api.novarelstudio.com/v1";
-// const API_BASE_URL = "https://subtle-husky-solely.ngrok-free.app/v1";
-// const API_BASE_URL = "https://api.novarelstudio.com/v1";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 600000,
   headers: {
     "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true", // bypass ngrok
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
@@ -28,7 +26,7 @@ apiClient.interceptors.request.use(
       message: error.message,
       originalError: error,
     });
-  }
+  },
 );
 
 apiClient.interceptors.response.use(
@@ -43,8 +41,6 @@ apiClient.interceptors.response.use(
       if (status === 401) {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("auth_user");
-        localStorage.removeItem("content_active_page");
-        localStorage.removeItem("content_active_tab");
         localStorage.removeItem("selected_export");
         sessionStorage.removeItem("content_session_initialized");
         // window.location.href = "/login";
@@ -73,7 +69,7 @@ apiClient.interceptors.response.use(
       message: error.message,
       originalError: error,
     });
-  }
+  },
 );
 
 export default apiClient;

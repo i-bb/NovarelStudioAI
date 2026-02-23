@@ -20,10 +20,14 @@ export default function CheckoutCancelPage() {
               Checkout Cancelled
             </h1>
             <p className="text-muted-foreground mb-8">
-              No worries! Your payment wasn't processed. You can try again whenever you're ready or start with our free Starter plan.
+              No worries! Your payment wasn't processed. You can try again
+              whenever you're ready or start with our free Starter plan.
             </p>
             <div className="space-y-3">
-              <Button asChild className="w-full bg-gradient-to-r from-primary to-accent">
+              <Button
+                asChild
+                className="w-full bg-gradient-to-r from-primary to-accent"
+              >
                 <Link href="/#pricing" data-testid="link-pricing">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Pricing
@@ -36,7 +40,7 @@ export default function CheckoutCancelPage() {
               </Button>
             </div>
             <p className="mt-6 text-xs text-muted-foreground">
-              Questions? Contact us at support@novarelstudio.com
+              Questions? Contact us at hello@novarelstudio.com
             </p>
           </Card>
         </div>

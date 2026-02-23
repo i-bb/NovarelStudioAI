@@ -12,6 +12,7 @@ import api from "@/lib/api/api";
 import { getErrorMessage } from "@/lib/getErrorMessage";
 import { Plan, TransformApiResponseToPlans } from "@/lib/MapApiPlans";
 import { trackEvent } from "@/lib/ga";
+import Footer from "@/components/Footer";
 
 type PlanInfo = {
   name: string;
@@ -42,7 +43,7 @@ export default function SignupPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
-    billingParam
+    billingParam,
   );
 
   const { toast } = useToast();
@@ -51,7 +52,7 @@ export default function SignupPage() {
     try {
       setLoadingPlans(true);
       const response: any = await api.getSubscriptionPlansByInterval(
-        billingPeriod === "monthly" ? "month" : "year"
+        billingPeriod === "monthly" ? "month" : "year",
       );
       setPlans(TransformApiResponseToPlans(response));
     } catch (error) {
@@ -202,7 +203,7 @@ export default function SignupPage() {
       toast({
         description: getErrorMessage(
           error,
-          "Failed to create account. Please try again."
+          "Failed to create account. Please try again.",
         ),
         variant: "destructive",
       });
@@ -416,6 +417,7 @@ export default function SignupPage() {
             </Card>
           </div>
         </div>
+        <Footer />
       </main>
     </AppLayout>
   );

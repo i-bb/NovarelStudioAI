@@ -38,7 +38,7 @@ async function safeRequest<T>(promise: Promise<any>): Promise<T> {
 function request<T>(
   method: "get" | "post" | "delete" | "patch" | "put",
   url: string,
-  data?: any
+  data?: any,
 ): Promise<T> {
   if (method === "get" || method === "delete") {
     return safeRequest<T>(apiClient[method](url));
@@ -181,17 +181,29 @@ export const api = {
   getDashboard: () => request<DashboardResponse>("get", ENDPOINTS.dashboard),
 
   // CONTENT STUDIO
-  getVideos: (page: string, limit: string, platform?: string) =>
+  getStreamingVideos: (page: string, limit: string, platform?: string) =>
     request<any>(
       "get",
-      `${ENDPOINTS.videos}/${platform}?page=${page}&limit=${limit}`
+      `${ENDPOINTS.streaming}?provider=${platform}&page=${page}&limit=${limit}`,
+    ),
+
+  deleteStreamingVideos: (streamingId: string) =>
+    request<any>("delete", `${ENDPOINTS.streaming}/${streamingId}`),
+
+  getVideos: (streamingId: string, page: string, limit: string) =>
+    request<any>(
+      "get",
+      `${ENDPOINTS.streaming}/${streamingId}/videos?page=${page}&limit=${limit}`,
     ),
 
   deleteVideos: (public_id: string) =>
     request<any>("delete", `${ENDPOINTS.videos}/${public_id}`),
 
-  getReelsData: (platform: string, public_id: string) =>
-    request<any>("get", ENDPOINTS.reels(platform, public_id)),
+  getReelsData: (page: string, limit: string, streaming_id: string) =>
+    request<any>(
+      "get",
+      `${ENDPOINTS.reels(streaming_id)}?page=${page}&limit=${limit}`,
+    ),
 
   getSingleReelData: (reelId: string) =>
     request<any>("get", `${ENDPOINTS.singleReel}/${reelId}`),
@@ -247,7 +259,7 @@ export const api = {
   uploadReels: (platform: string, public_id: string) =>
     request<any>(
       "post",
-      `${ENDPOINTS.uploadReels(platform)}?public_id=${public_id}`
+      `${ENDPOINTS.uploadReels(platform)}?public_id=${public_id}`,
     ),
 
   downloadReel: (reelId: string) =>
