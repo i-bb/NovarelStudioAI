@@ -48,7 +48,7 @@ export default function SingleVideoDetails() {
   const searchParams = new URLSearchParams(search);
   const tab = searchParams.get("tab");
   const streampage = searchParams.get("streampage");
-  const videopage = searchParams.get("videopage");
+  const videopage = searchParams.get("videopage") || 1;
 
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const captionEditingAllowed =
@@ -262,7 +262,7 @@ export default function SingleVideoDetails() {
           <div
             className="lg:hidden flex gap-2 items-center my-4 px-2 hover:cursor-pointer text-white"
             onClick={() =>
-              (window.location.href = `/dashboard/content/${exportId}`)
+              (window.location.href = `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${videopage}`)
             }
           >
             <ArrowLeft className="h-4 w-4" />
