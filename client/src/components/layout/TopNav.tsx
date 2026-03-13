@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Zap, ArrowRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export function TopNav() {
+  const [location] = useLocation();
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -15,6 +17,13 @@ export function TopNav() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const isActive = (href: string) => {
+    if (href.startsWith("/#")) {
+      return location === "/";
+    }
+    return location === href;
+  };
 
   const navItems = ["Features", "How it works", "Pricing", "Showcase"];
 
@@ -56,7 +65,7 @@ export function TopNav() {
         "fixed inset-x-0 top-0 z-50 transition-all duration-300",
         isScrolled || isMobileMenuOpen
           ? "border-b border-white/10 bg-[rgba(2,6,23,0.96)]"
-          : "border-b border-transparent bg-gradient-to-b from-black/70 via-black/20 to-transparent"
+          : "border-b border-transparent bg-gradient-to-b from-black/70 via-black/20 to-transparent",
       )}
     >
       <div className="mx-auto flex h-16 sm:h-18 max-w-7xl items-center justify-between px-4 md:px-8 lg:px-12">
@@ -81,15 +90,25 @@ export function TopNav() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-muted-foreground/90">
-          {navItems.map((item) => (
-            <a
-              key={item}
-              href={getHref(item)}
-              className="relative inline-flex items-center gap-1 py-1 transition-colors hover:text-foreground"
-            >
-              {item}
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const href = getHref(item);
+            const active = isActive(href);
+
+            console.log("active", active);
+
+            return (
+              <Link
+                key={item}
+                href={href}
+                className={cn(
+                  "relative inline-flex items-center gap-1 py-1 transition-colors hover:text-foreground",
+                  active ? "text-primary" : "text-muted-foreground/90",
+                )}
+              >
+                {item}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right Actions */}
@@ -134,26 +153,37 @@ export function TopNav() {
           "fixed inset-x-0 top-16 z-40 transition-all duration-300 ease-out md:hidden",
           isMobileMenuOpen
             ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none"
+            : "opacity-0 -translate-y-2 pointer-events-none",
         )}
       >
         <nav className="flex flex-col gap-1 border-t border-white/10 bg-[color-mix(in_srgb,#020617_90%,transparent_10%)] px-4 py-4 backdrop-blur-xl">
-          {navItems.map((item) => (
-            <a
-              key={item}
-              href={getHref(item)}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="rounded-md px-2 py-2 text-sm font-medium text-muted-foreground transition hover:bg-white/5 hover:text-foreground"
-            >
-              {item}
-            </a>
-          ))}
-          <a
+          {navItems.map((item) => {
+            const href = getHref(item);
+            const active = isActive(href);
+
+            return (
+              <Link
+                key={item}
+                href={href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={cn(
+                  "rounded-md px-2 py-2 text-sm font-medium transition hover:bg-white/5 hover:text-foreground",
+                  active ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                {item}
+              </Link>
+            );
+          })}
+          <Link
             href="/login"
-            className="rounded-md px-2 py-2 text-sm font-medium text-muted-foreground transition hover:bg-white/5 hover:text-foreground"
+            className={cn(
+              "rounded-md px-2 py-2 text-sm font-medium text-muted-foreground transition hover:bg-white/5 hover:text-foreground",
+              isActive("/login") ? "text-primary" : "text-muted-foreground",
+            )}
           >
             Log in
-          </a>
+          </Link>
         </nav>
       </div>
     </header>

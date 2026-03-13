@@ -146,7 +146,7 @@ export default function VideoDetail() {
     // 🔥 If URL page was invalid → fix URL
     if (String(safePage) !== streampage) {
       setLocation(
-        `/dashboard/content/${streamingId}?tab=${tab}&streampage=${safePage}&clipspage=${clipspage}`,
+        `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&clipspage=${safePage}`,
         { replace: true },
       );
     }
@@ -416,6 +416,7 @@ export default function VideoDetail() {
                     streamingId={streamingId || ""}
                     fetchReelsData={fetchReelsData}
                     platform={streamingVideoData?.provider}
+                    currentPage={currentPage}
                   />
                 );
               })}

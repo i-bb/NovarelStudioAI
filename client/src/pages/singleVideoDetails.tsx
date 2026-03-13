@@ -48,6 +48,7 @@ export default function SingleVideoDetails() {
   const searchParams = new URLSearchParams(search);
   const tab = searchParams.get("tab");
   const streampage = searchParams.get("streampage");
+  const clipspage = searchParams.get("clipspage");
   const videopage = searchParams.get("videopage") || 1;
 
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
@@ -252,7 +253,7 @@ export default function SingleVideoDetails() {
           <div
             className="hidden lg:flex absolute gap-4 top-4 left-2 hover:cursor-pointer hover:text-primary"
             onClick={() =>
-              (window.location.href = `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${videopage}`)
+              (window.location.href = `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&clipspage=${clipspage}`)
             }
           >
             <ArrowLeft className="h-4 w-4" />
@@ -262,7 +263,7 @@ export default function SingleVideoDetails() {
           <div
             className="lg:hidden flex gap-2 items-center my-4 px-2 hover:cursor-pointer text-white"
             onClick={() =>
-              (window.location.href = `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&videopage=${videopage}`)
+              (window.location.href = `/dashboard/content/${streamingId}?tab=${tab}&streampage=${streampage}&clipspage=${clipspage}`)
             }
           >
             <ArrowLeft className="h-4 w-4" />

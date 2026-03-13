@@ -28,11 +28,13 @@ function ClipCard({
   fetchReelsData,
   platform,
   streamingId,
+  currentPage,
 }: {
   clip: any;
   fetchReelsData: any;
   platform: string;
   streamingId: string;
+  currentPage: any;
 }) {
   const search = useSearch();
   const searchParams = new URLSearchParams(search);
@@ -101,7 +103,7 @@ function ClipCard({
     <>
       <div className="relative">
         <Link
-          href={`/dashboard/content/${streamingId}/reel/${clip.public_id}?tab=${tab}&streampage=${streampage}`}
+          href={`/dashboard/content/${streamingId}/reel/${clip.public_id}?tab=${tab}&streampage=${streampage}&clipspage=${currentPage}`}
         >
           <div
             className={`relative rounded-xl cursor-pointer group transition mt-9 ${
